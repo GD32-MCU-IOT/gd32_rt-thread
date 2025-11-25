@@ -27,6 +27,7 @@ struct gd32_spi_cs
 };
 
 /* gd32 spi dirver class */
+#if !defined(SOC_SERIES_GD32H75E)
 struct gd32_spi
 {
     uint32_t spi_periph;
@@ -46,6 +47,33 @@ struct gd32_spi
     uint16_t miso_pin;
     uint16_t mosi_pin;
 };
+#else
+
+#if defined(BSP_USING_SPI_TX_DMA) || defined(BSP_USING_SPI_RX_DMA)
+#include "drv_dma.h"
+#endif
+
+
+struct gd32_spi
+{
+    uint32_t spi_periph;
+    rcu_periph_enum spi_clk;
+    IRQn_Type irqn;
+    char *bus_name;
+    struct rt_spi_bus *spi_bus;
+#ifdef BSP_USING_SPI_TX_DMA
+    struct dma_config *dma_tx;
+#endif
+#ifdef BSP_USING_SPI_RX_DMA
+    struct dma_config *dma_rx;
+#endif
+};
+
+
+/* This function initializes the SPI pin */
+void gd32_spi_init(struct gd32_spi *gd32_spi);
+
+#endif
 
 rt_err_t rt_hw_spi_device_attach(const char *bus_name, const char *device_name, rt_base_t cs_pin);
 

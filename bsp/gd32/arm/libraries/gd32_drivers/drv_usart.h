@@ -19,6 +19,8 @@
 extern "C" {
 #endif
 
+#if !defined(SOC_SERIES_GD32H75E)
+
 #ifndef SOC_SERIES_GD32H7xx
 #undef RT_SERIAL_USING_DMA
 #endif
@@ -54,7 +56,7 @@ struct gd32_uart
 {
     uint32_t uart_periph;           /* Todo: 3bits */
     IRQn_Type irqn;                 /* Todo: 7bits */
-    rcu_periph_enum per_clk;        /* Todo: 5bits */
+    rcu_periph_enum uart_clk;       /* Todo: 5bits */
     rcu_periph_enum tx_gpio_clk;    /* Todo: 5bits */
     rcu_periph_enum rx_gpio_clk;    /* Todo: 5bits */
     uint32_t tx_port;               /* Todo: 4bits */
@@ -85,6 +87,36 @@ struct gd32_uart
     struct rt_serial_device * serial;
     char *device_name;
 };
+
+#else
+
+#ifdef RT_SERIAL_USING_DMA
+#include "drv_dma.h"
+#endif
+
+/* GD32 uart driver */
+struct gd32_uart
+{
+    uint32_t uart_periph;
+    rcu_periph_enum uart_clk;
+    IRQn_Type irqn;
+    char *device_name;
+    struct rt_serial_device * serial;
+
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+    gd32_uart_dma *dma_tx;
+#endif
+#ifdef BSP_USING_UART_RX_DMA
+    gd32_uart_dma *dma_rx;
+#endif
+#endif
+};
+
+
+void gd32_uart_gpio_init(struct gd32_uart *uart);
+
+#endif
 
 int rt_hw_usart_init(void);
 

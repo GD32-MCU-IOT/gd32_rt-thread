@@ -399,6 +399,7 @@ void UART7_IRQHandler(void)
 
 #endif /* BSP_USING_UART7 */
 
+#if !defined(SOC_SERIES_GD32H75E)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -616,7 +617,155 @@ static const struct gd32_uart uart_obj[] = {
     #endif
 };
 
+#else
+static const struct gd32_uart uart_obj[] = {
+    #ifdef BSP_USING_UART0
+    {
+        USART0,                                /* uart peripheral index */
+        RCU_USART0,                            /* uart periph clock */
+        USART0_IRQn,                           /* uart iqrn */
+        "uart0",
+        &serial0,
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+        &uart0_txdma,
+#endif
+#ifdef BSP_USING_UART_TX_DMA
+        &uart0_rxdma,
+#endif
+#endif
+    },
+    #endif
 
+    #ifdef BSP_USING_UART1
+    {
+        USART1,                                /* uart peripheral index */
+        RCU_USART1,                            /* uart periph clock */
+        USART1_IRQn,                           /* uart iqrn */
+        "uart1",
+        &serial1,
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+        &uart1_txdma,
+#endif
+#ifdef BSP_USING_UART_TX_DMA
+        &uart1_rxdma,
+#endif
+#endif
+    },
+    #endif
+
+    #ifdef BSP_USING_UART2
+    {
+        USART2,                                /* uart peripheral index */
+        RCU_USART2,                            /* uart periph clock */
+        USART2_IRQn,                           /* uart iqrn */
+        "uart2",
+        &serial2,
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+        &uart2_txdma,
+#endif
+#ifdef BSP_USING_UART_TX_DMA
+        &uart2_rxdma,
+#endif
+#endif
+    },
+    #endif
+
+    #ifdef BSP_USING_UART3
+    {
+        UART3,                                 /* uart peripheral index */
+        RCU_UART3,                             /* uart periph clock */
+        UART3_IRQn,                            /* uart iqrn */
+        "uart3",
+        &serial3,
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+        &uart3_txdma,
+#endif
+#ifdef BSP_USING_UART_TX_DMA
+        &uart3_rxdma,
+#endif
+#endif
+    },
+    #endif
+
+    #ifdef BSP_USING_UART4
+    {
+        UART4,                                 /* uart peripheral index */
+        RCU_UART4,                             /* uart periph clock */
+        UART4_IRQn,                            /* uart iqrn */
+        "uart4",
+        &serial4,
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+        &uart4_txdma,
+#endif
+#ifdef BSP_USING_UART_TX_DMA
+        &uart4_rxdma,
+#endif
+#endif
+    },
+    #endif
+
+    #ifdef BSP_USING_UART5
+    {
+        USART5,                                /* uart peripheral index */
+        RCU_USART5,                            /* uart periph clock */
+        USART5_IRQn,                           /* uart iqrn */
+        "uart5",
+        &serial5,
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+        &uart5_txdma,
+#endif
+#ifdef BSP_USING_UART_TX_DMA
+        &uart5_rxdma,
+#endif
+#endif
+    },
+    #endif
+
+    #ifdef BSP_USING_UART6
+    {
+        UART6,                                 /* uart peripheral index */
+        RCU_UART6,                             /* uart periph clock */
+        UART6_IRQn,                            /* uart iqrn */
+        "uart6",
+        &serial6,
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+        &uart6_txdma,
+#endif
+#ifdef BSP_USING_UART_TX_DMA
+        &uart6_rxdma,
+#endif
+#endif
+    },
+    #endif
+
+    #ifdef BSP_USING_UART7
+    {
+        UART7,                                 /* uart peripheral index */
+        RCU_UART7,                             /* uart periph clock */
+        UART7_IRQn,                            /* uart iqrn */
+        "uart7",
+        &serial7,
+#ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
+        &uart7_txdma,
+#endif
+#ifdef BSP_USING_UART_RX_DMA
+        &uart7_rxdma,
+#endif
+#endif
+    },
+    #endif
+};
+#endif
+
+#if !defined(SOC_SERIES_GD32H75E)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:
@@ -631,7 +780,7 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     /* enable USART clock */
     rcu_periph_clock_enable(uart->tx_gpio_clk);
     rcu_periph_clock_enable(uart->rx_gpio_clk);
-    rcu_periph_clock_enable(uart->per_clk);
+    rcu_periph_clock_enable(uart->uart_clk);
 
 #if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32E23x
     /* connect port to USARTx_Tx */
@@ -696,6 +845,7 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     NVIC_SetPriority(uart->irqn, 0);
     NVIC_EnableIRQ(uart->irqn);
 }
+#endif
 
 /**
   * @brief  uart configure

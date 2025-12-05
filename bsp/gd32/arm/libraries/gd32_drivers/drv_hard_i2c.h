@@ -53,8 +53,8 @@ struct gd32_i2c_bus
     rcu_periph_enum i2c_clk;
     IRQn_Type irqn_ev;
     IRQn_Type irqn_er;
-    char *device_name;
     struct rt_i2c_bus_device *i2c_bus;
+    char *device_name;
 #ifdef BSP_USING_I2C_TX_DMA
     struct dma_config *dma_tx;
 #endif

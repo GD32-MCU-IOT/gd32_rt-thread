@@ -581,7 +581,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
+          script: |-
             const fs = require('fs');
             const path = require('path');
             
@@ -614,6 +614,8 @@ jobs:
             }
             
             const total = successCount + failCount;
+            const libraryChanged = '${{ needs.analyze-changes.outputs.library_changed }}';
+            const repoName = '${{ github.repository }}';
             
             const body = `## 🔨 GD32 BSP CI测试结果
 
@@ -625,7 +627,7 @@ jobs:
 | ❌ 失败 | ${failCount} |
 | 📊 总计 | ${total} |
 | 📈 成功率 | ${successRate}% |
-| 📚 Libraries变更 | ${{ needs.analyze-changes.outputs.library_changed }} |
+| 📚 Libraries变更 | ${libraryChanged} |
 
 ### 📋 详细结果
 
@@ -634,7 +636,7 @@ jobs:
 ${results.join('\n')}
 
 ---
-*🤖 自动生成于 ${new Date().toISOString()} by [GD32 Mirror CI](https://github.com/${{ github.repository }})*`;
+*🤖 自动生成于 ${new Date().toISOString()} by [GD32 Mirror CI](https://github.com/${repoName})*`;
             
             await github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -665,3 +667,4 @@ ${results.join('\n')}
             echo "🎉 所有BSP编译成功！"
             exit 0
           fi
+

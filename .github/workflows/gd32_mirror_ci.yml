@@ -581,7 +581,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
+          script: |-
             const fs = require('fs');
             const path = require('path');
             
@@ -614,54 +614,8 @@ jobs:
             }
             
             const total = successCount + failCount;
+            const libraryChanged = '${{ needs.analyze-changes.outputs.library_changed }}';
+            const repoName = '${{ github.repository }}';
             
             const body = `## 🔨 GD32 BSP CI测试结果
 
-### 📊 统计摘要
-
-| 指标 | 数值 |
-|------|------|
-| ✅ 成功 | ${successCount} |
-| ❌ 失败 | ${failCount} |
-| 📊 总计 | ${total} |
-| 📈 成功率 | ${successRate}% |
-| 📚 Libraries变更 | ${{ needs.analyze-changes.outputs.library_changed }} |
-
-### 📋 详细结果
-
-| 架构 | BSP | 状态 |
-|------|-----|------|
-${results.join('\n')}
-
----
-*🤖 自动生成于 ${new Date().toISOString()} by [GD32 Mirror CI](https://github.com/${{ github.repository }})*`;
-            
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body
-            });
-            
-      - name: 检查编译状态
-        run: |
-          FAIL_COUNT=${{ env.FAIL_COUNT }}
-          SUCCESS_COUNT=${{ env.SUCCESS_COUNT }}
-          
-          echo "========================================="
-          echo "GD32 BSP CI测试完成"
-          echo "========================================="
-          echo "✅ 成功: $SUCCESS_COUNT"
-          echo "❌ 失败: $FAIL_COUNT"
-          echo "========================================="
-          
-          if [ "$FAIL_COUNT" -gt 0 ]; then
-            echo ""
-            echo "⚠️ 有 $FAIL_COUNT 个BSP编译失败"
-            echo "请检查上述日志获取详细错误信息"
-            exit 1
-          else
-            echo ""
-            echo "🎉 所有BSP编译成功！"
-            exit 0
-          fi

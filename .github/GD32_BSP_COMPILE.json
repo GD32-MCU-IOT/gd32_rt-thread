@@ -1,0 +1,32 @@
+{
+  "legs": [
+    {
+      "RTT_BSP": "gd32_arm",
+      "RTT_TOOL_CHAIN": "sourcery-arm",
+      "SUB_RTT_BSP": [
+        "gd32/arm/gd32103c-eval",
+        "gd32/arm/gd32105c-eval",
+        "gd32/arm/gd32105r-start",
+        "gd32/arm/gd32107c-eval",
+        "gd32/arm/gd32205r-start",
+        "gd32/arm/gd32207i-eval",
+        "gd32/arm/gd32303c-start",
+        "gd32/arm/gd32303e-eval",
+        "gd32/arm/gd32305r-start",
+        "gd32/arm/gd32307e-start",
+        "gd32/arm/gd32407v-start",
+        "gd32/arm/gd32407v-lckfb",
+        "gd32/arm/gd32450z-eval",
+        "gd32/arm/gd32470i-eval",
+        "gd32/arm/gd32470z-lckfb",
+        "gd32/arm/gd32e503v-eval",
+        "gd32/arm/gd32e517z-eval",
+        "gd32/arm/gd32527I-eval",
+        "gd32/arm/gd32e230-lckfb",
+        "gd32/arm/gd32h759i-start",
+        "gd32/arm/gd32h759i-eval",
+        "gd32/arm/gd32h75ey-eval"
+      ]
+    }
+  ]
+}

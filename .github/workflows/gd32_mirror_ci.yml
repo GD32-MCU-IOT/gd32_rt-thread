@@ -110,46 +110,23 @@ jobs:
           
           echo "=== 测试模式: $TEST_MODE ==="
           
-          # 复制 GD32 配置文件
-          cp .github/GD32_BSP_COMPILE.json .github/ALL_BSP_COMPILE_TEMP.json
+          # ⚠️ 重要：git_diff_show.py 会读取 ALL_BSP_COMPILE.json
+          # 所以需要先替换这个文件为 GD32 配置
+          cp .github/GD32_BSP_COMPILE.json .github/ALL_BSP_COMPILE.json
           
           if [ "$TEST_MODE" = "changed" ]; then
             echo "=== 使用智能变更检测 ==="
             
             # 方式 1: 复用 RT-Thread git_diff_show.py（推荐）
             if [ -f "tools/ci/git_diff_show.py" ]; then
+              # git_diff_show.py 会读取 ALL_BSP_COMPILE.json 并生成 ALL_BSP_COMPILE_TEMP.json
               python tools/ci/git_diff_show.py $BASE_REF
               
-              # 过滤只保留 GD32 BSP
-              python3 << 'EOF'
-          import json
-          
-          try:
-              with open('.github/ALL_BSP_COMPILE_TEMP.json', 'r') as f:
-                  config = json.load(f)
-              
-              # 只保留包含 gd32 的 legs
-              filtered_legs = []
-              for leg in config.get('legs', []):
-                  gd32_bsps = [bsp for bsp in leg.get('SUB_RTT_BSP', []) if 'gd32' in bsp.lower()]
-                  if gd32_bsps:
-                      filtered_legs.append({
-                          **leg,
-                          'SUB_RTT_BSP': gd32_bsps
-                      })
-              
-              new_config = {'legs': filtered_legs}
-              
-              with open('.github/ALL_BSP_COMPILE_TEMP.json', 'w') as f:
-                  json.dump(new_config, f, indent=2)
-              
-              print(f"✅ 过滤后保留 {len(filtered_legs)} 个 GD32 leg")
-          except Exception as e:
-              print(f"⚠️ 过滤失败: {e}")
-              # 使用原始 GD32 配置
-              import shutil
-              shutil.copy('.github/GD32_BSP_COMPILE.json', '.github/ALL_BSP_COMPILE_TEMP.json')
-          EOF
+              # 检查是否生成了文件
+              if [ ! -f ".github/ALL_BSP_COMPILE_TEMP.json" ]; then
+                echo "⚠️ git_diff_show.py 未生成配置文件，使用 GD32 完整配置"
+                cp .github/GD32_BSP_COMPILE.json .github/ALL_BSP_COMPILE_TEMP.json
+              fi
             else
               # 方式 2: 简单的 git diff 检测
               echo "⚠️ git_diff_show.py 不存在，使用简单检测"
@@ -166,6 +143,8 @@ jobs:
             fi
           else
             echo "=== 编译所有 GD32 BSP ==="
+            # all 模式直接使用 GD32 配置
+            cp .github/GD32_BSP_COMPILE.json .github/ALL_BSP_COMPILE_TEMP.json
           fi
           
           # 读取最终配置
@@ -384,3 +363,4 @@ jobs:
               issue_number: context.issue.number,
               body: body
             });
+

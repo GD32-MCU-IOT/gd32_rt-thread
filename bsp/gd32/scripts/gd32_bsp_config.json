@@ -60,7 +60,6 @@
       "gd32527I-eval",
       "gd32e230-lckfb",
       "gd32e503v-eval",
-      "gd32e517z-eval",
       "gd32h759i-eval",
       "gd32h759i-start",
       "gd32h75ey-eval"
@@ -72,16 +71,91 @@
     "clean_build": false,
     "clean_method": "both",
     "keep_build_dir": false,
-    "temp_kconfig_options": [],
+    "temp_kconfig_options": [
+      "CONFIG_RT_USING_I2C=y",
+      "CONFIG_BSP_USING_I2C=y",
+      "CONFIG_BSP_USING_I2C0=y",
+      "CONFIG_RT_USING_SPI=y",
+      "CONFIG_BSP_USING_SPI=y",
+      "CONFIG_BSP_USING_SPI0=y"
+    ],
+    "temp_config_presets": {
+      "_description": "预设的临时配置组合，方便快速测试不同功能",
+      "i2c_only": {
+        "description": "仅启用 I2C 驱动测试",
+        "options": [
+          "CONFIG_RT_USING_I2C=y",
+          "CONFIG_BSP_USING_I2C=y",
+          "CONFIG_BSP_USING_I2C0=y"
+        ]
+      },
+      "spi_only": {
+        "description": "仅启用 SPI 驱动测试",
+        "options": [
+          "CONFIG_RT_USING_SPI=y",
+          "CONFIG_BSP_USING_SPI=y",
+          "CONFIG_BSP_USING_SPI0=y"
+        ]
+      },
+      "i2c_spi": {
+        "description": "同时启用 I2C 和 SPI 驱动测试",
+        "options": [
+          "CONFIG_RT_USING_I2C=y",
+          "CONFIG_BSP_USING_I2C=y",
+          "CONFIG_BSP_USING_I2C0=y",
+          "CONFIG_RT_USING_SPI=y",
+          "CONFIG_BSP_USING_SPI=y",
+          "CONFIG_BSP_USING_SPI0=y"
+        ]
+      },
+      "full_peripheral": {
+        "description": "启用常用外设驱动进行全面测试",
+        "options": [
+          "CONFIG_RT_USING_I2C=y",
+          "CONFIG_BSP_USING_I2C=y",
+          "CONFIG_RT_USING_SPI=y",
+          "CONFIG_BSP_USING_SPI=y",
+          "CONFIG_RT_USING_SERIAL=y",
+          "CONFIG_BSP_USING_UART2=y",
+          "CONFIG_RT_USING_CAN=y",
+          "CONFIG_BSP_USING_CAN=y"
+        ]
+      }
+    },
     "notes": [
       "✅ 本配置文件同时用于 CI 和本地测试",
       "✅ CI 读取 'legs' 字段，本地测试读取 'local_test' 字段",
+      "✅ CI 不会使用 temp_kconfig_options，仅本地测试使用",
       "修改 libraries/ 目录会影响所有 BSP",
       "建议在提交前运行完整测试",
-      "clean_build: 是否执行清理编译 (false=增量, true=完全重编译)",
-      "clean_method: 清理方法 (scons/rmdir/both)",
-      "temp_kconfig_options: 临时配置选项，仅在编译时生效",
-      "  示例: [\"CONFIG_RT_USING_I2C=y\", \"CONFIG_RT_USING_SPI=y\"]"
+      "",
+      "配置说明：",
+      "  clean_build: 是否执行清理编译 (false=增量, true=完全重编译)",
+      "  clean_method: 清理方法 (scons/rmdir/both)",
+      "",
+      "临时配置功能（仅本地测试）：",
+      "  temp_kconfig_options: 临时配置选项列表，编译后自动恢复原始配置",
+      "  temp_config_presets: 预设配置组合，便于快速测试",
+      "",
+      "使用方式：",
+      "  1. 直接编辑 temp_kconfig_options 数组",
+      "  2. 或参考 temp_config_presets 中的预设",
+      "  3. 或保持为空数组 [] 使用默认配置",
+      "",
+      "示例1 - 测试 I2C+SPI：",
+      "  \"temp_kconfig_options\": [",
+      "    \"CONFIG_RT_USING_I2C=y\",",
+      "    \"CONFIG_BSP_USING_I2C=y\",",
+      "    \"CONFIG_RT_USING_SPI=y\",",
+      "    \"CONFIG_BSP_USING_SPI=y\"",
+      "  ]",
+      "",
+      "示例2 - 禁用某功能：",
+      "  \"temp_kconfig_options\": [",
+      "    \"CONFIG_RT_USING_CONSOLE=n\"",
+      "  ]",
+      "",
+      "⚠️ 重要：temp_kconfig_options 仅影响本地测试，CI 测试使用默认配置"
     ]
   }
 }

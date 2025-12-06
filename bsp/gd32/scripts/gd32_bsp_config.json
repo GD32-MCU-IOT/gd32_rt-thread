@@ -1,0 +1,87 @@
+{
+  "_comment": [
+    "GD32 BSP 统一配置文件",
+    "用途：CI 自动编译 + 本地测试",
+    "CI 使用 'legs' 字段（RT-Thread 标准格式）",
+    "本地测试使用 'local_test' 字段"
+  ],
+  
+  "legs": [
+    {
+      "RTT_BSP": "gd32_arm",
+      "RTT_TOOL_CHAIN": "sourcery-arm",
+      "SUB_RTT_BSP": [
+        "gd32/arm/gd32103c-eval",
+        "gd32/arm/gd32105c-eval",
+        "gd32/arm/gd32105r-start",
+        "gd32/arm/gd32107c-eval",
+        "gd32/arm/gd32205r-start",
+        "gd32/arm/gd32207i-eval",
+        "gd32/arm/gd32303c-start",
+        "gd32/arm/gd32303e-eval",
+        "gd32/arm/gd32305r-start",
+        "gd32/arm/gd32307e-start",
+        "gd32/arm/gd32407v-start",
+        "gd32/arm/gd32407v-lckfb",
+        "gd32/arm/gd32450z-eval",
+        "gd32/arm/gd32470i-eval",
+        "gd32/arm/gd32470z-lckfb",
+        "gd32/arm/gd32e503v-eval",
+        "gd32/arm/gd32527I-eval",
+        "gd32/arm/gd32e230-lckfb",
+        "gd32/arm/gd32h759i-start",
+        "gd32/arm/gd32h759i-eval",
+        "gd32/arm/gd32h75ey-eval"
+      ]
+    }
+  ],
+  
+  "local_test": {
+    "test_name": "GD32 ARM BSP Local Build Test",
+    "version": "2.0",
+    "description": "GD32 ARM 系列 BSP 本地编译测试配置（与 CI 共用 BSP 列表）",
+    "bsp_base_path": "bsp/gd32/arm",
+    "test_bsps": [
+      "gd32103c-eval",
+      "gd32105c-eval",
+      "gd32105r-start",
+      "gd32107c-eval",
+      "gd32205r-start",
+      "gd32207i-eval",
+      "gd32303c-start",
+      "gd32303e-eval",
+      "gd32305r-start",
+      "gd32307e-start",
+      "gd32407v-lckfb",
+      "gd32407v-start",
+      "gd32450z-eval",
+      "gd32470i-eval",
+      "gd32470z-lckfb",
+      "gd32527I-eval",
+      "gd32e230-lckfb",
+      "gd32e503v-eval",
+      "gd32e517z-eval",
+      "gd32h759i-eval",
+      "gd32h759i-start",
+      "gd32h75ey-eval"
+    ],
+    "excluded_bsps": [],
+    "toolchain": "sourcery-arm",
+    "parallel_jobs": 4,
+    "timeout_per_bsp": 600,
+    "clean_build": false,
+    "clean_method": "both",
+    "keep_build_dir": false,
+    "temp_kconfig_options": [],
+    "notes": [
+      "✅ 本配置文件同时用于 CI 和本地测试",
+      "✅ CI 读取 'legs' 字段，本地测试读取 'local_test' 字段",
+      "修改 libraries/ 目录会影响所有 BSP",
+      "建议在提交前运行完整测试",
+      "clean_build: 是否执行清理编译 (false=增量, true=完全重编译)",
+      "clean_method: 清理方法 (scons/rmdir/both)",
+      "temp_kconfig_options: 临时配置选项，仅在编译时生效",
+      "  示例: [\"CONFIG_RT_USING_I2C=y\", \"CONFIG_RT_USING_SPI=y\"]"
+    ]
+  }
+}

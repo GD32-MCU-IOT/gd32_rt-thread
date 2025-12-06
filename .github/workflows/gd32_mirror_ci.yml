@@ -24,7 +24,7 @@ on:
       - '!bsp/gd32/**/README*.md'
       - '!bsp/gd32/**/docs/**'
       - '.github/workflows/gd32_bsp_ci_optimized.yml'
-      - '.github/GD32_BSP_COMPILE.json'
+      - 'bsp/gd32/scripts/gd32_bsp_config.json'
       
   # Push 到 master - 触发全量测试（可选）
   push:
@@ -112,7 +112,7 @@ jobs:
           
           # ⚠️ 重要：git_diff_show.py 会读取 ALL_BSP_COMPILE.json
           # 所以需要先替换这个文件为 GD32 配置
-          cp .github/GD32_BSP_COMPILE.json .github/ALL_BSP_COMPILE.json
+          cp bsp/gd32/scripts/gd32_bsp_config.json .github/ALL_BSP_COMPILE.json
           
           if [ "$TEST_MODE" = "changed" ]; then
             echo "=== 使用智能变更检测 ==="
@@ -125,7 +125,7 @@ jobs:
               # 检查是否生成了文件
               if [ ! -f ".github/ALL_BSP_COMPILE_TEMP.json" ]; then
                 echo "⚠️ git_diff_show.py 未生成配置文件，使用 GD32 完整配置"
-                cp .github/GD32_BSP_COMPILE.json .github/ALL_BSP_COMPILE_TEMP.json
+                cp bsp/gd32/scripts/gd32_bsp_config.json .github/ALL_BSP_COMPILE_TEMP.json
               fi
             else
               # 方式 2: 简单的 git diff 检测
@@ -144,7 +144,7 @@ jobs:
           else
             echo "=== 编译所有 GD32 BSP ==="
             # all 模式直接使用 GD32 配置
-            cp .github/GD32_BSP_COMPILE.json .github/ALL_BSP_COMPILE_TEMP.json
+            cp bsp/gd32/scripts/gd32_bsp_config.json .github/ALL_BSP_COMPILE_TEMP.json
           fi
           
           # 读取最终配置

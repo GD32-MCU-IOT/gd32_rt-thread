@@ -1,0 +1,19 @@
+# Build logs and test reports
+# 编译日志和测试报告
+build_logs/
+*.log
+build_test_report_*.html
+build_test_report_*.json
+
+# Temporary backup files
+# 临时备份文件
+*.bak
+.config.bak
+rtconfig.h.bak
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python

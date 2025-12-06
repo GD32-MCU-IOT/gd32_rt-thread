@@ -4,57 +4,49 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # GD32 Mirror Repository CI Workflow
-# 专为 GD32-MCU-IOT/gd32_rt-thread 镜像仓库设计的CI流程
+# 基于 RT-Thread CI 框架，专为 GD32 BSP 优化
+# 复用 tools/ci/bsp_buildings.py 核心编译逻辑
 #
 
-name: GD32 BSP CI Test
+name: GD32 BSP CI
 
 on:
-  # PR触发 - 自动测试受影响的BSP
+  # PR 触发 - 自动检测并编译受影响的 GD32 BSP
   pull_request:
     branches:
       - master
     paths:
       - 'bsp/gd32/**'
-      - '!bsp/gd32/**/README.md'
+      - 'components/**'
+      - 'libcpu/**'
+      - 'src/**'
+      - 'include/**'
+      - '!bsp/gd32/**/README*.md'
       - '!bsp/gd32/**/docs/**'
-      - '.github/workflows/gd32_mirror_ci.yml'
+      - '.github/workflows/gd32_bsp_ci_optimized.yml'
+      - '.github/GD32_BSP_COMPILE.json'
       
-  # Push到master - 全量测试（可选）
+  # Push 到 master - 触发全量测试（可选）
   push:
     branches:
       - master
     paths:
       - 'bsp/gd32/**'
-      - '.github/workflows/gd32_mirror_ci.yml'
+      - '.github/workflows/gd32_bsp_ci_optimized.yml'
       
-  # 手动触发 - 灵活控制测试范围
+  # 手动触发
   workflow_dispatch:
     inputs:
       test_mode:
-        description: '测试模式 (all=全部BSP, changed=仅变更的BSP, single=单个BSP)'
-        required: true
-        default: 'changed'
-        type: choice
-        options:
-          - all
-          - changed
-          - single
-      target_bsp:
-        description: '目标BSP（single模式下使用，例如：gd32407v-start）'
-        required: false
-        type: string
-      architecture:
-        description: 'GD32架构（all=全部, arm=仅ARM, risc-v=仅RISC-V）'
+        description: '测试模式'
         required: false
         default: 'all'
         type: choice
         options:
-          - all
-          - arm
-          - risc-v
-
-# 并发控制 - 同一PR的新提交会取消旧的运行
+          - all        # 编译所有 GD32 BSP
+          - changed    # 仅编译变更的 BSP
+      
+# 并发控制
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
@@ -65,603 +57,330 @@ permissions:
   issues: write
 
 jobs:
-  #==============================================================================
-  # Job 1: 分析变更并生成测试矩阵
-  #==============================================================================
-  analyze-changes:
+  #============================================================================
+  # Job 1: 分析变更并生成编译矩阵
+  #============================================================================
+  generate-matrix:
     runs-on: ubuntu-22.04
-    name: 🔍 分析GD32 BSP变更
+    name: 🔍 分析 GD32 BSP 变更
+    # 仅在 GD32-MCU-IOT 组织运行
+    if: github.repository_owner == 'GD32-MCU-IOT'
     outputs:
-      test_matrix: ${{ steps.generate-matrix.outputs.matrix }}
-      test_count: ${{ steps.generate-matrix.outputs.count }}
-      library_changed: ${{ steps.detect-changes.outputs.library_changed }}
+      filtered_matrix: ${{ steps.filter.outputs.filtered_matrix }}
+      test_count: ${{ steps.filter.outputs.test_count }}
       
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
-      - name: 设置Python环境
+          persist-credentials: false
+      
+      - name: 设置 Python 环境
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
-      - name: 检测文件变更
-        id: detect-changes
+      
+      - name: 检测变更并生成矩阵
+        id: filter
         run: |
-          echo "=== 检测GD32 BSP变更 ==="
+          # 设置 git 配置
+          git config --global http.postBuffer 524288000
+          git remote -v
+          git fetch origin
           
           # 确定基准分支
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE_REF="origin/${{ github.base_ref }}"
-          elif [ "${{ github.event_name }}" = "push" ]; then
-            BASE_REF="HEAD^"
           else
             BASE_REF="origin/master"
           fi
           
-          echo "Base ref: $BASE_REF"
+          echo "=== 基准分支: $BASE_REF ==="
           
-          # 检测 libraries 变更
-          LIBRARY_CHANGED=false
-          if git diff --name-only $BASE_REF HEAD | grep -q "bsp/gd32/.*/libraries/"; then
-            LIBRARY_CHANGED=true
-            echo "✅ GD32 libraries 目录有变更 - 将测试所有相关BSP"
+          # 判断测试模式
+          TEST_MODE="${{ github.event.inputs.test_mode }}"
+          if [ -z "$TEST_MODE" ]; then
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+              TEST_MODE="all"
+            else
+              TEST_MODE="changed"
+            fi
           fi
           
-          echo "library_changed=$LIBRARY_CHANGED" >> $GITHUB_OUTPUT
+          echo "=== 测试模式: $TEST_MODE ==="
           
-          # 获取变更的文件列表
-          CHANGED_FILES=$(git diff --name-only $BASE_REF HEAD | grep "bsp/gd32/" || true)
-          echo "$CHANGED_FILES" > /tmp/changed_files.txt
+          # 复制 GD32 配置文件
+          cp .github/GD32_BSP_COMPILE.json .github/ALL_BSP_COMPILE_TEMP.json
           
-          if [ -n "$CHANGED_FILES" ]; then
-            echo "变更的文件："
-            echo "$CHANGED_FILES"
-          else
-            echo "⚠️ 未检测到GD32相关文件变更"
-          fi
-          
-      - name: 生成测试矩阵
-        id: generate-matrix
-        run: |
-          python3 << 'EOF'
+          if [ "$TEST_MODE" = "changed" ]; then
+            echo "=== 使用智能变更检测 ==="
+            
+            # 方式 1: 复用 RT-Thread git_diff_show.py（推荐）
+            if [ -f "tools/ci/git_diff_show.py" ]; then
+              python tools/ci/git_diff_show.py $BASE_REF
+              
+              # 过滤只保留 GD32 BSP
+              python3 << 'EOF'
           import json
-          import os
-          import re
-          from pathlib import Path
           
-          # GD32 ARM BSP列表（基于当前仓库）
-          ARM_BSPS = [
-              "gd32103c-eval", "gd32105c-eval", "gd32105r-start", "gd32107c-eval",
-              "gd32205r-start", "gd32207i-eval", "gd32303c-start", "gd32303e-eval",
-              "gd32305r-start", "gd32307e-start", "gd32407v-lckfb", "gd32407v-start",
-              "gd32450z-eval", "gd32470i-eval", "gd32470z-lckfb", "gd32527I-eval",
-              "gd32e230-lckfb", "gd32e503v-eval", "gd32e517z-eval",
-              "gd32h759i-eval", "gd32h759i-start", "gd32h75ey-eval"
-          ]
-          
-          # GD32 RISC-V BSP列表（如果存在）
-          RISCV_BSPS = [
-              # 根据实际情况添加 RISC-V BSP
-          ]
-          
-          # 读取输入参数
-          event_name = os.getenv('GITHUB_EVENT_NAME', 'pull_request')
-          test_mode = os.getenv('INPUT_TEST_MODE', 'changed')
-          target_bsp = os.getenv('INPUT_TARGET_BSP', '')
-          architecture = os.getenv('INPUT_ARCHITECTURE', 'all')
-          library_changed = os.getenv('LIBRARY_CHANGED', 'false') == 'true'
-          
-          print(f"事件类型: {event_name}")
-          print(f"测试模式: {test_mode}")
-          print(f"架构选择: {architecture}")
-          print(f"libraries变更: {library_changed}")
-          
-          # 生成候选BSP列表
-          candidate_bsps = []
-          if architecture == 'all':
-              candidate_bsps = ARM_BSPS + RISCV_BSPS
-          elif architecture == 'arm':
-              candidate_bsps = ARM_BSPS
-          elif architecture == 'risc-v':
-              candidate_bsps = RISCV_BSPS
-          
-          # 根据模式决定测试哪些BSP
-          test_bsps = []
-          
-          if test_mode == 'single' and target_bsp:
-              # 单BSP模式
-              if target_bsp in candidate_bsps:
-                  test_bsps = [target_bsp]
-                  print(f"✅ 单BSP测试模式: {target_bsp}")
-              else:
-                  print(f"⚠️ 指定的BSP '{target_bsp}' 不在候选列表中")
-                  
-          elif test_mode == 'all':
-              # 全部BSP模式
-              test_bsps = candidate_bsps
-              print(f"✅ 全部BSP测试模式: {len(test_bsps)} 个BSP")
+          try:
+              with open('.github/ALL_BSP_COMPILE_TEMP.json', 'r') as f:
+                  config = json.load(f)
               
-          else:
-              # 变更检测模式
-              if library_changed:
-                  # libraries变更影响所有BSP
-                  test_bsps = candidate_bsps
-                  print(f"✅ libraries变更 - 测试所有 {len(test_bsps)} 个BSP")
-              else:
-                  # 分析具体变更的BSP
-                  try:
-                      with open('/tmp/changed_files.txt', 'r') as f:
-                          changed_files = f.read().strip().split('\n')
-                  except:
-                      changed_files = []
-                  
-                  affected_bsps = set()
-                  for file_path in changed_files:
-                      if not file_path or file_path == '':
-                          continue
-                      
-                      # 匹配 bsp/gd32/arm/XXX/ 或 bsp/gd32/risc-v/XXX/
-                      match = re.match(r'bsp/gd32/(arm|risc-v)/([^/]+)/', file_path)
-                      if match:
-                          arch = match.group(1)
-                          bsp_name = match.group(2)
-                          
-                          # 排除非BSP目录
-                          if bsp_name not in ['libraries', 'docs', 'tools', 'scripts']:
-                              if bsp_name in candidate_bsps:
-                                  affected_bsps.add(bsp_name)
-                                  print(f"  检测到变更: {arch}/{bsp_name}")
-                  
-                  test_bsps = sorted(list(affected_bsps))
-                  
-                  if test_bsps:
-                      print(f"✅ 检测到 {len(test_bsps)} 个BSP需要测试")
-                  else:
-                      print("ℹ️ 未检测到BSP变更（可能是文档或配置文件）")
-          
-          # 生成matrix JSON
-          if test_bsps:
-              # 确定架构和工具链
-              matrix_data = []
-              for bsp in test_bsps:
-                  if bsp in ARM_BSPS:
-                      matrix_data.append({
-                          "bsp": bsp,
-                          "arch": "arm",
-                          "toolchain": "gcc-arm-none-eabi"
-                      })
-                  elif bsp in RISCV_BSPS:
-                      matrix_data.append({
-                          "bsp": bsp,
-                          "arch": "risc-v",
-                          "toolchain": "riscv-none-elf"
+              # 只保留包含 gd32 的 legs
+              filtered_legs = []
+              for leg in config.get('legs', []):
+                  gd32_bsps = [bsp for bsp in leg.get('SUB_RTT_BSP', []) if 'gd32' in bsp.lower()]
+                  if gd32_bsps:
+                      filtered_legs.append({
+                          **leg,
+                          'SUB_RTT_BSP': gd32_bsps
                       })
               
-              matrix = {"include": matrix_data}
-          else:
-              matrix = {"include": []}
-          
-          # 输出到GitHub Actions
-          with open(os.getenv('GITHUB_OUTPUT'), 'a') as f:
-              f.write(f"matrix={json.dumps(matrix)}\n")
-              f.write(f"count={len(test_bsps)}\n")
-          
-          print(f"\n生成的测试矩阵: {json.dumps(matrix, indent=2)}")
-          print(f"总测试数量: {len(test_bsps)}")
+              new_config = {'legs': filtered_legs}
+              
+              with open('.github/ALL_BSP_COMPILE_TEMP.json', 'w') as f:
+                  json.dump(new_config, f, indent=2)
+              
+              print(f"✅ 过滤后保留 {len(filtered_legs)} 个 GD32 leg")
+          except Exception as e:
+              print(f"⚠️ 过滤失败: {e}")
+              # 使用原始 GD32 配置
+              import shutil
+              shutil.copy('.github/GD32_BSP_COMPILE.json', '.github/ALL_BSP_COMPILE_TEMP.json')
           EOF
-        env:
-          INPUT_TEST_MODE: ${{ github.event.inputs.test_mode || 'changed' }}
-          INPUT_TARGET_BSP: ${{ github.event.inputs.target_bsp }}
-          INPUT_ARCHITECTURE: ${{ github.event.inputs.architecture || 'all' }}
-          LIBRARY_CHANGED: ${{ steps.detect-changes.outputs.library_changed }}
+            else
+              # 方式 2: 简单的 git diff 检测
+              echo "⚠️ git_diff_show.py 不存在，使用简单检测"
+              
+              CHANGED_FILES=$(git diff --name-only $BASE_REF HEAD | grep "^bsp/gd32/" || true)
+              
+              if [ -z "$CHANGED_FILES" ]; then
+                echo "ℹ️ 未检测到 GD32 变更，跳过编译"
+                echo '{"legs": []}' > .github/ALL_BSP_COMPILE_TEMP.json
+              else
+                echo "✅ 检测到 GD32 变更，编译全部 GD32 BSP"
+                echo "$CHANGED_FILES"
+              fi
+            fi
+          else
+            echo "=== 编译所有 GD32 BSP ==="
+          fi
+          
+          # 读取最终配置
+          raw_matrix=$(cat .github/ALL_BSP_COMPILE_TEMP.json)
+          filtered_matrix=$(jq -c "{legs: [.legs[]]}" <<< "$raw_matrix")
+          
+          # 统计测试数量
+          test_count=$(echo "$filtered_matrix" | jq '[.legs[].SUB_RTT_BSP[]] | length')
+          
+          echo "filtered_matrix=${filtered_matrix}" >> $GITHUB_OUTPUT
+          echo "test_count=${test_count}" >> $GITHUB_OUTPUT
+          
+          echo "=== 生成的编译矩阵 ==="
+          echo "$filtered_matrix" | jq .
+          echo "=== 总测试数量: $test_count ==="
       
       - name: 显示测试计划
         run: |
-          echo "### 📋 GD32 BSP测试计划" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 GD32 BSP 编译计划" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **测试数量**: ${{ steps.generate-matrix.outputs.count }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Libraries变更**: ${{ steps.detect-changes.outputs.library_changed }}" >> $GITHUB_STEP_SUMMARY
           echo "- **触发方式**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **测试数量**: ${{ steps.filter.outputs.test_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **仓库**: ${{ github.repository }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-  #==============================================================================
-  # Job 2: 并行编译测试
-  #==============================================================================
-  build-test:
+  #============================================================================
+  # Job 2: 并行编译 GD32 BSP
+  #============================================================================
+  build-gd32:
     runs-on: ubuntu-22.04
-    needs: analyze-changes
-    if: needs.analyze-changes.outputs.test_count > 0
-    name: 🔨 编译 ${{ matrix.arch }}/${{ matrix.bsp }}
+    needs: generate-matrix
+    name: 🔨 编译 ${{ matrix.legs.RTT_BSP }}
+    if: needs.generate-matrix.outputs.test_count > 0
     
     strategy:
       fail-fast: false
-      max-parallel: 10
-      matrix: ${{ fromJson(needs.analyze-changes.outputs.test_matrix) }}
+      max-parallel: 5  # GD32 BSP 并发编译数
+      matrix: ${{ fromJson(needs.generate-matrix.outputs.filtered_matrix) }}
     
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          
-      - name: 设置Python环境
+      
+      - name: 设置 Python 环境
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
-          
-      - name: 安装系统依赖
+      
+      - name: 安装 RT-Thread Env 工具
+        shell: bash
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq scons libncurses5-dev build-essential
-          pip install --quiet requests pyyaml
+          wget https://raw.githubusercontent.com/RT-Thread/env/master/install_ubuntu.sh
+          chmod 777 install_ubuntu.sh
+          ./install_ubuntu.sh
+          pip install -r tools/requirements.txt
           git config --global http.postBuffer 524288000
-          
-      - name: 缓存ARM工具链
-        if: matrix.arch == 'arm'
-        id: cache-arm-toolchain
-        uses: actions/cache@v4
-        with:
-          path: /opt/gcc-arm-none-eabi-10.3-2021.10
-          key: ${{ runner.os }}-gcc-arm-10.3-2021.10-v1
-          
-      - name: 下载ARM工具链
-        if: matrix.arch == 'arm' && steps.cache-arm-toolchain.outputs.cache-hit != 'true'
-        run: |
-          echo "📥 下载 ARM GCC 工具链..."
-          wget -q https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-          sudo tar -xjf gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2 -C /opt
-          rm gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-          
-      - name: 缓存RISC-V工具链
-        if: matrix.arch == 'risc-v'
-        id: cache-riscv-toolchain
-        uses: actions/cache@v4
-        with:
-          path: /opt/riscv-none-elf
-          key: ${{ runner.os }}-riscv-none-elf-v1
-          
-      - name: 下载RISC-V工具链
-        if: matrix.arch == 'risc-v' && steps.cache-riscv-toolchain.outputs.cache-hit != 'true'
-        run: |
-          echo "📥 下载 RISC-V GCC 工具链..."
-          # 根据实际需要修改下载链接
-          wget -q https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz
-          sudo mkdir -p /opt/riscv-none-elf
-          sudo tar -xzf xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz -C /opt
-          sudo mv /opt/xpack-riscv-none-elf-gcc-13.2.0-2 /opt/riscv-none-elf
-          rm xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz
-          
-      - name: 配置编译环境
-        run: |
-          if [ "${{ matrix.arch }}" = "arm" ]; then
-            export RTT_EXEC_PATH=/opt/gcc-arm-none-eabi-10.3-2021.10/bin
-            export PATH=/opt/gcc-arm-none-eabi-10.3-2021.10/bin:$PATH
-            arm-none-eabi-gcc --version
-          elif [ "${{ matrix.arch }}" = "risc-v" ]; then
-            export RTT_EXEC_PATH=/opt/riscv-none-elf/bin
-            export PATH=/opt/riscv-none-elf/bin:$PATH
-            riscv-none-elf-gcc --version
-          fi
-          
-          echo "RTT_EXEC_PATH=$RTT_EXEC_PATH" >> $GITHUB_ENV
-          echo "RTT_ROOT=$(pwd)" >> $GITHUB_ENV
+          echo "RTT_ROOT=${{ github.workspace }}" >> $GITHUB_ENV
           echo "RTT_CC=gcc" >> $GITHUB_ENV
+          echo "export PATH=~/.env/tools/scripts:$PATH" > ~/.env/env.sh
+
+      #========================================================================
+      # 工具链安装 - ARM GCC（GD32 主要使用）
+      #========================================================================
+      - name: 缓存 ARM 工具链
+        if: ${{ matrix.legs.RTT_TOOL_CHAIN == 'sourcery-arm' }}
+        id: cache-gcc-arm
+        uses: actions/cache@v4
+        with:
+          path: /opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi
+          key: ${{ runner.os }}-gcc-arm-13.2-rel1
           
-      - name: 编译BSP - ${{ matrix.arch }}/${{ matrix.bsp }}
-        timeout-minutes: 20
+      - name: 下载 ARM 工具链
+        if: ${{ matrix.legs.RTT_TOOL_CHAIN == 'sourcery-arm' && steps.cache-gcc-arm.outputs.cache-hit != 'true' }}
+        shell: bash
         run: |
-          set -e
+          wget -q https://github.com/RT-Thread/toolchains-ci/releases/download/v1.8/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
+          sudo tar -xf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
           
-          BSP_PATH="bsp/gd32/${{ matrix.arch }}/${{ matrix.bsp }}"
+      - name: 配置 ARM 工具链
+        if: ${{ matrix.legs.RTT_TOOL_CHAIN == 'sourcery-arm' }}
+        shell: bash
+        run: |
+          /opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin/arm-none-eabi-gcc --version
+          echo "RTT_EXEC_PATH=/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin" >> $GITHUB_ENV
+
+      #========================================================================
+      # 核心编译步骤 - 复用 RT-Thread bsp_buildings.py
+      #========================================================================
+      - name: 编译 GD32 BSP
+        if: ${{ success() }}
+        shell: bash
+        env:
+          RTT_BSP: ${{ matrix.legs.RTT_BSP }}
+          RTT_TOOL_CHAIN: ${{ matrix.legs.RTT_TOOL_CHAIN }}
+          SRTT_BSP: ${{ join(matrix.legs.SUB_RTT_BSP, ',') }}
+        run: |
+          source ~/.env/env.sh
           
-          if [ ! -d "$BSP_PATH" ]; then
-            echo "❌ BSP目录不存在: $BSP_PATH"
-            exit 1
-          fi
-          
-          cd "$BSP_PATH"
-          
-          echo "========================================="
-          echo "编译 GD32 BSP: ${{ matrix.bsp }}"
-          echo "架构: ${{ matrix.arch }}"
-          echo "工作目录: $(pwd)"
-          echo "RTT_ROOT: $RTT_ROOT"
-          echo "RTT_EXEC_PATH: $RTT_EXEC_PATH"
-          echo "========================================="
-          
-          # 步骤1: 配置BSP
+          echo "=== 编译环境变量 ==="
+          echo "RTT_ROOT=$RTT_ROOT"
+          echo "RTT_CC=$RTT_CC"
+          echo "RTT_EXEC_PATH=$RTT_EXEC_PATH"
+          echo "RTT_BSP=$RTT_BSP"
+          echo "SRTT_BSP=$SRTT_BSP"
           echo ""
-          echo "📝 步骤1: 配置BSP..."
-          if [ -f "Kconfig" ]; then
-            scons --pyconfig-silent
-          else
-            echo "⚠️ 未找到Kconfig文件，跳过配置步骤"
-          fi
           
-          # 步骤2: 更新软件包（如果需要）
-          echo ""
-          echo "📦 步骤2: 更新软件包..."
-          if [ -f "packages/Kconfig" ] || grep -q "PKG_" .config 2>/dev/null; then
-            python $RTT_ROOT/tools/menuconfig.py --silent || true
-            scons --pyconfig-silent || true
-          else
-            echo "ℹ️ 未检测到软件包配置，跳过"
-          fi
-          
-          # 步骤3: 编译
-          echo ""
-          echo "🔨 步骤3: 开始编译..."
-          scons -j$(nproc) --verbose
-          
-          # 步骤4: 验证编译产物
-          echo ""
-          echo "✅ 步骤4: 验证编译产物..."
-          
-          ARTIFACTS_FOUND=false
-          for artifact in rtthread.bin rtthread.elf rtthread.hex; do
-            if [ -f "$artifact" ]; then
-              echo "  ✓ 找到: $artifact ($(stat -c%s $artifact) bytes)"
-              ARTIFACTS_FOUND=true
-            fi
-          done
-          
-          if [ "$ARTIFACTS_FOUND" = false ]; then
-            echo "❌ 错误: 未找到编译产物"
-            ls -la
-            exit 1
-          fi
-          
-          # 显示代码大小统计
-          if [ -f "rtthread.elf" ]; then
-            echo ""
-            echo "📊 代码大小统计:"
-            if command -v arm-none-eabi-size &> /dev/null; then
-              arm-none-eabi-size rtthread.elf
-            elif command -v riscv-none-elf-size &> /dev/null; then
-              riscv-none-elf-size rtthread.elf
-            fi
-          fi
-          
-          echo ""
-          echo "========================================="
-          echo "✅ ${{ matrix.bsp }} 编译成功!"
-          echo "========================================="
-          
+          # 复用 RT-Thread 核心编译脚本
+          python tools/ci/bsp_buildings.py
+
+      #========================================================================
+      # 上传编译产物
+      #========================================================================
       - name: 上传编译产物
-        if: success()
+        if: ${{ success() }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.arch }}-${{ matrix.bsp }}
-          path: |
-            bsp/gd32/${{ matrix.arch }}/${{ matrix.bsp }}/rtthread.bin
-            bsp/gd32/${{ matrix.arch }}/${{ matrix.bsp }}/rtthread.elf
-            bsp/gd32/${{ matrix.arch }}/${{ matrix.bsp }}/rtthread.hex
-            bsp/gd32/${{ matrix.arch }}/${{ matrix.bsp }}/rtthread.map
+          name: gd32-${{ matrix.legs.RTT_BSP }}-${{ github.sha }}
+          if-no-files-found: ignore
           retention-days: 7
-          if-no-files-found: warn
-          compression-level: 9
+          path: |
+            output/**/*.elf
+            output/**/*.bin
+            output/**/*.hex
+            output/**/*.map
 
-  #==============================================================================
-  # Job 3: 生成测试报告
-  #==============================================================================
-  report:
+      #========================================================================
+      # 失败处理
+      #========================================================================
+      - name: 编译失败时评论 PR
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `@${context.actor} ⚠️ **GD32 BSP 编译失败**\n\n**失败的 BSP**: \`${{ matrix.legs.RTT_BSP }}\`\n\n请检查编译日志并修复错误。`
+            })
+
+  #============================================================================
+  # Job 3: 收集所有编译产物（可选）
+  #============================================================================
+  collect-artifacts:
+    needs: build-gd32
     runs-on: ubuntu-22.04
-    needs: [analyze-changes, build-test]
-    if: always() && needs.analyze-changes.outputs.test_count > 0
-    name: 📊 生成测试报告
+    if: success() && github.event_name != 'pull_request'
+    name: 📦 收集编译产物
     
     steps:
-      - name: 检出代码（获取版本信息）
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          
       - name: 下载所有编译产物
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
-          
-      - name: 生成详细报告
+          path: gd32-output/
+          merge-multiple: true
+      
+      - name: 列出产物
         run: |
-          echo "# 🔨 GD32 BSP CI测试报告" >> $GITHUB_STEP_SUMMARY
+          echo "=== 编译产物列表 ==="
+          ls -lhR gd32-output/
+          
+          echo "### 📦 编译产物汇总" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📋 测试信息" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| 项目 | 值 |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| **测试时间** | $(date +'%Y-%m-%d %H:%M:%S UTC') |" >> $GITHUB_STEP_SUMMARY
-          echo "| **触发事件** | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **提交SHA** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Libraries变更** | ${{ needs.analyze-changes.outputs.library_changed }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| **计划测试数量** | ${{ needs.analyze-changes.outputs.test_count }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          echo "## 📊 编译结果" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| # | 架构 | BSP | 状态 | 产物大小 |" >> $GITHUB_STEP_SUMMARY
-          echo "|---|------|-----|------|----------|" >> $GITHUB_STEP_SUMMARY
-          
-          counter=1
-          success_count=0
-          fail_count=0
-          total_size=0
-          
-          # 遍历产物目录
-          if [ -d "artifacts" ]; then
-            for dir in artifacts/*/; do
-              if [ -d "$dir" ]; then
-                artifact_name=$(basename "$dir")
-                
-                # 解析架构和BSP名称
-                arch=$(echo "$artifact_name" | cut -d'-' -f1)
-                bsp=$(echo "$artifact_name" | cut -d'-' -f2-)
-                
-                # 检查编译产物
-                bin_file="$dir/rtthread.bin"
-                elf_file="$dir/rtthread.elf"
-                
-                if [ -f "$bin_file" ] || [ -f "$elf_file" ]; then
-                  # 计算大小
-                  size=0
-                  if [ -f "$bin_file" ]; then
-                    size=$(stat -c%s "$bin_file")
-                  elif [ -f "$elf_file" ]; then
-                    size=$(stat -c%s "$elf_file")
-                  fi
-                  
-                  # 格式化大小
-                  if [ $size -lt 1024 ]; then
-                    size_str="${size}B"
-                  elif [ $size -lt 1048576 ]; then
-                    size_kb=$((size / 1024))
-                    size_str="${size_kb}KB"
-                  else
-                    size_mb=$((size / 1048576))
-                    size_str="${size_mb}MB"
-                  fi
-                  
-                  echo "| $counter | \`$arch\` | \`$bsp\` | ✅ **成功** | $size_str |" >> $GITHUB_STEP_SUMMARY
-                  success_count=$((success_count + 1))
-                  total_size=$((total_size + size))
-                else
-                  echo "| $counter | \`$arch\` | \`$bsp\` | ❌ **失败** | - |" >> $GITHUB_STEP_SUMMARY
-                  fail_count=$((fail_count + 1))
-                fi
-                
-                counter=$((counter + 1))
-              fi
-            done
-          fi
-          
-          # 统计信息
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## 📈 统计摘要" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          
-          total=$((success_count + fail_count))
-          if [ $total -gt 0 ]; then
-            success_rate=$(awk "BEGIN {printf \"%.1f\", ($success_count / $total) * 100}")
-          else
-            success_rate="0.0"
-          fi
-          
-          # 格式化总大小
-          if [ $total_size -lt 1048576 ]; then
-            total_size_kb=$((total_size / 1024))
-            total_size_str="${total_size_kb} KB"
-          else
-            total_size_mb=$((total_size / 1048576))
-            total_size_str="${total_size_mb} MB"
-          fi
-          
-          echo "| 指标 | 数值 |" >> $GITHUB_STEP_SUMMARY
-          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| ✅ **成功** | $success_count |" >> $GITHUB_STEP_SUMMARY
-          echo "| ❌ **失败** | $fail_count |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📊 **总计** | $total |" >> $GITHUB_STEP_SUMMARY
-          echo "| 📈 **成功率** | ${success_rate}% |" >> $GITHUB_STEP_SUMMARY
-          echo "| 💾 **总产物大小** | $total_size_str |" >> $GITHUB_STEP_SUMMARY
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "*🤖 由 GD32 Mirror CI 自动生成*" >> $GITHUB_STEP_SUMMARY
-          
-          # 保存统计信息供后续步骤使用
-          echo "SUCCESS_COUNT=$success_count" >> $GITHUB_ENV
-          echo "FAIL_COUNT=$fail_count" >> $GITHUB_ENV
-          echo "SUCCESS_RATE=$success_rate" >> $GITHUB_ENV
-          
-      - name: 在PR中评论测试结果
-        if: github.event_name == 'pull_request'
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ls -lhR gd32-output/ >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+      
+      - name: 上传合并产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: gd32-all-bsp-${{ github.sha }}
+          path: gd32-output/
+          retention-days: 30
+
+  #============================================================================
+  # Job 4: 发布编译报告到 PR（可选）
+  #============================================================================
+  post-summary:
+    needs: [generate-matrix, build-gd32]
+    runs-on: ubuntu-22.04
+    if: always() && github.event_name == 'pull_request'
+    name: 📊 发布编译报告
+    
+    steps:
+      - name: 生成编译报告
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const fs = require('fs');
-            const path = require('path');
+            const testCount = '${{ needs.generate-matrix.outputs.test_count }}';
+            const buildResult = '${{ needs.build-gd32.result }}';
             
-            let successCount = parseInt(process.env.SUCCESS_COUNT || '0');
-            let failCount = parseInt(process.env.FAIL_COUNT || '0');
-            let successRate = process.env.SUCCESS_RATE || '0.0';
-            
-            const results = [];
-            const artifactsDir = 'artifacts';
-            
-            if (fs.existsSync(artifactsDir)) {
-              const dirs = fs.readdirSync(artifactsDir);
-              
-              for (const dir of dirs) {
-                const dirPath = path.join(artifactsDir, dir);
-                if (!fs.statSync(dirPath).isDirectory()) continue;
-                
-                const [arch, ...bspParts] = dir.split('-');
-                const bsp = bspParts.join('-');
-                
-                const binFile = path.join(dirPath, 'rtthread.bin');
-                const elfFile = path.join(dirPath, 'rtthread.elf');
-                
-                if (fs.existsSync(binFile) || fs.existsSync(elfFile)) {
-                  results.push(`| \`${arch}\` | \`${bsp}\` | ✅ 成功 |`);
-                } else {
-                  results.push(`| \`${arch}\` | \`${bsp}\` | ❌ 失败 |`);
-                }
-              }
+            let emoji = '✅';
+            let status = '成功';
+            if (buildResult === 'failure') {
+              emoji = '❌';
+              status = '失败';
+            } else if (buildResult === 'cancelled') {
+              emoji = '⚠️';
+              status = '已取消';
             }
             
-            const total = successCount + failCount;
+            const body = `## ${emoji} GD32 BSP CI 编译报告
             
-            const body = `## 🔨 GD32 BSP CI测试结果
-
-### 📊 统计摘要
-
-| 指标 | 数值 |
-|------|------|
-| ✅ 成功 | ${successCount} |
-| ❌ 失败 | ${failCount} |
-| 📊 总计 | ${total} |
-| 📈 成功率 | ${successRate}% |
-| 📚 Libraries变更 | ${{ needs.analyze-changes.outputs.library_changed }} |
-
-### 📋 详细结果
-
-| 架构 | BSP | 状态 |
-|------|-----|------|
-${results.join('\n')}
-
----
-*🤖 自动生成于 ${new Date().toISOString()} by [GD32 Mirror CI](https://github.com/${{ github.repository }})*`;
+            - **测试数量**: ${testCount} 个 BSP
+            - **编译状态**: ${status}
+            - **触发**: ${context.eventName}
+            - **提交**: ${context.sha.substring(0, 7)}
             
-            await github.rest.issues.createComment({
-              issue_number: context.issue.number,
+            ${buildResult === 'success' ? '🎉 所有 GD32 BSP 编译通过！' : '⚠️ 部分编译失败，请检查日志。'}
+            `;
+            
+            github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
+              issue_number: context.issue.number,
               body: body
             });
-            
-      - name: 检查编译状态
-        run: |
-          FAIL_COUNT=${{ env.FAIL_COUNT }}
-          SUCCESS_COUNT=${{ env.SUCCESS_COUNT }}
-          
-          echo "========================================="
-          echo "GD32 BSP CI测试完成"
-          echo "========================================="
-          echo "✅ 成功: $SUCCESS_COUNT"
-          echo "❌ 失败: $FAIL_COUNT"
-          echo "========================================="
-          
-          if [ "$FAIL_COUNT" -gt 0 ]; then
-            echo ""
-            echo "⚠️ 有 $FAIL_COUNT 个BSP编译失败"
-            echo "请检查上述日志获取详细错误信息"
-            exit 1
-          else
-            echo ""
-            echo "🎉 所有BSP编译成功！"
-            exit 0
-          fi

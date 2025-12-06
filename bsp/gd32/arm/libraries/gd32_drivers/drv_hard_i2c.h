@@ -63,7 +63,6 @@ struct gd32_i2c_bus
 #endif
 };
 
-
 /* This function initializes the I2C pin */
 void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c);
 

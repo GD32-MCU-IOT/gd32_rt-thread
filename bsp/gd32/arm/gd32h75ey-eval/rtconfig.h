@@ -342,6 +342,8 @@
 /* touch drivers */
 
 /* end of touch drivers */
+#define PKG_USING_AT24CXX
+#define PKG_USING_AT24CXX_LATEST_VERSION
 /* end of peripheral libraries and drivers */
 
 /* AI packages */
@@ -441,7 +443,7 @@
 /* end of On-chip Peripheral Drivers */
 
 /* Board extended module Drivers */
-#define PKG_USING_AT24CXX
+
 /* end of Hardware Drivers Config */
 
 #endif

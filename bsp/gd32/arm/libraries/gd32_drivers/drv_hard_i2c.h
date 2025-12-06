@@ -22,6 +22,7 @@ extern "C" {
 
 /* GD32 i2c driver */
 #if !defined(SOC_SERIES_GD32H75E)
+
 struct gd32_i2c_bus
 {
     uint32_t i2c_periph;             /* Todo: 3bits */
@@ -41,6 +42,7 @@ struct gd32_i2c_bus
     struct rt_i2c_bus_device *i2c_bus;
     char *device_name;
 };
+
 #else
 
 #if defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)
@@ -53,8 +55,8 @@ struct gd32_i2c_bus
     rcu_periph_enum i2c_clk;
     IRQn_Type irqn_ev;
     IRQn_Type irqn_er;
-    char *device_name;
     struct rt_i2c_bus_device *i2c_bus;
+    char *device_name;
 #ifdef BSP_USING_I2C_TX_DMA
     struct dma_config *dma_tx;
 #endif

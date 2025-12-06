@@ -1,0 +1,61 @@
+import rtconfig
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+
+# The set of source files associated with this SConscript file.
+
+src = Split('''
+GD32H75E_standard_peripheral/Source/gd32h75e_gpio.c
+GD32H75E_standard_peripheral/Source/gd32h75e_rcu.c
+GD32H75E_standard_peripheral/Source/gd32h75e_exti.c
+GD32H75E_standard_peripheral/Source/gd32h75e_misc.c
+GD32H75E_standard_peripheral/Source/gd32h75e_syscfg.c
+GD32H75E_standard_peripheral/Source/gd32h75e_pmu.c
+''')
+
+if GetDepend(['RT_USING_SERIAL']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_usart.c']
+
+if GetDepend(['RT_USING_I2C']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_i2c.c']
+
+if GetDepend(['RT_USING_SPI']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_spi.c']
+
+if GetDepend(['RT_USING_CAN']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_can.c']
+
+if GetDepend(['RT_USING_ADC']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_adc.c']
+
+if GetDepend(['RT_USING_DAC']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_dac.c']
+
+if GetDepend(['RT_USING_RTC']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_rtc.c']
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_pmu.c']
+
+if GetDepend(['RT_USING_WDT']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_wwdgt.c']
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_fwdgt.c']
+
+if GetDepend(['RT_USING_DMA']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_dma.c']
+
+if GetDepend(['BSP_USING_OSPI']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_ospi.c']
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_ospim.c']
+
+if GetDepend(['BSP_USING_SDRAM']):
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_fmc.c']
+    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_exmc.c']
+
+path = [cwd + '/GD32H75E_standard_peripheral/Include']
+
+CPPDEFINES = ['USE_STDPERIPH_DRIVER']
+
+group = DefineGroup('Libraries', src, depend = ['SOC_SERIES_GD32H75E'], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+Return('group')

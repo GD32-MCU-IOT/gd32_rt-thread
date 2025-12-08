@@ -197,8 +197,8 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
     RCU_I2C0,      /* periph clock */
     I2C0_EV_IRQn,
     I2C0_ER_IRQn,
-    &i2c0,
     "hwi2c0",
+    &i2c0,
     },
 #endif
 
@@ -208,8 +208,8 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
     RCU_I2C1,
     I2C1_EV_IRQn,
     I2C1_ER_IRQn,
-    &i2c1,
     "hwi2c1",
+    &i2c1,
     },
 #endif
 
@@ -219,8 +219,8 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
     RCU_I2C2,
     I2C2_EV_IRQn,
     I2C2_ER_IRQn,
-    &i2c2,
     "hwi2c2",
+    &i2c2,
     },
 #endif
 

@@ -481,15 +481,23 @@ class GD32BuildTester:
         import re
         required_packages = set()
         
-        # 匹配 PKG_USING_XXX=y 的行
-        pattern = r'PKG_USING_([A-Z0-9_]+)=y'
+        # 匹配 CONFIG_PKG_USING_XXX=y 的行（注意 CONFIG_ 前缀）
+        # 排除 _LATEST_VERSION, _EXAMPLE, _SAMPLE 等后缀
+        pattern = r'CONFIG_PKG_USING_([A-Z0-9_]+?)(?:_LATEST_VERSION|_EXAMPLE|_SAMPLE)?=y'
         matches = re.findall(pattern, config_content)
         
         for match in matches:
-            # 将 PKG_USING_XXX 转换为实际的包名（通常是小写，用 - 分隔）
-            # 例如: PKG_USING_WIZNET -> wiznet
+            # 跳过版本选择等配置项
+            if match.endswith('_LATEST_VERSION') or match.endswith('_EXAMPLE') or match.endswith('_SAMPLE'):
+                continue
+            
+            # 将包名转换为小写并替换下划线为连字符
+            # 例如: AT24CXX -> at24cxx, GD32_ARM_CMSIS_DRIVER -> gd32-arm-cmsis-driver
             pkg_name = match.lower().replace('_', '-')
             required_packages.add(pkg_name)
+            
+            # 同时保留原始名称（某些包名可能保留大小写或下划线）
+            required_packages.add(match.lower())  # 全小写版本
         
         return required_packages
     
@@ -540,20 +548,67 @@ class GD32BuildTester:
         
         # 检查已存在的软件包
         valid_existing_packages = set()
+        existing_package_names = set()
         for pkg_dir in packages_dir.iterdir():
             if pkg_dir.is_dir() and not pkg_dir.name.startswith('.'):
                 if self._validate_package(pkg_dir):
                     valid_existing_packages.add(pkg_dir.name)
+                    # 同时记录包名的各种可能形式（用于模糊匹配）
+                    existing_package_names.add(pkg_dir.name.lower())
+                    existing_package_names.add(pkg_dir.name.lower().replace('-', '_'))
+                    existing_package_names.add(pkg_dir.name.lower().replace('_', '-'))
         
-        # 判断是否所有需要的包都已存在且有效
-        # 注意：由于包名转换可能不完全准确，我们采用宽松策略
-        # 只要 packages 目录中有有效的包，且没有明显缺失，就跳过更新
-        if valid_existing_packages and len(valid_existing_packages) > 0:
-            # 已有有效的软件包，跳过更新
-            return False, required_packages, valid_existing_packages
-        else:
+        if not valid_existing_packages:
             # 没有有效的软件包，需要更新
             return True, required_packages, valid_existing_packages
+        
+        # 检查是否所有需要的包都已存在
+        # 采用模糊匹配策略：检查包名的各种变体是否存在
+        missing_packages = set()
+        for required_pkg in required_packages:
+            # 尝试多种匹配方式
+            pkg_variants = {
+                required_pkg,
+                required_pkg.replace('-', '_'),
+                required_pkg.replace('_', '-'),
+            }
+            
+            # 检查是否有任何变体匹配
+            found_exact = any(variant in existing_package_names for variant in pkg_variants)
+            
+            if not found_exact:
+                # 未找到精确匹配，尝试部分匹配（包名可能包含版本后缀）
+                # 例如: at24cxx 匹配 at24cxx-latest
+                #      gd32-arm-cmsis-driver 匹配 gd32-arm-cmsis-latest
+                found_partial = False
+                for existing_pkg in valid_existing_packages:
+                    existing_lower = existing_pkg.lower()
+                    required_lower = required_pkg.lower()
+                    
+                    # 检查包名是否为已存在包的前缀（考虑版本后缀）
+                    # 例如: "gd32-arm-cmsis" 是 "gd32-arm-cmsis-latest" 的前缀
+                    if existing_lower.startswith(required_lower) or required_lower.startswith(existing_lower):
+                        # 进一步检查：确保是合理的前缀匹配，不是偶然的部分重叠
+                        # 分割包名，检查主要部分是否匹配
+                        existing_parts = existing_lower.replace('-', ' ').replace('_', ' ').split()
+                        required_parts = required_lower.replace('-', ' ').replace('_', ' ').split()
+                        
+                        # 检查主要部分是否大部分重叠
+                        common_parts = set(existing_parts) & set(required_parts)
+                        if len(common_parts) >= min(len(existing_parts), len(required_parts)) - 1:
+                            found_partial = True
+                            break
+                
+                if not found_partial:
+                    missing_packages.add(required_pkg)
+        
+        # 如果有缺失的包，需要更新
+        if missing_packages:
+            Color.print_warning(f"    ⚠ Missing packages detected: {', '.join(sorted(missing_packages))}")
+            return True, required_packages, valid_existing_packages
+        
+        # 所有需要的包都已存在
+        return False, required_packages, valid_existing_packages
     
     def _backup_config_files(self, bsp_path: Path) -> List[Path]:
         """

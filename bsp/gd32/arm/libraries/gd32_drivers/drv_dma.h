@@ -27,8 +27,29 @@
 struct dma_config
 {
     uint32_t periph;
+    uint32_t dma_flag;
     rcu_periph_enum rcu;
     dma_channel_enum channel;
+    IRQn_Type irq;
+};
+
+#elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E)
+
+#define DRV_DMA_CONFIG(dmax, chx, reqx)     {                                                   \
+                                                .periph     = DMA##dmax,                        \
+                                                .channel    = DMA_CH##chx,                      \
+                                                .rcu        = RCU_DMA##dmax,                    \
+                                                .subperiph  = DMA_SUBPERI##reqx,                \
+                                                .irq        = DMA##dmax##_Channel##chx##_IRQn,  \
+                                            }
+
+struct dma_config
+{
+    uint32_t periph;
+    uint32_t dma_flag;
+    rcu_periph_enum rcu;
+    dma_channel_enum channel;
+    uint32_t request;
     IRQn_Type irq;
 };
 
@@ -45,6 +66,7 @@ struct dma_config
 struct dma_config
 {
     uint32_t periph;
+    uint32_t dma_flag;
     rcu_periph_enum rcu;
     dma_channel_enum channel;
     dma_subperipheral_enum subperiph;

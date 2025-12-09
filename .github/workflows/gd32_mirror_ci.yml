@@ -73,6 +73,9 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@main
         with:
+    # 当 workflow 由 pull_request 触发时：github.head_ref 是源分支名
+    # github.event.pull_request.head.sha 可以更精确（commit SHA）
+          ref: ${{ github.event.pull_request.head.sha || github.head_ref || github.ref }}
           persist-credentials: false
           fetch-depth: 0
       

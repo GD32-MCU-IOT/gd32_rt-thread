@@ -260,18 +260,13 @@ jobs:
           ./install_ubuntu.sh
           pip install -r tools/requirements.txt
           
-          # 🔥 关键修复：配置 Git 允许脏工作区，避免 pkgs 工具报错
+          # 🔥 配置 Git 参数
           git config --global advice.detachedHead false
           git config --global pull.rebase false
           git config --global core.fileMode false
-          
-          # 🛡️ 保护当前分支，防止 pkgs 工具意外 checkout
           git config --global --add safe.directory '*'
-          
           git config --global http.postBuffer 524288000
           
-          # 🔒 标记所有已修改的文件为假定不变（防止被 git checkout 覆盖）
-          # 注意：这只是临时措施，编译后会自动恢复
           echo "当前分支: $(git rev-parse --abbrev-ref HEAD)"
           echo "当前 commit: $(git rev-parse HEAD)"
           
@@ -305,7 +300,7 @@ jobs:
           echo "RTT_EXEC_PATH=/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin" >> $GITHUB_ENV
 
       #========================================================================
-      # 核心编译步骤 - 复用 RT-Thread bsp_buildings.py
+      # 核心编译步骤
       #========================================================================
       - name: 编译 GD32 BSP
         if: ${{ success() }}
@@ -325,26 +320,7 @@ jobs:
           echo "SRTT_BSP=$SRTT_BSP"
           echo ""
           
-          # 🔍 调试：检查 BSP 目录是否存在
-          echo "=== 检查 BSP 目录 ==="
-          IFS=',' read -ra BSP_ARRAY <<< "$SRTT_BSP"
-          for bsp in "${BSP_ARRAY[@]}"; do
-            bsp_path="$RTT_ROOT/bsp/$bsp"
-            if [ -d "$bsp_path" ]; then
-              echo "✅ 目录存在: $bsp_path"
-              ls -la "$bsp_path" | head -10
-            else
-              echo "❌ 目录不存在: $bsp_path"
-              echo "   当前工作目录: $(pwd)"
-              echo "   bsp/gd32/arm/ 目录内容:"
-              ls -la bsp/gd32/arm/ || echo "   gd32/arm 目录不存在"
-              exit 1
-            fi
-          done
-          echo ""
-          
-          # 🔥 使用 GD32 调试版编译脚本（拦截 os.chdir 调用）
-         # python tools/ci/gd32_bsp_build_debug.py
+          python tools/ci/bsp_buildings.py
 
       #========================================================================
       # 上传编译产物

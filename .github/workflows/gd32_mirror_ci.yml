@@ -73,11 +73,29 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@main
         with:
-    # 当 workflow 由 pull_request 触发时：github.head_ref 是源分支名
-    # github.event.pull_request.head.sha 可以更精确（commit SHA）
-          ref: ${{ github.event.pull_request.head.sha || github.head_ref || github.ref }}
+          # PR 触发时 checkout 源分支的 HEAD commit
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
           persist-credentials: false
           fetch-depth: 0
+      
+      - name: 🔍 调试：验证 checkout 状态
+        shell: bash
+        run: |
+          echo "=== Checkout 信息 ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Base Ref: ${{ github.base_ref }}"
+          echo "Head Ref: ${{ github.head_ref }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "PR Head SHA: ${{ github.event.pull_request.head.sha }}"
+          echo ""
+          echo "=== Git 状态 ==="
+          git log -3 --oneline --graph
+          git branch -a
+          echo "当前 commit: $(git rev-parse HEAD)"
+          echo ""
+          echo "=== GD32 BSP 目录检查 ==="
+          ls -la bsp/gd32/arm/ | head -15
       
       - name: 设置 Python 环境
         uses: actions/setup-python@main
@@ -190,6 +208,43 @@ jobs:
     steps:
       - name: 检出代码
         uses: actions/checkout@main
+        with:
+          # 🔥 关键修复：与 generate-matrix job 保持一致的 checkout 策略
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          persist-credentials: false
+          fetch-depth: 0
+      
+      - name: 🔍 调试：验证代码目录结构
+        shell: bash
+        run: |
+          echo "=== Checkout 详细信息 ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "PR Head SHA: ${{ github.event.pull_request.head.sha }}"
+          echo ""
+          echo "=== Git 状态 ==="
+          git log -3 --oneline --decorate
+          echo "当前分支: $(git rev-parse --abbrev-ref HEAD)"
+          echo "当前 commit: $(git rev-parse HEAD)"
+          echo ""
+          echo "=== 检查待编译的 BSP 路径 ==="
+          IFS=',' read -ra BSP_ARRAY <<< "${{ join(matrix.legs.SUB_RTT_BSP, ',') }}"
+          for bsp in "${BSP_ARRAY[@]}"; do
+            bsp_path="bsp/$bsp"
+            if [ -d "$bsp_path" ]; then
+              echo "✅ 目录存在: $bsp_path"
+              ls -la "$bsp_path" | head -5
+            else
+              echo "❌ 目录不存在: $bsp_path"
+              echo "   列出父目录内容:"
+              parent_dir=$(dirname "$bsp_path")
+              ls -la "$parent_dir" 2>/dev/null || echo "   父目录也不存在: $parent_dir"
+            fi
+            echo ""
+          done
       
       - name: 设置 Python 环境
         uses: actions/setup-python@main
@@ -253,6 +308,24 @@ jobs:
           echo "RTT_EXEC_PATH=$RTT_EXEC_PATH"
           echo "RTT_BSP=$RTT_BSP"
           echo "SRTT_BSP=$SRTT_BSP"
+          echo ""
+          
+          # 🔍 调试：检查 BSP 目录是否存在
+          echo "=== 检查 BSP 目录 ==="
+          IFS=',' read -ra BSP_ARRAY <<< "$SRTT_BSP"
+          for bsp in "${BSP_ARRAY[@]}"; do
+            bsp_path="$RTT_ROOT/bsp/$bsp"
+            if [ -d "$bsp_path" ]; then
+              echo "✅ 目录存在: $bsp_path"
+              ls -la "$bsp_path" | head -10
+            else
+              echo "❌ 目录不存在: $bsp_path"
+              echo "   当前工作目录: $(pwd)"
+              echo "   bsp/gd32/arm/ 目录内容:"
+              ls -la bsp/gd32/arm/ || echo "   gd32/arm 目录不存在"
+              exit 1
+            fi
+          done
           echo ""
           
           # 复用 RT-Thread 核心编译脚本

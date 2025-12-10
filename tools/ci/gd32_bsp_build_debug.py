@@ -87,11 +87,27 @@ def debug_chdir(path):
         import traceback
         traceback.print_stack()
         
+        # 🔥 关键检查：新BSP目录是否还存在
+        test_bsp_path = os.path.join(rtt_root, 'bsp/gd32/arm/gd32h759i-eval-citest')
+        print(f"\n   🚨 检查测试BSP目录: {test_bsp_path}")
+        print(f"   存在状态: {os.path.exists(test_bsp_path)}")
+        if not os.path.exists(test_bsp_path):
+            print(f"   ⚠️ 测试BSP目录已被删除！这是问题根源！")
+        
         raise FileNotFoundError(f"目录不存在: {abs_path}")
     
     try:
         result = original_chdir(path)
         print(f"   ✅ chdir 成功，新目录: {os.getcwd()}\n")
+        
+        # 🔥 每次 chdir 成功后，检查测试BSP是否仍存在
+        test_bsp_path = os.path.join(rtt_root, 'bsp/gd32/arm/gd32h759i-eval-citest')
+        if not os.path.exists(test_bsp_path):
+            print(f"\n⚠️ 警告：chdir 成功后，测试BSP目录消失了！")
+            print(f"   测试BSP路径: {test_bsp_path}")
+            print(f"   当前操作的BSP: {path}")
+            print(f"   这可能是问题的触发点！\n")
+        
         return result
     except Exception as e:
         print(f"   ❌ chdir 失败: {e}\n")
@@ -100,7 +116,44 @@ def debug_chdir(path):
 # 替换 os.chdir
 os.chdir = debug_chdir
 
-print("🔧 已启用 os.chdir() 调试模式\n")
+# 🔥 同时拦截可能删除文件的系统调用
+original_system = os.system
+original_remove = os.remove
+original_rmdir = os.rmdir
+
+def debug_system(cmd):
+    """拦截 os.system 调用"""
+    print(f"\n📟 [DEBUG] os.system() 调用: {cmd}")
+    result = original_system(cmd)
+    
+    # 检查测试BSP是否仍存在
+    test_bsp_path = os.path.join(rtt_root, 'bsp/gd32/arm/gd32h759i-eval-citest')
+    if not os.path.exists(test_bsp_path):
+        print(f"\n🚨 警告：执行命令后，测试BSP目录消失！")
+        print(f"   命令: {cmd}")
+        print(f"   测试BSP: {test_bsp_path}\n")
+    
+    return result
+
+def debug_remove(path):
+    """拦截 os.remove 调用"""
+    print(f"\n🗑️ [DEBUG] os.remove() 调用: {path}")
+    return original_remove(path)
+
+def debug_rmdir(path):
+    """拦截 os.rmdir 调用"""
+    print(f"\n🗑️ [DEBUG] os.rmdir() 调用: {path}")
+    if 'gd32h759i-eval-citest' in path:
+        print(f"   ⚠️ 尝试删除测试BSP目录！")
+        import traceback
+        traceback.print_stack()
+    return original_rmdir(path)
+
+os.system = debug_system
+os.remove = debug_remove
+os.rmdir = debug_rmdir
+
+print("🔧 已启用 os.chdir()/os.system()/os.remove()/os.rmdir() 调试模式\n")
 print("="*80)
 print("  开始执行 bsp_buildings.py")
 print("="*80 + "\n")

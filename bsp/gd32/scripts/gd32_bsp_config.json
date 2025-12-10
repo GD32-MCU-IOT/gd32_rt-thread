@@ -29,11 +29,10 @@
         "gd32/arm/gd32e503v-eval",
         "gd32/arm/gd32527I-eval",
         "gd32/arm/gd32e230-lckfb",
+        "gd32/arm/gd32h759i-eval-citest",
         "gd32/arm/gd32h759i-start",
         "gd32/arm/gd32h759i-eval",
-        "gd32/arm/gd32h75ey-eval",
-        "gd32/arm/gd32h759i-eval-citest",
-        "gd32/arm/gd32h759i-eval-citest"
+        "gd32/arm/gd32h75ey-eval"
       ]
     }
   ],
@@ -62,10 +61,10 @@
       "gd32527I-eval",
       "gd32e230-lckfb",
       "gd32e503v-eval",
+      "gd32h759i-eval-citest",
       "gd32h759i-eval",
       "gd32h759i-start",
-      "gd32h75ey-eval",
-      "gd32h759i-eval-citest"
+      "gd32h75ey-eval"
     ],
     "excluded_bsps": [],
     "toolchain": "sourcery-arm",

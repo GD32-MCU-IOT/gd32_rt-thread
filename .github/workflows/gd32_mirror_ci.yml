@@ -300,43 +300,8 @@ jobs:
           echo "RTT_EXEC_PATH=/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin" >> $GITHUB_ENV
 
       #========================================================================
-      # 核心编译步骤 - 自动保护所有未跟踪的 BSP 目录
+      # 核心编译步骤
       #========================================================================
-      - name: 🛡️ 保护工作区（编译前）
-        shell: bash
-        run: |
-          echo "=== 自动保护所有未跟踪的 BSP 目录 ==="
-          
-          # 🔥 关键：pkgs 执行 git checkout 时会清理未跟踪文件
-          # 解决方案：自动检测并保护所有未跟踪的 BSP 目录
-          
-          # 查找所有未跟踪的 bsp/gd32 目录
-          echo "🔍 检测未跟踪的 BSP 目录..."
-          untracked_bsps=$(git ls-files --others --exclude-standard bsp/gd32/ | grep -E '^bsp/gd32/[^/]+/[^/]+/$' | sed 's|/$||' | sort -u)
-          
-          if [ -n "$untracked_bsps" ]; then
-            echo "📦 发现未跟踪的 BSP 目录，添加到 Git 索引："
-            echo "$untracked_bsps"
-            echo ""
-            
-            # 将所有未跟踪的 BSP 目录添加到索引（intent-to-add）
-            while IFS= read -r bsp_dir; do
-              if [ -d "$bsp_dir" ]; then
-                echo "  ➕ git add -N $bsp_dir"
-                git add -N "$bsp_dir"
-              fi
-            done <<< "$untracked_bsps"
-            
-            echo ""
-            echo "✅ 所有新 BSP 已添加到索引，不会被 Git 操作清理"
-          else
-            echo "ℹ️ 未发现未跟踪的 BSP 目录"
-          fi
-          
-          echo ""
-          echo "📊 Git 状态（仅显示 bsp/gd32）："
-          git status --short bsp/gd32/ | head -20
-      
       - name: 编译 GD32 BSP
         if: ${{ success() }}
         shell: bash
@@ -355,36 +320,7 @@ jobs:
           echo "SRTT_BSP=$SRTT_BSP"
           echo ""
           
-          # 执行编译（.git 已隐藏，pkgs 无法执行 Git 操作）
           python tools/ci/bsp_buildings.py
-      
-      - name: 📋 检查编译结果（编译后）
-        if: always()
-        shell: bash
-        run: |
-          echo "=== 检查编译后状态 ==="
-          
-          # 检查所有新添加的 BSP 目录是否仍然存在
-          echo "🔍 检查所有 BSP 目录状态："
-          
-          untracked_bsps=$(git ls-files --others --exclude-standard bsp/gd32/ | grep -E '^bsp/gd32/[^/]+/[^/]+/$' | sed 's|/$||' | sort -u)
-          
-          if [ -n "$untracked_bsps" ]; then
-            echo "📦 检查保护的 BSP 目录："
-            while IFS= read -r bsp_dir; do
-              if [ -d "$bsp_dir" ]; then
-                echo "  ✅ $bsp_dir - 存在"
-              else
-                echo "  ❌ $bsp_dir - 已被删除（保护失败）"
-              fi
-            done <<< "$untracked_bsps"
-          else
-            echo "ℹ️ 没有需要检查的未跟踪 BSP"
-          fi
-          
-          echo ""
-          echo "📊 最终 Git 状态："
-          git status --short bsp/gd32/ | head -20
 
       #========================================================================
       # 上传编译产物

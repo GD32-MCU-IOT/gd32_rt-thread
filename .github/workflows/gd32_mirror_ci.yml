@@ -300,26 +300,28 @@ jobs:
           echo "RTT_EXEC_PATH=/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin" >> $GITHUB_ENV
 
       #========================================================================
-      # 核心编译步骤 - 使用 Git Stash 保护工作区
+      # 核心编译步骤 - 临时移除 .git 目录保护工作区
       #========================================================================
       - name: 🛡️ 保护工作区（编译前）
         shell: bash
         run: |
           echo "=== 保护工作区免受 pkgs Git 操作影响 ==="
           
-          # 显示当前状态
-          echo "当前 Git 状态:"
-          git status --short
+          # 🔥 关键发现：pkgs 工具会将 bsp/gd32/arm 当作 Git 仓库并执行 git fetch/checkout
+          # 这会删除所有未跟踪/修改的文件（包括新添加的 BSP 目录）
           
-          # 🔥 关键：使用 git stash 保存所有修改（包括未跟踪的文件）
-          # --include-untracked: 保存未跟踪的文件（新 BSP 目录）
-          # --keep-index: 保持暂存区不变
-          git stash push --include-untracked --keep-index -m "CI: Protect BSP directories from pkgs operations" || true
+          # 解决方案：临时隐藏 .git 目录，让 pkgs 无法执行 Git 操作
+          if [ -d "bsp/gd32/arm/.git" ]; then
+            echo "📦 备份 bsp/gd32/arm/.git 目录"
+            mv bsp/gd32/arm/.git bsp/gd32/arm/.git.backup
+            echo "✅ .git 目录已隐藏，pkgs 将无法执行 Git 操作"
+          else
+            echo "ℹ️ bsp/gd32/arm/.git 不存在，无需处理"
+          fi
           
-          echo "✅ 工作区已保护"
           echo ""
-          echo "保护后的 Git 状态:"
-          git status --short
+          echo "当前 bsp/gd32/arm 目录内容（前20项）:"
+          ls -la bsp/gd32/arm/ | head -20
       
       - name: 编译 GD32 BSP
         if: ${{ success() }}
@@ -348,23 +350,18 @@ jobs:
         run: |
           echo "=== 恢复工作区状态 ==="
           
-          # 🔥 关键：恢复 stash 的内容
-          # || true: 如果没有 stash 可以 pop，不报错
-          if git stash list | grep -q "CI: Protect BSP"; then
-            echo "发现保护的 stash，正在恢复..."
-            git stash pop || {
-              echo "⚠️ Stash pop 失败，尝试强制恢复"
-              git stash apply
-              git stash drop || true
-            }
-            echo "✅ 工作区已恢复"
+          # 🔥 关键：恢复被隐藏的 .git 目录
+          if [ -d "bsp/gd32/arm/.git.backup" ]; then
+            echo "📦 恢复 bsp/gd32/arm/.git 目录"
+            mv bsp/gd32/arm/.git.backup bsp/gd32/arm/.git
+            echo "✅ .git 目录已恢复"
           else
-            echo "ℹ️ 没有需要恢复的 stash"
+            echo "ℹ️ 没有需要恢复的 .git 备份"
           fi
           
           echo ""
-          echo "恢复后的 Git 状态:"
-          git status --short
+          echo "恢复后的 bsp/gd32/arm 目录内容（前20项）:"
+          ls -la bsp/gd32/arm/ | head -20
 
       #========================================================================
       # 上传编译产物

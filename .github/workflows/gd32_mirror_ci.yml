@@ -307,21 +307,22 @@ jobs:
         run: |
           echo "=== 保护工作区免受 pkgs Git 操作影响 ==="
           
-          # 🔥 关键发现：pkgs 工具会将 bsp/gd32/arm 当作 Git 仓库并执行 git fetch/checkout
-          # 这会删除所有未跟踪/修改的文件（包括新添加的 BSP 目录）
+          # 🔥 关键发现：pkgs 在 BSP 子目录执行时，会向上查找并使用仓库根目录的 .git
+          # 然后执行 git fetch + git checkout，导致未跟踪文件（新 BSP）被删除
           
-          # 解决方案：临时隐藏 .git 目录，让 pkgs 无法执行 Git 操作
-          if [ -d "bsp/gd32/arm/.git" ]; then
-            echo "📦 备份 bsp/gd32/arm/.git 目录"
-            mv bsp/gd32/arm/.git bsp/gd32/arm/.git.backup
-            echo "✅ .git 目录已隐藏，pkgs 将无法执行 Git 操作"
+          # 解决方案：临时隐藏根目录的 .git，让 pkgs 无法执行任何 Git 操作
+          if [ -d ".git" ]; then
+            echo "📦 备份仓库根目录 .git -> .git.ci_backup"
+            mv .git .git.ci_backup
+            echo "✅ .git 已隐藏，pkgs 将跳过所有 Git 操作"
           else
-            echo "ℹ️ bsp/gd32/arm/.git 不存在，无需处理"
+            echo "⚠️ .git 目录不存在，这不正常！"
+            exit 1
           fi
           
           echo ""
-          echo "当前 bsp/gd32/arm 目录内容（前20项）:"
-          ls -la bsp/gd32/arm/ | head -20
+          echo "当前工作区根目录（确认 .git 已隐藏）:"
+          ls -la | grep -E "^\.git"
       
       - name: 编译 GD32 BSP
         if: ${{ success() }}
@@ -341,8 +342,8 @@ jobs:
           echo "SRTT_BSP=$SRTT_BSP"
           echo ""
           
-          # 🔥 使用 GD32 调试版编译脚本（拦截 os.chdir 调用）
-          python tools/ci/gd32_bsp_build_debug.py
+          # 执行编译（.git 已隐藏，pkgs 无法执行 Git 操作）
+          python tools/ci/bsp_buildings.py
       
       - name: 🔓 恢复工作区（编译后）
         if: always()
@@ -350,18 +351,26 @@ jobs:
         run: |
           echo "=== 恢复工作区状态 ==="
           
-          # 🔥 关键：恢复被隐藏的 .git 目录
-          if [ -d "bsp/gd32/arm/.git.backup" ]; then
-            echo "📦 恢复 bsp/gd32/arm/.git 目录"
-            mv bsp/gd32/arm/.git.backup bsp/gd32/arm/.git
+          # 🔥 关键：恢复根目录的 .git
+          if [ -d ".git.ci_backup" ]; then
+            echo "📦 恢复 .git.ci_backup -> .git"
+            mv .git.ci_backup .git
             echo "✅ .git 目录已恢复"
           else
-            echo "ℹ️ 没有需要恢复的 .git 备份"
+            echo "⚠️ 警告：.git.ci_backup 不存在，无法恢复！"
           fi
           
           echo ""
-          echo "恢复后的 bsp/gd32/arm 目录内容（前20项）:"
-          ls -la bsp/gd32/arm/ | head -20
+          echo "恢复后的工作区根目录:"
+          ls -la | grep -E "^\.git"
+          
+          echo ""
+          echo "检查新 BSP 目录状态:"
+          if [ -d "bsp/gd32/arm/gd32h759i-eval-citest" ]; then
+            echo "✅ gd32h759i-eval-citest 目录存在"
+          else
+            echo "❌ gd32h759i-eval-citest 目录不存在"
+          fi
 
       #========================================================================
       # 上传编译产物

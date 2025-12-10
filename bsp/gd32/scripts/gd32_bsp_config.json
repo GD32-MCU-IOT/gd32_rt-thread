@@ -32,6 +32,7 @@
         "gd32/arm/gd32h759i-start",
         "gd32/arm/gd32h759i-eval",
         "gd32/arm/gd32h75ey-eval",
+        "gd32/arm/gd32h759i-eval-citest",
         "gd32/arm/gd32h759i-eval-citest"
       ]
     }

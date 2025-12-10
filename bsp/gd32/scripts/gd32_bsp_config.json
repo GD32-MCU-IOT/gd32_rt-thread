@@ -31,7 +31,8 @@
         "gd32/arm/gd32e230-lckfb",
         "gd32/arm/gd32h759i-start",
         "gd32/arm/gd32h759i-eval",
-        "gd32/arm/gd32h759i-eval_ci_test_1210"
+        "gd32/arm/gd32h759i-eval_ci_test_1210",
+        "gd32/arm/gd32h75ey-eval"
       ]
     }
   ],

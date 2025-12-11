@@ -78,7 +78,7 @@ GD32F307C-EVAL是兆易创新推出的一款GD32F30X系列的评估板，最高�
 ```bash
  \ | /
 - RT -     Thread Operating System
- / | \     4.0.4 build Jan  9 2021
+ / | \     5.3.0 build Dec  9 2025
  2006 - 2021 Copyright by rt-thread team
 msh >
 ```

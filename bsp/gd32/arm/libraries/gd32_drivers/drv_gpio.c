@@ -607,8 +607,8 @@ static rt_err_t gd32_pin_irq_enable(struct rt_device *device, rt_base_t pin, rt_
 #endif
 
         /* configure EXTI line */
-        exti_init((exti_line_enum)(index->pin), EXTI_INTERRUPT, trigger_mode);
-        exti_interrupt_flag_clear((exti_line_enum)(index->pin));
+        exti_init((exti_line_enum)(index->exit_line), EXTI_INTERRUPT, trigger_mode);
+        exti_interrupt_flag_clear((exti_line_enum)(index->exit_line));
 
         rt_hw_interrupt_enable(level);
     }
@@ -660,10 +660,16 @@ rt_inline void pin_irq_hdr(int irqno)
   */
 void GD32_GPIO_EXTI_IRQHandler(rt_int8_t exti_line)
 {
-    if(RESET != exti_interrupt_flag_get((exti_line_enum)(1 << exti_line)))
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E)
+    exti_line_enum pin_exti_line = exti_line;
+#else
+    exti_line_enum pin_exti_line = 1 << exti_line;
+#endif
+
+    if (RESET != exti_interrupt_flag_get(pin_exti_line))
     {
         pin_irq_hdr(exti_line);
-        exti_interrupt_flag_clear((exti_line_enum)(1 << exti_line));
+        exti_interrupt_flag_clear(pin_exti_line);
     }
 }
 

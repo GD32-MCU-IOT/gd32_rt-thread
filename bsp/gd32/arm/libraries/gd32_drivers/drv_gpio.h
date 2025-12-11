@@ -50,7 +50,8 @@ extern "C" {
 #define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,      \
                                     GPIO##port, GPIO_PIN_##pin, \
                                     EXTI_SOURCE_GPIO##port,     \
-                                    EXTI_SOURCE_PIN##pin}
+                                    EXTI_SOURCE_PIN##pin,       \
+                                    EXTI_##pin}
 #else
 #define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,        \
                                     GPIO##port, GPIO_PIN_##pin,   \
@@ -77,6 +78,7 @@ struct pin_index
     rt_uint32_t pin;
     rt_uint8_t port_src;
     rt_uint8_t pin_src;
+    rt_uint32_t exit_line;
 };
 
 struct pin_irq_map

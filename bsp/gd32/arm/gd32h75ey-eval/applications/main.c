@@ -5,7 +5,6 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2024-08-07     RT-Thread    first implementation for GD32H75E-EVAL
  */
 
 #include <rtthread.h>
@@ -13,8 +12,16 @@
 #include <board.h>
 #include <string.h>
 
-#define GD32H7_I2C_EEPROM_TEST
-//#define GD32H7_SPI_TEST
+#define GD32_I2C_EEPROM_TEST
+
+/* Note: The h75ey eval board not support SPI flash, if you want to test this function,
+ *       please connect the SPI to SPI flash.
+ */
+//#define GD32_SPI_TEST
+
+#define GD32_UART_TEST
+
+#define GD32_GPIO_EXTI_TEST
 
 
 /* defined the LED pins: LED1 and LED2 */
@@ -22,8 +29,7 @@
 #define LED2_PIN    GET_PIN(C, 4)   /* LED2 on PC4 */
 #define LED3_PIN    GET_PIN(C, 5)   /* LED2 on PC4 */
 
-
-#ifdef GD32H7_I2C_EEPROM_TEST
+#ifdef GD32_I2C_EEPROM_TEST
 #include "at24cxx.h"
 #define BUFFER_SIZE    256
 #define I2C_SERIAL     "hwi2c3"
@@ -33,7 +39,7 @@ rt_uint8_t i2c_buffer_read[BUFFER_SIZE];
 uint8_t i2c_24c02_test(void);
 #endif
 
-#ifdef GD32H7_SPI_TEST
+#ifdef GD32_SPI_TEST
 #define BUS_NAME     "spi2"
 #define SPI_NAME     "spi00"
 
@@ -49,6 +55,21 @@ uint8_t  rx_buffer[200];
 static void spi_sample(void);
 #endif
 
+#ifdef GD32_UART_TEST
+#define SAMPLE_UART_NAME    "uart0"
+static struct rt_semaphore  rx_sem;
+static rt_device_t serial;
+
+static int uart_sample(int argc, char *argv[]);
+#endif
+
+#ifdef GD32_GPIO_EXTI_TEST
+#define WAKEUP_PIN_NUM   GET_PIN(A, 0)
+#define TAMPER_PIN       GET_PIN(C, 13)
+
+static void pin_irq_sample(void);
+#endif
+
 int main(void)
 {
     int count = 1;
@@ -62,7 +83,7 @@ int main(void)
     rt_kprintf("RT-Thread BSP adaptation successful!\n");
     rt_kprintf("System Clock: %d Hz\n", SystemCoreClock);
 
-#ifdef GD32H7_I2C_EEPROM_TEST
+#ifdef GD32_I2C_EEPROM_TEST
     struct rt_i2c_bus_device *i2c0_dev;
     i2c0_dev = rt_i2c_bus_device_find(I2C_SERIAL);
     if(i2c_24c02_test() != 0){
@@ -70,8 +91,16 @@ int main(void)
     }
 #endif
 
-#ifdef GD32H7_SPI_TEST
+#ifdef GD32_SPI_TEST
     spi_sample();
+#endif
+
+#ifdef GD32_UART_TEST
+    uart_sample(0, 0);
+#endif
+
+#ifdef GD32_GPIO_EXTI_TEST
+    pin_irq_sample();
 #endif
 
     while (count++)
@@ -102,7 +131,7 @@ int main(void)
 }
 
 
-#ifdef GD32H7_SPI_TEST
+#ifdef GD32_SPI_TEST
 
 static void spi_sample(void)
 {
@@ -167,7 +196,7 @@ static void spi_sample(void)
 MSH_CMD_EXPORT(spi_sample, dspi_sample);
 #endif
 
-#ifdef GD32H7_I2C_EEPROM_TEST
+#ifdef GD32_I2C_EEPROM_TEST
 
 uint8_t i2c_24c02_test(void)
 {
@@ -209,5 +238,91 @@ uint8_t i2c_24c02_test(void)
         }
     }
     return 1;
+}
+#endif
+
+#ifdef GD32_UART_TEST
+/* receive callback */
+static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
+{
+    rt_sem_release(&rx_sem);
+
+    return RT_EOK;
+}
+
+static void serial_thread_entry(void *parameter)
+{
+    char ch;
+
+    while (1) {
+        while (rt_device_read(serial, -1, &ch, 1) != 1) {
+            rt_sem_take(&rx_sem, RT_WAITING_FOREVER);
+        }
+
+        /* echothe recived ch */
+        rt_device_write(serial, 0, &ch, 1);
+    }
+}
+
+static int uart_sample(int argc, char *argv[])
+{
+    rt_err_t ret = RT_EOK;
+    char uart_name[RT_NAME_MAX];
+    char str[] = "hello RT-Thread!\r\n";
+
+    if (argc == 2) {
+        rt_strncpy(uart_name, argv[1], RT_NAME_MAX);
+    } else {
+        rt_strncpy(uart_name, SAMPLE_UART_NAME, RT_NAME_MAX);
+    }
+
+    serial = rt_device_find(uart_name);
+    if (!serial) {
+        rt_kprintf("find %s failed!\n", uart_name);
+        return RT_ERROR;
+    }
+
+    rt_sem_init(&rx_sem, "rx_sem", 0, RT_IPC_FLAG_FIFO);
+    rt_device_open(serial, RT_DEVICE_FLAG_INT_RX);
+    rt_device_set_rx_indicate(serial, uart_input);
+    rt_device_write(serial, 0, str, (sizeof(str) - 1));
+
+    rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 1024, 25, 10);
+
+    if (thread != RT_NULL) {
+        rt_thread_startup(thread);
+    } else {
+        ret = RT_ERROR;
+    }
+
+    return ret;
+}
+#endif
+
+#ifdef GD32_GPIO_EXTI_TEST
+
+void wakeup_key_pin_cb(void *args)
+{
+    rt_kprintf("Wakeup key pin pressed!\n");
+}
+
+void tamper_key_pin_cb(void *args)
+{
+    rt_kprintf("Tamper key pin pressed!\n");
+}
+
+static void pin_irq_sample(void)
+{
+    /* Wakeup key interrupt */
+    rt_pin_mode(WAKEUP_PIN_NUM, PIN_MODE_INPUT_PULLUP);
+    rt_pin_attach_irq(WAKEUP_PIN_NUM, PIN_IRQ_MODE_FALLING, wakeup_key_pin_cb, RT_NULL);
+
+    rt_pin_irq_enable(WAKEUP_PIN_NUM, PIN_IRQ_ENABLE);
+
+    /* Tamper key interrupt */
+    rt_pin_mode(TAMPER_PIN, PIN_MODE_INPUT_PULLUP);
+    rt_pin_attach_irq(TAMPER_PIN, PIN_IRQ_MODE_FALLING, tamper_key_pin_cb, RT_NULL);
+
+    rt_pin_irq_enable(TAMPER_PIN, PIN_IRQ_ENABLE);
 }
 #endif

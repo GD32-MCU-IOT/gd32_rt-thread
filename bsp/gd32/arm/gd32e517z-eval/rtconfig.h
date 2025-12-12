@@ -61,7 +61,7 @@
 
 /* end of rt_strnlen options */
 /* end of klibc options */
-#define RT_NAME_MAX 12
+#define RT_NAME_MAX 16
 #define RT_CPUS_NR 1
 #define RT_ALIGN_SIZE 8
 #define RT_THREAD_PRIORITY_32
@@ -80,6 +80,10 @@
 /* kservice options */
 
 /* end of kservice options */
+#define RT_USING_DEBUG
+#define RT_DEBUGING_ASSERT
+#define RT_DEBUGING_COLOR
+#define RT_DEBUGING_CONTEXT
 
 /* Inter-Thread communication */
 
@@ -108,7 +112,6 @@
 #define RT_USING_CPU_FFS
 #define ARCH_ARM
 #define ARCH_ARM_CORTEX_M
-#define ARCH_ARM_CORTEX_SECURE
 #define ARCH_ARM_CORTEX_M33
 
 /* RT-Thread Components */
@@ -141,6 +144,7 @@
 #define RT_USING_DFS_V1
 #define DFS_FILESYSTEMS_MAX 4
 #define DFS_FILESYSTEM_TYPES_MAX 4
+#define RT_USING_DFS_DEVFS
 /* end of DFS: device virtual file system */
 
 /* Device Drivers */
@@ -149,8 +153,15 @@
 #define RT_UNAMED_PIPE_NUMBER 64
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
-#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
+#define RT_USING_I2C
+#define RT_USING_I2C_BITOPS
+#define RT_USING_SPI
+#define RT_USING_SPI_ISR
+#define RT_USING_SFUD
+#define RT_SFUD_USING_SFDP
+#define RT_SFUD_USING_FLASH_INFO_TABLE
+#define RT_SFUD_SPI_MAX_HZ 50000000
 #define RT_USING_PIN
 /* end of Device Drivers */
 
@@ -411,19 +422,29 @@
 /* end of Arduino libraries */
 /* end of RT-Thread online packages */
 #define SOC_FAMILY_GD32
-#define SOC_SERIES_GD32F5xx
+#define SOC_SERIES_GD32E51x
 
 /* Hardware Drivers Config */
 
-#define SOC_GD32527
+#define SOC_GD32E51X
 
 /* Onboard Peripheral Drivers */
+
+#define BSP_USING_SPI_FLASH
+#define BSP_SPI_FLASH_ON_SPI1
+#define BSP_USING_EEPROM
+#define BSP_EEPROM_ON_I2C0
+/* end of Onboard Peripheral Drivers */
 
 /* On-chip Peripheral Drivers */
 
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART0
+#define BSP_USING_SPI
+#define BSP_USING_SPI1
+#define BSP_USING_I2C
+#define BSP_USING_HARD_I2C0
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

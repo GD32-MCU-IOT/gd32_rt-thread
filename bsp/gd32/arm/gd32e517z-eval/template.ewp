@@ -16,15 +16,15 @@
                 <debug>1</debug>
                 <option>
                     <name>ExePath</name>
-                    <state>build\Exe</state>
+                    <state>Debug\Exe</state>
                 </option>
                 <option>
                     <name>ObjPath</name>
-                    <state>build\Obj</state>
+                    <state>Debug\Obj</state>
                 </option>
                 <option>
                     <name>ListPath</name>
-                    <state>build\List</state>
+                    <state>Debug\List</state>
                 </option>
                 <option>
                     <name>GEndianMode</name>
@@ -32,11 +32,11 @@
                 </option>
                 <option>
                     <name>Input description</name>
-                    <state>Automatic choice of formatter.</state>
+                    <state>Automatic choice of formatter, without multibyte support.</state>
                 </option>
                 <option>
                     <name>Output description</name>
-                    <state>Automatic choice of formatter.</state>
+                    <state>Automatic choice of formatter, without multibyte support.</state>
                 </option>
                 <option>
                     <name>GOutputBinary</name>
@@ -49,20 +49,20 @@
                 <option>
                     <name>GRuntimeLibSelect</name>
                     <version>0</version>
-                    <state>2</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>GRuntimeLibSelectSlave</name>
                     <version>0</version>
-                    <state>2</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>RTDescription</name>
-                    <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
+                    <state>Use the normal configuration of the C/C++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
                 </option>
                 <option>
                     <name>OGProductVersion</name>
-                    <state>7.40.2.8567</state>
+                    <state>8.32.1.18618</state>
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
@@ -78,7 +78,7 @@
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
-                    <state>Default	None</state>
+                    <state>GD32E517xE	GD GD32E517xE</state>
                 </option>
                 <option>
                     <name>GenLowLevelInterface</name>
@@ -112,20 +112,20 @@
                 </option>
                 <option>
                     <name>RTConfigPath2</name>
-                    <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Full.h</state>
+                    <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</state>
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
                     <version>26</version>
-                    <state>39</state>
+                    <state>59</state>
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>OGUseCmsisDspLib</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GRuntimeLibThreads</name>
@@ -134,21 +134,21 @@
                 <option>
                     <name>CoreVariant</name>
                     <version>26</version>
-                    <state>0</state>
+                    <state>59</state>
                 </option>
                 <option>
                     <name>GFPUDeviceSlave</name>
-                    <state>Default	None</state>
+                    <state>GD32E517xE	GD GD32E517xE</state>
                 </option>
                 <option>
                     <name>FPU2</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>6</state>
                 </option>
                 <option>
                     <name>NrRegs</name>
                     <version>0</version>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>NEON</name>
@@ -157,7 +157,7 @@
                 <option>
                     <name>GFPUCoreSlave2</name>
                     <version>26</version>
-                    <state>0</state>
+                    <state>59</state>
                 </option>
                 <option>
                     <name>OGCMSISPackSelectDevice</name>
@@ -220,17 +220,7 @@
                 <debug>1</debug>
                 <option>
                     <name>CCDefines</name>
-                    <state>USE_STDPERIPH_DRIVER</state>
-                    <state>GD32F4XX</state>
-                    <state>GD32F527</state>
-                    <state>__RTTHREAD__</state>
-                    <state>CLOCKS_PER_SEC=RT_TICK_PER_SECOND</state>
-                    <state>RT_USING_DLIBC</state>
-                    <state>RT_USING_LIBC</state>
-                    <state>_DLIB_ADD_EXTRA_SYMBOLS=0</state>
-                    <state>_DLIB_FILE_DESCRIPTOR</state>
-                    <state>__RT_IPC_SOURCE__</state>
-                    <state>__RT_KERNEL_SOURCE__</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -242,7 +232,7 @@
                 </option>
                 <option>
                     <name>CCPreprocLine</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CCListCFile</name>
@@ -355,25 +345,7 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
-                    <state>$PROJ_DIR$\applications</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</state>
-                    <state>$PROJ_DIR$\..\libraries\gd32_drivers</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\finsh</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\drivers\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension</state>
-                    <state>$PROJ_DIR$\..\..\..\..\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\epoll</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
-                    <state>$PROJ_DIR$\.</state>
-                    <state>$PROJ_DIR$\board</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m33</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\eventfd</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -627,7 +599,7 @@
                 </option>
                 <option>
                     <name>AOutputFile</name>
-                    <state>$FILE_BNAME$.o</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>ALimitErrorsCheck</name>
@@ -677,7 +649,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>project.srec</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -732,7 +704,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>rtthread.out</state>
+                    <state>project.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -772,23 +744,23 @@
                 </option>
                 <option>
                     <name>IlinkLogFile</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogInitialization</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogModule</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogSection</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogVeneer</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkIcfOverride</name>
@@ -796,7 +768,7 @@
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>$PROJ_DIR$\board\linker_scripts\link.icf</state>
+                    <state>$PROJ_DIR$/board/linker_scripts/link.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>
@@ -927,15 +899,15 @@
                 </option>
                 <option>
                     <name>IlinkLogAutoLibSelect</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogRedirSymbols</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogUnusedFragments</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkCrcReverseByteOrder</name>
@@ -1029,7 +1001,7 @@
                 </option>
                 <option>
                     <name>IlinkTrustzoneImportLibraryOut</name>
-                    <state>###Unitialized###</state>
+                    <state>template_import_lib.o</state>
                 </option>
                 <option>
                     <name>OILinkExtraOption</name>
@@ -1125,11 +1097,11 @@
                 </option>
                 <option>
                     <name>OGProductVersion</name>
-                    <state>7.40.2.8567</state>
+                    <state>8.32.1.18618</state>
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state>8.32.1.18618</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>GeneralEnableMisra</name>
@@ -1141,7 +1113,7 @@
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
-                    <state>Default	None</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>GenLowLevelInterface</name>
@@ -1180,7 +1152,7 @@
                 <option>
                     <name>GBECoreSlave</name>
                     <version>26</version>
-                    <state>1</state>
+                    <state>38</state>
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
@@ -1197,11 +1169,11 @@
                 <option>
                     <name>CoreVariant</name>
                     <version>26</version>
-                    <state>0</state>
+                    <state>38</state>
                 </option>
                 <option>
                     <name>GFPUDeviceSlave</name>
-                    <state>Default	None</state>
+                    <state>-</state>
                 </option>
                 <option>
                     <name>FPU2</name>
@@ -1220,7 +1192,7 @@
                 <option>
                     <name>GFPUCoreSlave2</name>
                     <version>26</version>
-                    <state>0</state>
+                    <state>38</state>
                 </option>
                 <option>
                     <name>OGCMSISPackSelectDevice</name>
@@ -1284,15 +1256,6 @@
                 <option>
                     <name>CCDefines</name>
                     <state>NDEBUG</state>
-                    <state>GD32F527</state>
-                    <state>__RTTHREAD__</state>
-                    <state>CLOCKS_PER_SEC=RT_TICK_PER_SECOND</state>
-                    <state>RT_USING_DLIBC</state>
-                    <state>RT_USING_LIBC</state>
-                    <state>_DLIB_ADD_EXTRA_SYMBOLS=0</state>
-                    <state>_DLIB_FILE_DESCRIPTOR</state>
-                    <state>__RT_IPC_SOURCE__</state>
-                    <state>__RT_KERNEL_SOURCE__</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -1304,7 +1267,7 @@
                 </option>
                 <option>
                     <name>CCPreprocLine</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CCListCFile</name>
@@ -1417,25 +1380,7 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
-                    <state>$PROJ_DIR$\applications</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</state>
-                    <state>$PROJ_DIR$\..\libraries\gd32_drivers</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\finsh</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\drivers\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension</state>
-                    <state>$PROJ_DIR$\..\..\..\..\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\epoll</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
-                    <state>$PROJ_DIR$\.</state>
-                    <state>$PROJ_DIR$\board</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m33</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
-                    <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\eventfd</state>
+                    <state></state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1830,7 +1775,7 @@
                 </option>
                 <option>
                     <name>IlinkMapFile</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkLogFile</name>
@@ -2126,241 +2071,4 @@
             <data />
         </settings>
     </configuration>
-    <group>
-        <name>Applications</name>
-        <file>
-            <name>$PROJ_DIR$\applications\main.c</name>
-        </file>
-    </group>
-    <group>
-        <name>Compiler</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\cctype.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\cstdlib.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\cstring.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\ctime.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\cunistd.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\cwchar.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\environ.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\syscall_close.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\syscall_lseek.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\syscall_mem.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\syscall_open.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\syscall_read.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\syscall_remove.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\syscall_write.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\libc\compilers\dlib\syscalls.c</name>
-        </file>
-    </group>
-    <group>
-        <name>DeviceDrivers</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\completion_comm.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\completion_up.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\condvar.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\dataqueue.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\pin\dev_pin.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\serial\dev_serial.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\core\device.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\pipe.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\ringblk_buf.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\ringbuffer.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\waitqueue.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\workqueue.c</name>
-        </file>
-    </group>
-    <group>
-        <name>Drivers</name>
-        <file>
-            <name>$PROJ_DIR$\board\board.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\libraries\gd32_drivers\drv_gpio.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\libraries\gd32_drivers\drv_usart.c</name>
-        </file>
-    </group>
-    <group>
-        <name>Filesystem</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\src\dfs.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\src\dfs_file.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\src\dfs_fs.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\src\dfs_posix.c</name>
-        </file>
-    </group>
-    <group>
-        <name>Finsh</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\finsh\cmd.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_file.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_parse.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\components\finsh\shell.c</name>
-        </file>
-    </group>
-    <group>
-        <name>Kernel</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\clock.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\components.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\cpu_up.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\defunct.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\idle.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\ipc.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\irq.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\kservice.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\mem.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\mempool.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\object.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\scheduler_comm.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\scheduler_up.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\thread.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\timer.c</name>
-        </file>
-    </group>
-    <group>
-        <name>klibc</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\klibc\kerrno.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\klibc\kstdio.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\klibc\kstring.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\klibc\rt_vsnprintf_tiny.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\src\klibc\rt_vsscanf.c</name>
-        </file>
-    </group>
-    <group>
-        <name>libcpu</name>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\common\atomic_arm.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m33\context_iar.S</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m33\cpuport.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\common\div0.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\common\showmem.c</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m33\syscall_iar.S</name>
-        </file>
-        <file>
-            <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m33\trustzone.c</name>
-        </file>
-    </group>
-    <group>
-        <name>POSIX</name>
-    </group>
-    <group>
-        <name>utc_UTest</name>
-    </group>
-    <group>
-        <name>utestcases</name>
-    </group>
 </project>

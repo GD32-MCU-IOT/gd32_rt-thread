@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>GD32H75EYMJ6</Device>
           <Vendor>GigaDevice</Vendor>
-          <PackID>GigaDevice.GD32H75E_DFP.0.0.1</PackID>
+          <PackID>GigaDevice.GD32H75E_DFP.1.3.0</PackID>
           <PackURL>https://gd32mcu.com</PackURL>
           <Cpu>IRAM(0x24000000,0x000D0000) IRAM2(0x00000000,0x00010000) IROM(0x08000000,0x03C0000) XRAM(0x20000000,0x00020000) XRAM2(0x30000000,0x00004000) XRAM3(0x30004000,0x00004000) CPUTYPE("Cortex-M7") FPU3(DFPU) CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -2727,14 +2727,14 @@
   <RTE>
     <apis/>
     <components>
-      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.6.0" condition="ARMv6_7_8-M Device">
-        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
+      <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.5.0" condition="ARMv6_7_8-M Device">
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.8.0"/>
         <targetInfos>
           <targetInfo name="rtthread"/>
         </targetInfos>
       </component>
-      <component Cclass="CMSIS" Cgroup="DSP" Cvariant="Source" Cvendor="ARM" Cversion="1.10.0" condition="CMSIS DSP">
-        <package name="CMSIS" schemaVersion="1.7.7" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
+      <component Cclass="CMSIS" Cgroup="DSP" Cvariant="Source" Cvendor="ARM" Cversion="1.9.0-dev" condition="CMSIS DSP">
+        <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.8.0"/>
         <targetInfos>
           <targetInfo name="rtthread"/>
         </targetInfos>

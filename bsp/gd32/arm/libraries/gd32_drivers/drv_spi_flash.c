@@ -48,7 +48,11 @@ static const struct spi_flash_config flash_configs[] =
         .bus_name    = "spi1",
         .device_name = "spi10",
         .flash_name  = "gd25q_spi1",
+#if defined(SOC_SERIES_GD32E51x) || defined(SOC_SERIES_GD32F3x0)
+        .cs_pin      = GET_PIN(B, 12),
+#else
         .cs_pin      = GET_PIN(B, 9),
+#endif
     },
 #endif
 
@@ -57,7 +61,11 @@ static const struct spi_flash_config flash_configs[] =
         .bus_name    = "spi2",
         .device_name = "spi20",
         .flash_name  = "gd25q_spi2",
+#if defined(SOC_SERIES_GD32E51x)
         .cs_pin      = GET_PIN(B, 12),
+#else
+        .cs_pin      = GET_PIN(B, 12),
+#endif
     },
 #endif
 

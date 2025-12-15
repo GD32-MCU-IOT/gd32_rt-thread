@@ -6,7 +6,7 @@ config SOC_SERIES_GD32E50x
     bool
     select SOC_FAMILY_GD32
     
-config SOC_SERIES_GD32E51X
+config SOC_SERIES_GD32E51x
     bool
     select ARCH_ARM_CORTEX_M33
     select SOC_FAMILY_GD32
@@ -49,4 +49,9 @@ config SOC_SERIES_GD32F5xx
 config SOC_SERIES_GD32E23x
     bool
     select ARCH_ARM_CORTEX_M23
+    select SOC_FAMILY_GD32
+
+config SOC_SERIES_GD32F3x0
+    bool
+    select ARCH_ARM_CORTEX_M4
     select SOC_FAMILY_GD32

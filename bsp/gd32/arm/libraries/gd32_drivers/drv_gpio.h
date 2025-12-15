@@ -52,6 +52,13 @@ extern "C" {
                                     EXTI_SOURCE_GPIO##port,     \
                                     EXTI_SOURCE_PIN##pin,       \
                                     EXTI_##pin}
+#elif defined SOC_SERIES_GD32E51x
+#define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,        \
+                                    GPIO##port, GPIO_PIN_##pin,   \
+                                    GPIO_PORT_SOURCE_GPIO##port,  \
+                                    GPIO_PIN_SOURCE_##pin,        \
+                                    EXTI_##pin}
+
 #else
 #define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,        \
                                     GPIO##port, GPIO_PIN_##pin,   \

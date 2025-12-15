@@ -140,12 +140,10 @@ struct rt_i2c_bus_device i2c5;
 
 #if defined (SOC_SERIES_GD32F5xx)
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1 || (periph) == I2C2)
-#elif defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F3x0)
+#elif defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32F30x)
 #define IS_I2C_LEGACY(periph)  (1)
-#elif defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32L23x) 
+#elif defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32L23x) 
 #define IS_I2C_LEGACY(periph)  (0)
-#elif  defined (SOC_SERIES_GD32F30x) 
-#define IS_I2C_LEGACY(periph)  (1)
 #elif defined SOC_SERIES_GD32E51x 
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1)
 #endif

@@ -814,7 +814,7 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
 
 #elif defined SOC_SERIES_GD32E50x
     /* configure remap function */
-    if (uart->uart_remap != 0)
+    if (uart->uart_remap != 0 || uart->tx_af != 0 || uart->rx_af != 0)
     {
         rcu_periph_clock_enable(RCU_AF);
         gpio_pin_remap_config(uart->uart_remap, ENABLE);
@@ -830,10 +830,8 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     if (uart->tx_af != 0 || uart->rx_af != 0)
     {
         rcu_periph_clock_enable(RCU_AF);
-        if (uart->tx_af != 0)
-            gpio_afio_port_config(uart->tx_af, ENABLE);
-        if (uart->rx_af != 0)
-            gpio_afio_port_config(uart->rx_af, ENABLE);
+        gpio_afio_port_config(uart->tx_af, ENABLE);
+        gpio_afio_port_config(uart->rx_af, ENABLE);
     }
 
 #else
@@ -946,28 +944,13 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
         if (ctrl_arg == RT_DEVICE_FLAG_DMA_RX) {
             nvic_irq_disable(uart->uart_dma->rx_irq_ch);
 
-#if defined SOC_SERIES_GD32E51x
             /* disable interrupt */
-            if (uart->uart_periph == USART5)
-            {
-                usart5_interrupt_disable(USART5, USART5_INT_IDLE);
-            }
-            else
-            {
-                usart_interrupt_disable(uart->uart_periph, USART_INT_IDLE);
-            }
+            usart_interrupt_disable(uart->uart_periph, USART_INT_IDLE);
 
             dma_channel_disable(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
-            if (uart->uart_periph == USART5)
-            {
-                usart_dma_receive_config(USART5, USART_RECEIVE_DMA_DISABLE);
-            }
-            else
-            {
-                usart_dma_receive_config(uart->uart_periph, USART_RECEIVE_DMA_DISABLE);
-            }
+            usart_dma_receive_config(uart->uart_periph, USART_RECEIVE_DMA_DISABLE);
             dma_deinit(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
-#endif
+
             uart->uart_dma->last_recv_index = 0;
         }
 #ifdef RT_SERIAL_USING_TX_DMA
@@ -1175,7 +1158,7 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     /* tx dma config */
     uart->uart_tx_dma->setting_recv_len = 0;
     dma_deinit(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch);
-    
+
     dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.request      = uart->uart_tx_dma->dma_mux_req_rx;
     dma_init_struct.direction    = DMA_MEMORY_TO_PERIPH;
@@ -1388,7 +1371,8 @@ static void GD32_UART_IRQHandler(struct rt_serial_device *serial)
 #endif
     {
         /* UART in mode Receiver -------------------------------------------------*/
-        if ((usart_interrupt_flag_get(uart->uart_periph, USART_INT_FLAG_RBNE) != RESET))
+	    if ((usart_interrupt_flag_get(uart->uart_periph, USART_INT_FLAG_RBNE) != RESET) &&
+	        (usart_flag_get(uart->uart_periph, USART_FLAG_RBNE) != RESET))
         {
             rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_IND);
             /* Clear RXNE interrupt flag */

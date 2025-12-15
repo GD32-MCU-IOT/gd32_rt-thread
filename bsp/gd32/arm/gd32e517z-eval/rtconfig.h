@@ -158,10 +158,6 @@
 #define RT_USING_I2C_BITOPS
 #define RT_USING_SPI
 #define RT_USING_SPI_ISR
-#define RT_USING_SFUD
-#define RT_SFUD_USING_SFDP
-#define RT_SFUD_USING_FLASH_INFO_TABLE
-#define RT_SFUD_SPI_MAX_HZ 50000000
 #define RT_USING_PIN
 /* end of Device Drivers */
 
@@ -430,8 +426,6 @@
 
 /* Onboard Peripheral Drivers */
 
-#define BSP_USING_SPI_FLASH
-#define BSP_SPI_FLASH_ON_SPI1
 #define BSP_USING_EEPROM
 #define BSP_EEPROM_ON_I2C0
 /* end of Onboard Peripheral Drivers */

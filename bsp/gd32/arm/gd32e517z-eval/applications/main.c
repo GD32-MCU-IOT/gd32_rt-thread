@@ -14,7 +14,7 @@
 
 #define GD32_I2C_EEPROM_TEST
 
-/* Note: The h75ey eval board not support SPI flash, if you want to test this function,
+/* Note: The e517z eval board not support SPI flash, if you want to test this function,
  *       please connect the SPI to SPI flash.
  */
 #define GD32_SPI_TEST
@@ -157,7 +157,7 @@ static void spi_sample(void)
     
     spi_dev = (struct rt_spi_device *)rt_malloc(sizeof(struct rt_spi_device));
     rt_hw_spi_device_attach(BUS_NAME, SPI_NAME, GET_PIN(D, 3));
-//    rt_spi_bus_attach_device_cspin(spi_dev, SPI_NAME, BUS_NAME, GET_PIN(A, 4), RT_NULL);
+    rt_spi_bus_attach_device_cspin(spi_dev, SPI_NAME, BUS_NAME, GET_PIN(A, 4), RT_NULL);
 
     cfg.data_width = 8;
     cfg.mode   = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;

@@ -17,7 +17,7 @@
 #include "drv_spi.h"
 #include "gd32e51x_exti.h"
 
-#define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
+#define EXT_SDRAM_BEGIN    (0x60000000U) /* the begining address of external SDRAM */
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
 
 /* <o> Internal SRAM memory size[Kbytes] <96-128>*/

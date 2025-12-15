@@ -27,7 +27,7 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
     switch(i2c->i2c_periph) {
 #ifdef BSP_USING_HARD_I2C0
     case I2C0:
-        /* enable I2C clock */
+        /* enable I2C GPIO clock */
         rcu_periph_clock_enable(RCU_GPIOB);
 
         /*GPIO pin configuration*/
@@ -38,7 +38,7 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
 #endif
 #ifdef BSP_USING_HARD_I2C1
     case I2C1:
-        /* enable I2C clock */
+        /* enable I2C GPIO clock */
         rcu_periph_clock_enable(RCU_GPIOB);
 
         /*GPIO pin configuration*/
@@ -48,7 +48,7 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
 #endif
 #ifdef BSP_USING_HARD_I2C2
     case I2C2:
-        /* enable I2C clock */
+        /* enable I2C GPIO clock */
         rcu_periph_clock_enable(RCU_GPIOA);
         rcu_periph_clock_enable(RCU_GPIOC);
         rcu_periph_clock_enable(RCU_AF);

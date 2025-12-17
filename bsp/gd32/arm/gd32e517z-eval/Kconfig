@@ -1,0 +1,18 @@
+mainmenu "RT-Thread Configuration"
+
+BSP_DIR := .
+PKGS_DIR := packages
+
+# Try multiple RT-Thread roots in order (missing paths are ignored)
+osource "$(RTT_DIR)/Kconfig"
+osource "../rt-thread-master/Kconfig"
+osource "../../../../Kconfig"
+
+osource "$PKGS_DIR/Kconfig"
+
+# GD32 common libraries Kconfig from RT-Thread tree (multiple fallbacks)
+osource "$(RTT_DIR)/bsp/gd32/arm/libraries/Kconfig"
+osource "../rt-thread-master/bsp/gd32/arm/libraries/Kconfig"
+osource "../../../../bsp/gd32/arm/libraries/Kconfig"
+
+rsource "board/Kconfig"

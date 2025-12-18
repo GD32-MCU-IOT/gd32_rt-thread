@@ -35,7 +35,7 @@ static struct rt_spi_bus spi_bus4;
 static struct rt_spi_bus spi_bus5;
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) && !defined(SOC_SERIES_GD32F50x) 
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -145,7 +145,7 @@ static const struct gd32_spi spi_bus_obj[] = {
 #if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx)
         GPIO_AF_5,
 #endif
-        GPIO_PIN_7,
+        GPIO_PIN_7,       
         GPIO_PIN_8,
         GPIO_PIN_9,
 
@@ -259,7 +259,7 @@ static struct rt_spi_ops gd32_spi_ops =
     .xfer = spixfer,
 };
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) && !defined(SOC_SERIES_GD32F50x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -447,12 +447,11 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
     /* enable SPI NSS output */
     spi_nss_output_enable(spi_periph);
 #endif
-
     /* init SPI */
     spi_init(spi_periph, &spi_init_struct);
     /* Enable SPI_MASTER */
     spi_enable(spi_periph);
-
+    
     return RT_EOK;
 }
 
@@ -681,4 +680,3 @@ INIT_BOARD_EXPORT(rt_hw_spi_init);
 
 #endif /* BSP_USING_SPI0 || BSP_USING_SPI1 || BSP_USING_SPI2 || BSP_USING_SPI3 || BSP_USING_SPI4 || BSP_USING_SPI5 */
 #endif /* RT_USING_SPI */
-

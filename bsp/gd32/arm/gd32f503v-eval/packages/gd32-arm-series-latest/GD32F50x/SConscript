@@ -1,0 +1,11 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd = GetCurrentDir()
+CPPPATH = [cwd + '/GD32F50x_standard_peripheral/Include']
+src = Glob('GD32F50x_standard_peripheral/Source/*.c')
+
+group = DefineGroup('gd32-arm-series', src, depend = ['SOC_SERIES_GD32F50x'], CPPPATH = CPPPATH)
+
+Return('group')

@@ -57,7 +57,7 @@ static void spi_sample(void);
 #endif
 
 #ifdef GD32_UART_TEST
-#define SAMPLE_UART_NAME    "uart0"
+#define SAMPLE_UART_NAME    "uart1"
 static struct rt_semaphore  rx_sem;
 static rt_device_t serial;
 

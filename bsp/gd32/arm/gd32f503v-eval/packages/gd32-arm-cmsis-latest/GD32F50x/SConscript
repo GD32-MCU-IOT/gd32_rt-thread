@@ -1,0 +1,28 @@
+import rtconfig
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+
+# The set of source files associated with this SConscript file.
+src = Split('''
+GD/GD32F50x/Source/system_gd32f50x.c
+''')
+
+path = [
+    cwd + '/GD/GD32F50x/Include',
+    cwd,
+]
+
+if rtconfig.PLATFORM in ['gcc']:
+    src += ['GD/GD32F50x/Source/GCC/startup_gd32f50x.s']
+elif rtconfig.PLATFORM in ['armcc', 'armclang']:
+    src += ['GD/GD32F50x/Source/ARM/startup_gd32f50x.s']
+elif rtconfig.PLATFORM in ['iccarm']:
+    src += ['GD/GD32F50x/Source/IAR/startup_gd32f50x.s']
+
+CPPDEFINES = ['USE_STDPERIPH_DRIVER']
+
+group = DefineGroup('Libraries', src, depend = ['SOC_SERIES_GD32F50x'], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+Return('group')

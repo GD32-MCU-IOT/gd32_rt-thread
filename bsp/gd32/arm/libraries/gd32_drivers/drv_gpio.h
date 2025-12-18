@@ -27,6 +27,9 @@ extern "C" {
 #include "gd32f30x_gpio.h"
 #elif defined SOC_SERIES_GD32F4xx
 #include "gd32f4xx_gpio.h"
+#elif defined SOC_SERIES_GD32F50x
+#include "gd32f50x_gpio.h"
+#include "gd32f50x_syscfg.h"
 #elif defined SOC_SERIES_GD32H7xx
 #include "gd32h7xx_gpio.h"
 #elif defined SOC_SERIES_GD32E50x
@@ -52,7 +55,7 @@ extern "C" {
                                     EXTI_SOURCE_GPIO##port,     \
                                     EXTI_SOURCE_PIN##pin,       \
                                     EXTI_##pin}
-#elif defined SOC_SERIES_GD32E51x
+#elif defined SOC_SERIES_GD32E51x || defined SOC_SERIES_GD32F50x
 #define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,        \
                                     GPIO##port, GPIO_PIN_##pin,   \
                                     GPIO_PORT_SOURCE_GPIO##port,  \
@@ -99,4 +102,3 @@ struct pin_irq_map
 #endif
 
 #endif /* __DRV_GPIO_H__ */
-

@@ -24,7 +24,7 @@
 #define GD32_GPIO_EXTI_TEST
 
 
-/* defined the LED pins: LED1 and LED2 */
+/* defined the LED pins: LED1 and LED4 */
 #define LED1_PIN    GET_PIN(G, 10)   /* LED1 on PG10 */
 #define LED2_PIN    GET_PIN(G, 11)   /* LED2 on PG11 */
 #define LED3_PIN    GET_PIN(G, 12)   /* LED2 on PG12 */
@@ -57,7 +57,7 @@ static void spi_sample(void);
 #endif
 
 #ifdef GD32_UART_TEST
-#define SAMPLE_UART_NAME    "uart0"
+#define SAMPLE_UART_NAME    "uart1"
 static struct rt_semaphore  rx_sem;
 static rt_device_t serial;
 
@@ -131,6 +131,8 @@ int main(void)
         /* turn on LED4 */
         rt_pin_write(LED4_PIN, PIN_HIGH);
         rt_thread_mdelay(500);
+
+        /* turn off LED4 */
         rt_pin_write(LED4_PIN, PIN_LOW);
         
     }

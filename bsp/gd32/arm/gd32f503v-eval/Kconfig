@@ -1,21 +1,15 @@
 mainmenu "RT-Thread Configuration"
 
-config BSP_ROOT
-    string
-    option env="BSP_ROOT"
-    default "."
+BSP_DIR := .
 
-config RTT_ROOT
-    string
-    option env="RTT_ROOT"
-    default "../../../.."
+RTT_DIR := ../../../..
 
-config PKGS_ROOT
-    string
-    option env="PKGS_ROOT"
-    default "packages"
+PKGS_DIR := packages
 
-source "$RTT_ROOT/Kconfig"
-source "$PKGS_ROOT/Kconfig"
-source "../libraries/Kconfig"
-source "board/Kconfig"
+source "$(RTT_DIR)/Kconfig"
+osource "$PKGS_DIR/Kconfig"
+rsource "../libraries/Kconfig"
+
+if !RT_USING_NANO
+rsource "board/Kconfig"
+endif

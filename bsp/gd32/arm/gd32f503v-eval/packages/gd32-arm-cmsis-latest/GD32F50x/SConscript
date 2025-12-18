@@ -15,11 +15,11 @@ path = [
 ]
 
 if rtconfig.PLATFORM in ['gcc']:
-    src += ['GD/GD32F50x/Source/GCC/startup_gd32f50x.s']
+    src += ['GD/GD32F50x/Source/GCC/startup_gd32f50x.S']
 elif rtconfig.PLATFORM in ['armcc', 'armclang']:
-    src += ['GD/GD32F50x/Source/ARM/startup_gd32f50x.s']
+    src += ['GD/GD32F50x/Source/ARM/startup_gd32f50x.S']
 elif rtconfig.PLATFORM in ['iccarm']:
-    src += ['GD/GD32F50x/Source/IAR/startup_gd32f50x.s']
+    src += ['GD/GD32F50x/Source/IAR/startup_gd32f50x.S']
 
 CPPDEFINES = ['USE_STDPERIPH_DRIVER']
 

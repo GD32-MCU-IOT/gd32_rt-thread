@@ -399,7 +399,7 @@ void UART7_IRQHandler(void)
 
 #endif /* BSP_USING_UART7 */
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x)  && !defined(SOC_SERIES_GD32F3x0)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x)  && !defined(SOC_SERIES_GD32F3x0) && !defined(SOC_SERIES_GD32F50x)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -765,7 +765,7 @@ static const struct gd32_uart uart_obj[] = {
 };
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x)  && !defined(SOC_SERIES_GD32F3x0)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x)  && !defined(SOC_SERIES_GD32F3x0) && !defined(SOC_SERIES_GD32F50x)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:

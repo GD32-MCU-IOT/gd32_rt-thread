@@ -422,11 +422,7 @@
 
 /* Hardware Drivers Config */
 
-/* SOC Series */
-
 #define SOC_GD32F3x0
-#define SOC_GD32F350
-/* end of SOC Series */
 
 /* Onboard Peripheral Drivers */
 
@@ -439,6 +435,7 @@
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART0
+#define BSP_USING_UART1
 #define BSP_USING_SPI
 #define BSP_USING_SPI0
 #define BSP_USING_I2C

@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) && !defined(SOC_SERIES_GD32F50x)
 
 #ifndef SOC_SERIES_GD32H7xx
 #undef RT_SERIAL_USING_DMA

@@ -148,14 +148,14 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
         /* enable UART clock */
         rcu_periph_clock_enable(RCU_GPIOA);
 
-        gpio_af_set(GPIOA, GPIO_AF_1, GPIO_PIN_14);
-        gpio_af_set(GPIOA, GPIO_AF_1, GPIO_PIN_15);
+        gpio_af_set(GPIOA, GPIO_AF_1, GPIO_PIN_2);
+        gpio_af_set(GPIOA, GPIO_AF_1, GPIO_PIN_3);
         /* configure USART Tx as alternate function push-pull */
-        gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_14);
-        gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_14);
+        gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_2);
+        gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2);
         /* configure USART Rx as alternate function push-pull */
-        gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_15);
-        gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_15);
+        gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_3);
+        gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_3);
         break;
 #endif
     default:

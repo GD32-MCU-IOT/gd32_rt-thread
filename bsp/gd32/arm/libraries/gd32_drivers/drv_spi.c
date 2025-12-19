@@ -35,7 +35,7 @@ static struct rt_spi_bus spi_bus4;
 static struct rt_spi_bus spi_bus5;
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) && !defined(SOC_SERIES_GD32F50x) 
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -259,7 +259,7 @@ static struct rt_spi_ops gd32_spi_ops =
     .xfer = spixfer,
 };
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) && !defined(SOC_SERIES_GD32F50x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS

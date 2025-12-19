@@ -14,9 +14,6 @@
 
 #define GD32_I2C_EEPROM_TEST
 
-/* Note: The f503v eval board not support SPI flash, if you want to test this function,
- *       please connect the SPI to SPI flash.
- */
 #define GD32_SPI_TEST
 
 #define GD32_UART_TEST

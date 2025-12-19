@@ -164,10 +164,10 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
         GPIOB, GPIO_MODE_AF_OD, GPIO_PIN_10,           /* scl port, scl alternate, scl pin */
         GPIOB, GPIO_MODE_AF_OD, GPIO_PIN_11,          /* sda port, sda alternate, sda pin */
 #else
-    RCU_I2C1, RCU_GPIOH, RCU_GPIOB,    /* periph clock, scl gpio clock, sda gpio clock */
+        RCU_I2C1, RCU_GPIOH, RCU_GPIOB,       /* periph clock, scl gpio clock, sda gpio clock */
 
-    GPIOH, GPIO_AF_4, GPIO_PIN_4,    /* scl port, scl alternate, scl pin */
-    GPIOB, GPIO_AF_4, GPIO_PIN_11,    /* sda port, sda alternate, sda pin */
+        GPIOH, GPIO_AF_4, GPIO_PIN_4,          /* scl port, scl alternate, scl pin */
+        GPIOB, GPIO_AF_4, GPIO_PIN_11,          /* sda port, sda alternate, sda pin */
 #endif
 
         &i2c1,
@@ -654,7 +654,8 @@ int rt_hw_i2c_init(void)
         /* configure I2C timing. I2C speed clock=400kHz*/
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) || defined (SOC_SERIES_GD32E51x)  || defined (SOC_SERIES_GD32F3x0)
         if(IS_I2C_LEGACY(gd_i2c_config[i].i2c_periph))
-		{
+        {
+
             i2c_clock_config(gd_i2c_config[i].i2c_periph, 100000, I2C_DTCY_2);
             i2c_mode_addr_config(gd_i2c_config[i].i2c_periph, I2C_I2CMODE_ENABLE, I2C_ADDFORMAT_7BITS, 0xa0);
             i2c_enable(gd_i2c_config[i].i2c_periph);
@@ -684,3 +685,4 @@ int rt_hw_i2c_init(void)
 INIT_BOARD_EXPORT(rt_hw_i2c_init);
 
 #endif /* RT_USING_I2C */
+

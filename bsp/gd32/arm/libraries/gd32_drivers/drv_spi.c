@@ -35,7 +35,7 @@ static struct rt_spi_bus spi_bus4;
 static struct rt_spi_bus spi_bus5;
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -251,7 +251,7 @@ static struct rt_spi_ops gd32_spi_ops =
     .xfer = spixfer,
 };
 
-#if !defined(SOC_SERIES_GD32H75E)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -265,7 +265,7 @@ static void gd32_spi_init(struct gd32_spi *gd32_spi)
     rcu_periph_clock_enable(gd32_spi->miso_gpio_clk);
     rcu_periph_clock_enable(gd32_spi->mosi_gpio_clk);
 
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx) || (defined SOC_SERIES_GD32E23x)
+#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx) || (defined SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32G5x3)
     /*GPIO pin configuration*/
     gpio_af_set(gd32_spi->sck_spi_port, gd32_spi->alt_func_num, gd32_spi->sck_pin);
     gpio_af_set(gd32_spi->miso_spi_port, gd32_spi->alt_func_num, gd32_spi->miso_pin);
@@ -273,7 +273,7 @@ static void gd32_spi_init(struct gd32_spi *gd32_spi)
     gpio_mode_set(gd32_spi->sck_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->sck_pin);
     gpio_mode_set(gd32_spi->miso_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->miso_pin);
     gpio_mode_set(gd32_spi->mosi_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->mosi_pin);
-    #if defined (SOC_SERIES_GD32H7xx)
+    #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32G5x3)
     gpio_output_options_set(gd32_spi->sck_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->sck_pin);
     gpio_output_options_set(gd32_spi->miso_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->miso_pin);
     gpio_output_options_set(gd32_spi->mosi_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->mosi_pin);
@@ -434,6 +434,11 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
 #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E)
     /* enable SPI byte access */
     spi_byte_access_enable(spi_periph);
+    /* enable SPI NSS output */
+    spi_nss_output_enable(spi_periph);
+#elif defined (SOC_SERIES_GD32G5x3)
+    /* enable SPI byte access */
+    spi_fifo_access_size_config(spi_periph, SPI_BYTE_ACCESS);
     /* enable SPI NSS output */
     spi_nss_output_enable(spi_periph);
 #endif

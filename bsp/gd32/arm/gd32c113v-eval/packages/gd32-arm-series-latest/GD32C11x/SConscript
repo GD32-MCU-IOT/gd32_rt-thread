@@ -1,0 +1,57 @@
+import rtconfig
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+
+# The set of source files associated with this SConscript file.
+
+src = Split('''
+GD32C11x_standard_peripheral/Source/gd32c11x_gpio.c
+GD32C11x_standard_peripheral/Source/gd32c11x_rcu.c
+GD32C11x_standard_peripheral/Source/gd32c11x_exti.c
+GD32C11x_standard_peripheral/Source/gd32c11x_misc.c
+GD32C11x_standard_peripheral/Source/gd32c11x_pmu.c
+''')
+
+if GetDepend(['RT_USING_SERIAL']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_usart.c']
+
+if GetDepend(['RT_USING_I2C']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_i2c.c']
+
+if GetDepend(['RT_USING_SPI']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_spi.c']
+
+if GetDepend(['RT_USING_CAN']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_can.c']
+
+if GetDepend(['RT_USING_ADC']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_adc.c']
+
+if GetDepend(['RT_USING_DAC']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_dac.c']
+
+if GetDepend(['RT_USING_RTC']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_rtc.c']
+
+if GetDepend(['RT_USING_WDT']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_wwdgt.c']
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_fwdgt.c']
+
+if GetDepend(['RT_USING_DMA']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_dma.c']
+
+if GetDepend(['BSP_USING_FMC']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_fmc.c']
+
+if GetDepend(['BSP_USING_EXMC']):
+    src += ['GD32C11x_standard_peripheral/Source/gd32c11x_exmc.c']
+
+path = [cwd + '/GD32C11x_standard_peripheral/Include']
+
+CPPDEFINES = ['USE_STDPERIPH_DRIVER', 'GD32C113']
+
+group = DefineGroup('Libraries', src, depend = ['SOC_SERIES_GD32C11x'], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+Return('group')

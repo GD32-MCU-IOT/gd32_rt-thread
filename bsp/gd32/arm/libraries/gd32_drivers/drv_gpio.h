@@ -37,16 +37,20 @@ extern "C" {
 #include "gd32e23x_gpio.h"
 #elif defined SOC_SERIES_GD32L23x
 #include "gd32l23x_gpio.h"
+#elif defined SOC_SERIES_GD32G5x3
+#include "gd32g5x3_gpio.h"
 #elif defined SOC_SERIES_GD32E51x
 #include "gd32e51x_gpio.h"
 #elif defined SOC_SERIES_GD32H75E
 #include "gd32h75e_gpio.h"
+#elif defined SOC_SERIES_GD32C11x
+#include "gd32c11x_gpio.h"
 #endif
 
 #define __GD32_PORT(port)  GPIO##port
 
 #if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32E23x \
- || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32H75E
+ || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32G5x3
 #define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,      \
                                     GPIO##port, GPIO_PIN_##pin, \
                                     EXTI_SOURCE_GPIO##port,     \

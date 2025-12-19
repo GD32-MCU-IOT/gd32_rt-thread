@@ -29,7 +29,6 @@ extern "C" {
 #include "gd32f4xx_gpio.h"
 #elif defined SOC_SERIES_GD32F50x
 #include "gd32f50x_gpio.h"
-#include "gd32f50x_syscfg.h"
 #elif defined SOC_SERIES_GD32H7xx
 #include "gd32h7xx_gpio.h"
 #elif defined SOC_SERIES_GD32E50x

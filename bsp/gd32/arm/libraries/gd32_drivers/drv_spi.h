@@ -27,7 +27,7 @@ struct gd32_spi_cs
 };
 
 /* gd32 spi dirver class */
-#if !defined(SOC_SERIES_GD32H75E)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x)
 struct gd32_spi
 {
     uint32_t spi_periph;

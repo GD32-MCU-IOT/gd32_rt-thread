@@ -21,8 +21,7 @@ extern "C" {
 #endif
 
 /* GD32 i2c driver */
-#if !defined(SOC_SERIES_GD32H75E)
-
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x)
 struct gd32_i2c_bus
 {
     uint32_t i2c_periph;             /* Todo: 3bits */

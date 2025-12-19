@@ -399,7 +399,7 @@ void UART7_IRQHandler(void)
 
 #endif /* BSP_USING_UART7 */
 
-#if !defined(SOC_SERIES_GD32H75E)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -454,8 +454,6 @@ static const struct gd32_uart uart_obj[] = {
         GPIOA, GPIO_AF_1, GPIO_PIN_14,
         GPIOA, GPIO_AF_1, GPIO_PIN_15,
 #else
-        RCU_GPIOA, RCU_GPIOA,                   /* periph clock, tx gpio clock, rt gpio clock */
-        GPIOA, GPIO_PIN_2,                      /* tx port, tx pin */
         RCU_GPIOA, RCU_GPIOA,                   /* periph clock, tx gpio clock, rt gpio clock */
         GPIOA, GPIO_PIN_2,                      /* tx port, tx pin */
         GPIOA, GPIO_PIN_3,                      /* rx port, rx pin */
@@ -765,7 +763,7 @@ static const struct gd32_uart uart_obj[] = {
 };
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:
@@ -797,7 +795,7 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     gpio_mode_set(uart->rx_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, uart->rx_pin);
     gpio_output_options_set(uart->rx_port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, uart->rx_pin);
 
-#elif defined SOC_SERIES_GD32H7xx
+#elif defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32G5x3
     /* connect port to USARTx_Tx */
     gpio_af_set(uart->tx_port, uart->tx_af, uart->tx_pin);
 

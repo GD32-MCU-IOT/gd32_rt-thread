@@ -406,7 +406,7 @@ static const struct gd32_uart uart_obj[] = {
         USART0,                                /* uart peripheral index */
         USART0_IRQn,                           /* uart iqrn */
         RCU_USART0,                            /* uart periph clock */
-#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32H7xx
+#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32H7xx 
         RCU_GPIOA, RCU_GPIOA,                  /* tx gpio clock, rx gpio clock */
         GPIOA, GPIO_AF_7, GPIO_PIN_9,          /* tx port, tx alternate, tx pin */
         GPIOA, GPIO_AF_7, GPIO_PIN_10,         /* rx port, rx alternate, rx pin */

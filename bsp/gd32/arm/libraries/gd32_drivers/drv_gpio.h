@@ -27,6 +27,8 @@ extern "C" {
 #include "gd32f30x_gpio.h"
 #elif defined SOC_SERIES_GD32F4xx
 #include "gd32f4xx_gpio.h"
+#elif defined SOC_SERIES_GD32F50x
+#include "gd32f50x_gpio.h"
 #elif defined SOC_SERIES_GD32H7xx
 #include "gd32h7xx_gpio.h"
 #elif defined SOC_SERIES_GD32E50x
@@ -41,6 +43,8 @@ extern "C" {
 #include "gd32g5x3_gpio.h"
 #elif defined SOC_SERIES_GD32E51x
 #include "gd32e51x_gpio.h"
+#elif defined SOC_SERIES_GD32F3x0
+#include "gd32f3x0_gpio.h"
 #elif defined SOC_SERIES_GD32H75E
 #include "gd32h75e_gpio.h"
 #elif defined SOC_SERIES_GD32C11x
@@ -50,17 +54,18 @@ extern "C" {
 #define __GD32_PORT(port)  GPIO##port
 
 #if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32E23x \
- || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32G5x3
+ || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32F3x0 || defined SOC_SERIES_GD32G5x3
 #define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,      \
                                     GPIO##port, GPIO_PIN_##pin, \
                                     EXTI_SOURCE_GPIO##port,     \
-                                    EXTI_SOURCE_PIN##pin}
+                                    EXTI_SOURCE_PIN##pin,       \
+                                    EXTI_##pin}
 #else
 #define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,        \
                                     GPIO##port, GPIO_PIN_##pin,   \
                                     GPIO_PORT_SOURCE_GPIO##port,  \
-                                    GPIO_PIN_SOURCE_##pin}
-
+                                    GPIO_PIN_SOURCE_##pin,        \
+                                    EXTI_##pin}            
 #endif
 
 #define GD32_PIN_DEFAULT            {-1, (rcu_periph_enum)0, 0, 0, 0, 0}
@@ -81,6 +86,7 @@ struct pin_index
     rt_uint32_t pin;
     rt_uint8_t port_src;
     rt_uint8_t pin_src;
+    rt_uint32_t exit_line;
 };
 
 struct pin_irq_map
@@ -94,4 +100,3 @@ struct pin_irq_map
 #endif
 
 #endif /* __DRV_GPIO_H__ */
-

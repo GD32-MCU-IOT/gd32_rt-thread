@@ -1,0 +1,17 @@
+; Keil scatter file for GD32F350RB (Flash 128KB, SRAM 16KB)
+; Adjust sizes if you use a different part number.
+
+LR_IROM1 0x08000000 0x00020000  ; Load Region: Flash, 128KB
+{
+	ER_IROM1 0x08000000 0x00020000  ; Execution Region: Code/RO in Flash
+	{
+		*.o (RESET, +First)
+		*(InRoot$$Sections)
+		.ANY (+RO)
+	}
+
+	RW_IRAM1 0x20000000 0x00004000  ; RW/ZI Region: SRAM, 16KB
+	{
+		.ANY (+RW +ZI)
+	}
+}

@@ -32,6 +32,9 @@
         "gd32/arm/gd32h759i-start",
         "gd32/arm/gd32h759i-eval",
         "gd32/arm/gd32c113v-eval",
+        "gd32/arm/gd32f503v-eval",
+        "gd32/arm/gd32f350r-eval",
+        "gd32/arm/gd32e517z-eval",
         "gd32/arm/gd32307c-eval",
         "gd32/arm/gd32h75ey-eval"
       ]
@@ -65,6 +68,9 @@
       "gd32h759i-eval",
       "gd32h759i-start",
       "gd32c113v-eval",
+      "gd32f503v-eval",
+      "gd32f350r-eval",
+      "gd32e517z-eval",
       "gd32307c-eval",
       "gd32h75ey-eval"
     ],

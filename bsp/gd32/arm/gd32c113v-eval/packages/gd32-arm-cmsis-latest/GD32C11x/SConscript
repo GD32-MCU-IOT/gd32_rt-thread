@@ -22,7 +22,7 @@ elif rtconfig.PLATFORM in ['armcc', 'armclang']:
 elif rtconfig.PLATFORM in ['iccarm']:
     src += ['GD/GD32C11x/Source/IAR/startup_gd32c11x.s']
 
-CPPDEFINES = ['USE_STDPERIPH_DRIVER', 'GD32C113']
+CPPDEFINES = ['USE_STDPERIPH_DRIVER']
 
 group = DefineGroup('Libraries', src, depend = ['SOC_SERIES_GD32C11x'], CPPPATH = path, CPPDEFINES = CPPDEFINES)
 

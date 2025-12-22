@@ -138,26 +138,6 @@ struct rt_i2c_bus_device i2c5;
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1)
 #endif
 
-/*
- * IRQ name compatibility (macro-controlled):
- * GD32G5x3 startup vector and CMSIS header use I2C*_EV_WKUP_IRQn.
- * Some common driver code uses I2C*_EV_IRQn.
- */
-#if defined(SOC_SERIES_GD32G5x3)
-    #ifndef I2C0_EV_IRQn
-        #define I2C0_EV_IRQn  I2C0_EV_WKUP_IRQn
-    #endif
-    #ifndef I2C1_EV_IRQn
-        #define I2C1_EV_IRQn  I2C1_EV_WKUP_IRQn
-    #endif
-    #ifndef I2C2_EV_IRQn
-        #define I2C2_EV_IRQn  I2C2_EV_WKUP_IRQn
-    #endif
-    #ifndef I2C3_EV_IRQn
-        #define I2C3_EV_IRQn  I2C3_EV_WKUP_IRQn
-    #endif
-#endif
-
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x)
 static const struct gd32_i2c_bus gd_i2c_config[] = {
@@ -258,7 +238,11 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
     {
     I2C0,          /* uart peripheral index */
     RCU_I2C0,      /* periph clock */
+#if defined(SOC_SERIES_GD32G5x3)
+    I2C0_EV_WKUP_IRQn,
+#else
     I2C0_EV_IRQn,
+#endif
     I2C0_ER_IRQn,
     "hwi2c0",
     &i2c0,
@@ -269,7 +253,11 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
     {
     I2C1,
     RCU_I2C1,
+#if defined(SOC_SERIES_GD32G5x3)
+    I2C1_EV_WKUP_IRQn,
+#else
     I2C1_EV_IRQn,
+#endif
     I2C1_ER_IRQn,
     "hwi2c1",
     &i2c1,
@@ -280,7 +268,11 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
     {
     I2C2,
     RCU_I2C2,
+#if defined(SOC_SERIES_GD32G5x3)
+    I2C2_EV_WKUP_IRQn,
+#else
     I2C2_EV_IRQn,
+#endif
     I2C2_ER_IRQn,
     "hwi2c2",
     &i2c2,
@@ -291,7 +283,11 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
     {
     I2C3,
     RCU_I2C3,
+#if defined(SOC_SERIES_GD32G5x3)
+    I2C3_EV_WKUP_IRQn,
+#else
     I2C3_EV_IRQn,
+#endif
     I2C3_ER_IRQn,
     "hwi2c3",
     &i2c3,
@@ -335,7 +331,7 @@ static void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
     rcu_periph_clock_enable(i2c->scl_gpio_clk);
     rcu_periph_clock_enable(i2c->sda_gpio_clk);
     rcu_periph_clock_enable(i2c->i2c_clk);
-#if defined (SOC_SERIES_GD32F30x) || defined (SOC_SERIES_GD32C11x)
+#if defined (SOC_SERIES_GD32F30x)
     gpio_init(i2c->sda_port, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, i2c->sda_pin);
     gpio_init(i2c->scl_port, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, i2c->scl_pin);
 	
@@ -344,7 +340,7 @@ static void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
     /* configure I2C_SCL as alternate function push-pull */
     gpio_af_set(i2c->scl_port, i2c->scl_af, i2c->scl_pin);
     gpio_mode_set(i2c->scl_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, i2c->scl_pin);
-#if defined (SOC_SERIES_GD32H7xx) || defined SOC_SERIES_GD32G5x3
+#if defined (SOC_SERIES_GD32H7xx)
     gpio_output_options_set(i2c->scl_port, GPIO_OTYPE_OD, GPIO_OSPEED_60MHZ, i2c->scl_pin);
     /* configure I2C_SDA as alternate function push-pull */
     gpio_af_set(i2c->sda_port, i2c->sda_af, i2c->sda_pin);

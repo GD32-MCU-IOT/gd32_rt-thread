@@ -97,9 +97,3 @@ msh >
 ## 注意事项
 
 暂无
-
-## 联系人信息
-
-维护人:
-
-- [BruceOu](https://github.com/Ouxiaolong/), 邮箱：<ouxiaolong@bruceou.cn>

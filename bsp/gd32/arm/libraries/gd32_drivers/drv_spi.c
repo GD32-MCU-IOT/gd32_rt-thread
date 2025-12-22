@@ -275,7 +275,7 @@ static void gd32_spi_init(struct gd32_spi *gd32_spi)
     rcu_periph_clock_enable(gd32_spi->miso_gpio_clk);
     rcu_periph_clock_enable(gd32_spi->mosi_gpio_clk);
 
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx) || (defined SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32G5x3)
+#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx) || (defined SOC_SERIES_GD32E23x)
     /*GPIO pin configuration*/
     gpio_af_set(gd32_spi->sck_spi_port, gd32_spi->alt_func_num, gd32_spi->sck_pin);
     gpio_af_set(gd32_spi->miso_spi_port, gd32_spi->alt_func_num, gd32_spi->miso_pin);
@@ -283,7 +283,7 @@ static void gd32_spi_init(struct gd32_spi *gd32_spi)
     gpio_mode_set(gd32_spi->sck_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->sck_pin);
     gpio_mode_set(gd32_spi->miso_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->miso_pin);
     gpio_mode_set(gd32_spi->mosi_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->mosi_pin);
-    #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32G5x3)
+    #if defined (SOC_SERIES_GD32H7xx)
     gpio_output_options_set(gd32_spi->sck_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->sck_pin);
     gpio_output_options_set(gd32_spi->miso_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->miso_pin);
     gpio_output_options_set(gd32_spi->mosi_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->mosi_pin);

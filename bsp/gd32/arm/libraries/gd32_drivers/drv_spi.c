@@ -35,7 +35,8 @@ static struct rt_spi_bus spi_bus4;
 static struct rt_spi_bus spi_bus5;
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
+ && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -193,7 +194,11 @@ static const struct gd32_spi spi_bus_obj[] = {
     {
         SPI1,
         RCU_SPI1,
+#if defined(SOC_SERIES_GD32E51x) 
+        SPI1_I2S1ADD_IRQn,
+#else
         SPI1_IRQn,
+#endif
         "spi1",
         &spi_bus1,
     },
@@ -203,7 +208,11 @@ static const struct gd32_spi spi_bus_obj[] = {
     {
         SPI2,
         RCU_SPI2,
+#if defined(SOC_SERIES_GD32E51x) 
+        SPI2_I2S2ADD_IRQn,
+#else
         SPI2_IRQn,
+#endif
         "spi2",
         &spi_bus2,
     },
@@ -251,7 +260,8 @@ static struct rt_spi_ops gd32_spi_ops =
     .xfer = spixfer,
 };
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
+ && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -350,8 +360,8 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
         LOG_D("CK_APB2 freq: %d\n", rcu_clock_freq_get(CK_APB2));
         LOG_D("max   freq: %d\n", max_hz);
 
-        #if defined SOC_SERIES_GD32E23x
-        spi_src = CK_APB2;
+        #if defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32L23x  || (defined SOC_SERIES_GD32F3x0)
+        spi_src = spi_periph == SPI0? CK_APB2:CK_APB1;
         #else
         if (spi_periph == SPI1 || spi_periph == SPI2)
         {
@@ -428,7 +438,9 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
     spi_init_struct.trans_mode = SPI_TRANSMODE_FULLDUPLEX;
     spi_init_struct.device_mode = SPI_MASTER;
     spi_init_struct.nss = SPI_NSS_SOFT;
-
+#if defined SOC_SERIES_GD32L23x
+    spi_fifo_access_size_config(spi_periph, SPI_BYTE_ACCESS);
+#endif
     spi_crc_off(spi_periph);
 
 #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E)

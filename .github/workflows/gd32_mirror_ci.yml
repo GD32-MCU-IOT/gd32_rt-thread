@@ -23,7 +23,7 @@ on:
       - 'include/**'
       - '!bsp/gd32/**/README*.md'
       - '!bsp/gd32/**/docs/**'
-      - '.github/workflows/gd32_bsp_ci_optimized.yml'
+      - '.github/workflows/gd32_mirror_ci.yml'
       - 'bsp/gd32/scripts/gd32_bsp_config.json'
       
   # Push 到 master - 触发全量测试（可选）
@@ -32,7 +32,7 @@ on:
       - master
     paths:
       - 'bsp/gd32/**'
-      - '.github/workflows/gd32_bsp_ci_optimized.yml'
+      - '.github/workflows/gd32_mirror_ci.yml'
       
   # 手动触发
   workflow_dispatch:
@@ -71,13 +71,34 @@ jobs:
       
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
         with:
-          fetch-depth: 0
+          # PR 触发时 checkout 源分支的 HEAD commit
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
           persist-credentials: false
+          fetch-depth: 0
+      
+      - name: 🔍 调试：验证 checkout 状态
+        shell: bash
+        run: |
+          echo "=== Checkout 信息 ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Base Ref: ${{ github.base_ref }}"
+          echo "Head Ref: ${{ github.head_ref }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "PR Head SHA: ${{ github.event.pull_request.head.sha }}"
+          echo ""
+          echo "=== Git 状态 ==="
+          git log -3 --oneline --graph
+          git branch -a
+          echo "当前 commit: $(git rev-parse HEAD)"
+          echo ""
+          echo "=== GD32 BSP 目录检查 ==="
+          ls -la bsp/gd32/arm/ | head -15
       
       - name: 设置 Python 环境
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@main
         with:
           python-version: '3.11'
       
@@ -186,10 +207,47 @@ jobs:
     
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
+        with:
+          # 🔥 关键修复：与 generate-matrix job 保持一致的 checkout 策略
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+          persist-credentials: false
+          fetch-depth: 0
+      
+      - name: 🔍 调试：验证代码目录结构
+        shell: bash
+        run: |
+          echo "=== Checkout 详细信息 ==="
+          echo "Event: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Actor: ${{ github.actor }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "PR Head SHA: ${{ github.event.pull_request.head.sha }}"
+          echo ""
+          echo "=== Git 状态 ==="
+          git log -3 --oneline --decorate
+          echo "当前分支: $(git rev-parse --abbrev-ref HEAD)"
+          echo "当前 commit: $(git rev-parse HEAD)"
+          echo ""
+          echo "=== 检查待编译的 BSP 路径 ==="
+          IFS=',' read -ra BSP_ARRAY <<< "${{ join(matrix.legs.SUB_RTT_BSP, ',') }}"
+          for bsp in "${BSP_ARRAY[@]}"; do
+            bsp_path="bsp/$bsp"
+            if [ -d "$bsp_path" ]; then
+              echo "✅ 目录存在: $bsp_path"
+              ls -la "$bsp_path" | head -5
+            else
+              echo "❌ 目录不存在: $bsp_path"
+              echo "   列出父目录内容:"
+              parent_dir=$(dirname "$bsp_path")
+              ls -la "$parent_dir" 2>/dev/null || echo "   父目录也不存在: $parent_dir"
+            fi
+            echo ""
+          done
       
       - name: 设置 Python 环境
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@main
         with:
           python-version: '3.11'
       
@@ -201,7 +259,17 @@ jobs:
           chmod 777 install_ubuntu.sh
           ./install_ubuntu.sh
           pip install -r tools/requirements.txt
+          
+          # 🔥 配置 Git 参数
+          git config --global advice.detachedHead false
+          git config --global pull.rebase false
+          git config --global core.fileMode false
+          git config --global --add safe.directory '*'
           git config --global http.postBuffer 524288000
+          
+          echo "当前分支: $(git rev-parse --abbrev-ref HEAD)"
+          echo "当前 commit: $(git rev-parse HEAD)"
+          
           echo "RTT_ROOT=${{ github.workspace }}" >> $GITHUB_ENV
           echo "RTT_CC=gcc" >> $GITHUB_ENV
           echo "export PATH=~/.env/tools/scripts:$PATH" > ~/.env/env.sh
@@ -212,7 +280,7 @@ jobs:
       - name: 缓存 ARM 工具链
         if: ${{ matrix.legs.RTT_TOOL_CHAIN == 'sourcery-arm' }}
         id: cache-gcc-arm
-        uses: actions/cache@v4
+        uses: actions/cache@main
         with:
           path: /opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi
           key: ${{ runner.os }}-gcc-arm-13.2-rel1
@@ -232,7 +300,7 @@ jobs:
           echo "RTT_EXEC_PATH=/opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi/bin" >> $GITHUB_ENV
 
       #========================================================================
-      # 核心编译步骤 - 复用 RT-Thread bsp_buildings.py
+      # 核心编译步骤
       #========================================================================
       - name: 编译 GD32 BSP
         if: ${{ success() }}
@@ -252,7 +320,6 @@ jobs:
           echo "SRTT_BSP=$SRTT_BSP"
           echo ""
           
-          # 复用 RT-Thread 核心编译脚本
           python tools/ci/bsp_buildings.py
 
       #========================================================================
@@ -260,7 +327,7 @@ jobs:
       #========================================================================
       - name: 上传编译产物
         if: ${{ success() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: gd32-${{ matrix.legs.RTT_BSP }}-${{ github.sha }}
           if-no-files-found: ignore
@@ -297,7 +364,7 @@ jobs:
     
     steps:
       - name: 下载所有编译产物
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@main
         with:
           path: gd32-output/
           merge-multiple: true
@@ -314,7 +381,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
       
       - name: 上传合并产物
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: gd32-all-bsp-${{ github.sha }}
           path: gd32-output/
@@ -331,7 +398,7 @@ jobs:
     
     steps:
       - name: 生成编译报告
-        uses: actions/github-script@v7
+        uses: actions/github-script@main
         with:
           script: |
             const testCount = '${{ needs.generate-matrix.outputs.test_count }}';
@@ -363,4 +430,3 @@ jobs:
               issue_number: context.issue.number,
               body: body
             });
-

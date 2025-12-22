@@ -19,7 +19,8 @@
 extern "C" {
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x)
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
+ && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x)
 
 #ifndef SOC_SERIES_GD32H7xx
 #undef RT_SERIAL_USING_DMA
@@ -94,6 +95,17 @@ struct gd32_uart
 #include "drv_dma.h"
 #endif
 
+#ifdef RT_SERIAL_USING_DMA
+typedef struct
+{
+    dma_config *config;
+    /* setting receive len */
+    rt_size_t setting_recv_len;
+    /* last receive index */
+    rt_size_t last_recv_index;
+} gd32_uart_dma;
+#endif
+
 /* GD32 uart driver */
 struct gd32_uart
 {
@@ -105,10 +117,14 @@ struct gd32_uart
 
 #ifdef RT_SERIAL_USING_DMA
 #ifdef BSP_USING_UART_TX_DMA
-    gd32_uart_dma *dma_tx;
+    dma_config *dma_tx;
 #endif
 #ifdef BSP_USING_UART_RX_DMA
-    gd32_uart_dma *dma_rx;
+    dma_config *dma_rx;
+    /* setting receive len */
+    rt_size_t setting_recv_len;
+    /* last receive index */
+    rt_size_t last_recv_index;
 #endif
 #endif
 };

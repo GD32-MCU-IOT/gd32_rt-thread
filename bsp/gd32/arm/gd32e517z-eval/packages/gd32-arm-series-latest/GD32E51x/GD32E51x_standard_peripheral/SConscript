@@ -1,0 +1,71 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd = GetCurrentDir()
+
+# Standard Peripheral Library source files
+src = Split('''
+GD32E51x_standard_peripheral/Source/gd32e51x_bkp.c
+GD32E51x_standard_peripheral/Source/gd32e51x_cmp.c
+GD32E51x_standard_peripheral/Source/gd32e51x_crc.c
+GD32E51x_standard_peripheral/Source/gd32e51x_ctc.c
+GD32E51x_standard_peripheral/Source/gd32e51x_dbg.c
+GD32E51x_standard_peripheral/Source/gd32e51x_dma.c
+GD32E51x_standard_peripheral/Source/gd32e51x_exti.c
+GD32E51x_standard_peripheral/Source/gd32e51x_fmc.c
+GD32E51x_standard_peripheral/Source/gd32e51x_gpio.c
+GD32E51x_standard_peripheral/Source/gd32e51x_misc.c
+GD32E51x_standard_peripheral/Source/gd32e51x_pmu.c
+GD32E51x_standard_peripheral/Source/gd32e51x_rcu.c
+''')
+
+# Include directories
+CPPPATH = [cwd + '/Include']
+
+# Define the group
+group = DefineGroup('GD32E51x_StdPeriphDriver', src, depend = [''], CPPPATH = CPPPATH)
+
+if GetDepend(['RT_USING_SERIAL']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_usart.c']
+
+if GetDepend(['RT_USING_I2C']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_i2c.c']
+
+if GetDepend(['RT_USING_SPI']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_spi.c']
+    
+if GetDepend(['RT_USING_PWM']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_timer.c']
+
+if GetDepend(['RT_USING_CAN']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_can.c']
+
+if GetDepend(['BSP_USING_ETH']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_enet.c']
+
+if GetDepend(['RT_USING_ADC']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_adc.c']
+
+if GetDepend(['RT_USING_DAC']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_dac.c']
+
+if GetDepend(['RT_USING_RTC']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_rtc.c']
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_pmu.c']
+
+if GetDepend(['RT_USING_WDT']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_wwdgt.c']
+
+if GetDepend(['RT_USING_SDIO']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_sdio.c']
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_dma.c']
+
+if GetDepend(['BSP_USING_SDRAM']):
+	src += ['GD32E51x_standard_peripheral/Source/gd32e51x_exmc.c']
+
+path = [cwd + '/Include']
+
+CPPDEFINES = ['USE_STDPERIPH_DRIVER']
+
+Return('group')

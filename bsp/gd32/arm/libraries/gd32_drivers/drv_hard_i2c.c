@@ -447,8 +447,8 @@ static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_
 #endif
         {
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) \
- || defined (SOC_SERIES_GD32G5x3) || defined (SOC_SERIES_GD32L23x) || defined (SOC_SERIES_GD32E51x) \
- || defined (SOC_SERIES_GD32F50x)
+ || defined (SOC_SERIES_GD32L23x) || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F50x) \
+ || defined (SOC_SERIES_GD32G5x3)
             /* wait until the transmit data buffer is empty */
             I2C_STAT_GD(i2c_periph) |= I2C_STAT_TBE_GD;
             while(!i2c_flag_get_gd(i2c_periph, I2C_FLAG_TBE));

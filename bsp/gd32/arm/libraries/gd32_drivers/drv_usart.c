@@ -407,7 +407,7 @@ static const struct gd32_uart uart_obj[] = {
         USART0,                                /* uart peripheral index */
         USART0_IRQn,                           /* uart iqrn */
         RCU_USART0,                            /* uart periph clock */
-#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32H7xx 
+#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32H7xx
         RCU_GPIOA, RCU_GPIOA,                  /* tx gpio clock, rx gpio clock */
         GPIOA, GPIO_AF_7, GPIO_PIN_9,          /* tx port, tx alternate, tx pin */
         GPIOA, GPIO_AF_7, GPIO_PIN_10,         /* rx port, rx alternate, rx pin */
@@ -797,7 +797,7 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     gpio_mode_set(uart->rx_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, uart->rx_pin);
     gpio_output_options_set(uart->rx_port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, uart->rx_pin);
 
-#elif defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32G5x3
+#elif defined SOC_SERIES_GD32H7xx
     /* connect port to USARTx_Tx */
     gpio_af_set(uart->tx_port, uart->tx_af, uart->tx_pin);
 

@@ -679,20 +679,11 @@ void GD32_GPIO_EXTI_IRQHandler(rt_int8_t exti_line)
 #else
     exti_line_enum pin_exti_line = 1 << exti_line;
 #endif
-
-#if defined (SOC_SERIES_GD32G5x3)
-    if(RESET != exti_interrupt_flag_get(exti_line))
-    {
-        pin_irq_hdr(exti_line);
-        exti_interrupt_flag_clear(exti_line);
-    }
-#else   
     if (RESET != exti_interrupt_flag_get(pin_exti_line))
     {
         pin_irq_hdr(exti_line);
         exti_interrupt_flag_clear(pin_exti_line);
     }
-#endif
 }
 
 #if defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32F3x0

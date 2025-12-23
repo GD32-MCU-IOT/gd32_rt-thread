@@ -1,0 +1,60 @@
+import rtconfig
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+
+# The set of source files associated with this SConscript file.
+src = Split('''
+GD32G5x3_standard_peripheral/Source/gd32g5x3_gpio.c
+GD32G5x3_standard_peripheral/Source/gd32g5x3_rcu.c
+GD32G5x3_standard_peripheral/Source/gd32g5x3_dma.c
+GD32G5x3_standard_peripheral/Source/gd32g5x3_exti.c
+GD32G5x3_standard_peripheral/Source/gd32g5x3_misc.c
+GD32G5x3_standard_peripheral/Source/gd32g5x3_syscfg.c
+''')
+
+if GetDepend(['RT_USING_SERIAL']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_usart.c']
+
+if GetDepend(['RT_USING_I2C']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_i2c.c']
+
+if GetDepend(['RT_USING_SPI']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_spi.c']
+
+if GetDepend(['RT_USING_CAN']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_can.c']
+
+if GetDepend(['BSP_USING_ETH']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_enet.c']
+
+if GetDepend(['RT_USING_ADC']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_adc.c']
+
+if GetDepend(['RT_USING_DAC']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_dac.c']
+
+if GetDepend(['RT_USING_RTC']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_rtc.c']
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_pmu.c']
+
+if GetDepend(['RT_USING_WDT']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_wwdgt.c']
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_fwdgt.c']
+
+if GetDepend(['RT_USING_SDIO']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_sdio.c']
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_dma.c']
+
+if GetDepend(['BSP_USING_SDRAM']):
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_fmc.c']
+    src += ['GD32G5x3_standard_peripheral/Source/gd32g5x3_exmc.c']
+
+path = [cwd + '/GD32G5x3_standard_peripheral/Include']
+
+CPPDEFINES = ['USE_STDPERIPH_DRIVER']
+
+group = DefineGroup('Libraries', src, depend = ['SOC_SERIES_GD32G5x3'], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+Return('group')

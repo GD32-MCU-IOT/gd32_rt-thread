@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2024-08-07     RT-Thread    first implementation for GD32307C-EVAL
+ * 2024-08-07     RT-Thread    first implementation for GD32G553Q-EVAL
  */
 
 #include <rtthread.h>
@@ -19,7 +19,7 @@
 
 #define GD32_I2C_EEPROM_TEST
 
-/* Note: The GD32307C-EVAL board does not support SPI flash, if you want to test this function,
+/* Note: The GD32G553Q-EVAL board does not support SPI flash, if you want to test this function,
  *       please connect the SPI to SPI flash.
  */
 #define GD32_SPI_TEST

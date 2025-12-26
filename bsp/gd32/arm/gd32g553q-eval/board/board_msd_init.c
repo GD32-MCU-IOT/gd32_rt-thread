@@ -71,12 +71,6 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
         gpio_output_options_set(GPIOG, GPIO_OTYPE_OD, GPIO_OSPEED_100_220MHZ, GPIO_PIN_8);
         break;
 #endif
-    /*
-     * [I2C3 引脚配置]
-     * SCL: PC6 (AF10)
-     * SDA: PC7 (AF10)
-     * 详见 GD32G553xx 数据手册 Table 2-12
-     */
 #ifdef BSP_USING_HARD_I2C3
     case I2C3:
         /* enable I2C3 GPIO clock: PC6(SCL), PC7(SDA) */

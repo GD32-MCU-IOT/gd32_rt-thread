@@ -128,7 +128,7 @@ int main(void)
     rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
 
-    rt_kprintf("Hello GD32307C-EVAL!\n");
+    rt_kprintf("Hello GD32G553Q-EVAL!\n");
     rt_kprintf("RT-Thread BSP adaptation successful!\n");
     rt_kprintf("System Clock: %d Hz\n", SystemCoreClock);
 
@@ -172,9 +172,10 @@ int main(void)
         rt_pin_write(LED3_PIN, PIN_HIGH);
         rt_thread_mdelay(500);
         
-        /* turn off LED4 */
+        /* turn off LED3 */
         rt_pin_write(LED3_PIN, PIN_LOW);
 
+        /* turn on LED4 */
         rt_pin_write(LED4_PIN, PIN_HIGH);
         rt_thread_mdelay(500);
         

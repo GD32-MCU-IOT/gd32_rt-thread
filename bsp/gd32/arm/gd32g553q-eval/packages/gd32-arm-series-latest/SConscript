@@ -1,0 +1,15 @@
+import os
+from building import *
+
+cwd = GetCurrentDir()
+
+objs = []
+
+# Align folder layout with other BSPs (e.g. GD32H75xx):
+# a top-level SConscript that dispatches into each SoC series subfolder.
+for item in os.listdir(cwd):
+    path = os.path.join(cwd, item)
+    if os.path.isfile(os.path.join(path, 'SConscript')):
+        objs += SConscript(os.path.join(item, 'SConscript'))
+
+Return('objs')

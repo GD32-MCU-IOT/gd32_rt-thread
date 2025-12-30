@@ -674,7 +674,7 @@ rt_inline void pin_irq_hdr(int irqno)
   */
 void GD32_GPIO_EXTI_IRQHandler(rt_int8_t exti_line)
 {
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E)
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32G5x3)
     exti_line_enum pin_exti_line = exti_line;
 #else
     exti_line_enum pin_exti_line = 1 << exti_line;

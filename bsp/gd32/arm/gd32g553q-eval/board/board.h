@@ -19,9 +19,6 @@
 
 #include "gd32g5x3_exti.h"
 
-#define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
-#define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
-
 /* Internal Flash: 512KB (0x08000000 - 0x0807FFFF) for GD32G553 */
 #define GD32_FLASH_START_ADRESS    ((uint32_t)0x08000000)
 #define GD32_FLASH_SIZE            (512 * 1024)
@@ -34,7 +31,7 @@
 extern char __ICFEDIT_region_RAM_end__;
 #define GD32_SRAM_END          &__ICFEDIT_region_RAM_end__
 #else
-#define GD32_SRAM_SIZE         128
+#define GD32_SRAM_SIZE         96
 #define GD32_SRAM_END          (0x20000000 + GD32_SRAM_SIZE * 1024)
 #endif
 

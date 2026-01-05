@@ -1,0 +1,54 @@
+import rtconfig
+from building import *
+
+cwd = GetCurrentDir()
+
+# add the standard peripheral library source files
+src = Split('''
+Source/gd32l23x_adc.c
+Source/gd32l23x_cmp.c
+Source/gd32l23x_crc.c
+Source/gd32l23x_ctc.c
+Source/gd32l23x_dac.c
+Source/gd32l23x_dbg.c
+Source/gd32l23x_dma.c
+Source/gd32l23x_exti.c
+Source/gd32l23x_fmc.c
+Source/gd32l23x_fwdgt.c
+Source/gd32l23x_gpio.c
+Source/gd32l23x_i2c.c
+Source/gd32l23x_lptimer.c
+Source/gd32l23x_lpuart.c
+Source/gd32l23x_misc.c
+Source/gd32l23x_pmu.c
+Source/gd32l23x_rcu.c
+Source/gd32l23x_rtc.c
+Source/gd32l23x_slcd.c
+Source/gd32l23x_spi.c
+Source/gd32l23x_syscfg.c
+Source/gd32l23x_timer.c
+Source/gd32l23x_trng.c
+Source/gd32l23x_usart.c
+Source/gd32l23x_vref.c
+Source/gd32l23x_wwdgt.c
+''')
+
+# add CAN source if enabled
+if GetDepend(['BSP_USING_CAN']):
+    src += ['Source/gd32l23x_can.c']
+
+# add CAU source if enabled
+if GetDepend(['BSP_USING_CAU']):
+    src += ['Source/gd32l23x_cau.c']
+    src += ['Source/gd32l23x_cau_aes.c']
+    src += ['Source/gd32l23x_cau_des.c']
+    src += ['Source/gd32l23x_cau_tdes.c']
+
+path = [
+    cwd + '/Include',
+]
+
+CPPDEFINES = ['USE_STDPERIPH_DRIVER']
+group = DefineGroup('GD32L23x_StdPeriph', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+Return('group')

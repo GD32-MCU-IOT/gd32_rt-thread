@@ -598,9 +598,9 @@ static rt_err_t gd32_pin_irq_enable(struct rt_device *device, rt_base_t pin, rt_
         }
 
 #if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32F5xx \
- || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32G5x3
+ || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32G5x3 || defined SOC_SERIES_GD32L23x
         rcu_periph_clock_enable(RCU_SYSCFG);
-#elif defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32F3x0
+#elif defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32F3x0
         rcu_periph_clock_enable(RCU_CFGCMP);
 #else
         rcu_periph_clock_enable(RCU_AF);

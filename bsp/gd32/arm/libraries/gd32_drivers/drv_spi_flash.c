@@ -39,7 +39,11 @@ static const struct spi_flash_config flash_configs[] =
         .bus_name    = "spi0",
         .device_name = "spi00",
         .flash_name  = "gd25q_spi0",
+#ifdef SOC_SERIES_GD32L23x
+        .cs_pin      = GET_PIN(D, 2),
+#else
         .cs_pin      = GET_PIN(A, 4),
+#endif
     },
 #endif
 

@@ -1,0 +1,17 @@
+; *************************************************************
+; *** Scatter-Loading Description File for GD32L233R ***
+; *************************************************************
+; Keil scatter file for GD32L233RB (Flash 256KB, SRAM 32KB)
+
+LR_IROM1 0x08000000 0x00040000  {    ; Load Region: Flash, 256KB
+  ER_IROM1 0x08000000 0x00040000  {  ; Execution Region: Code/RO in Flash
+   *.o (RESET, +First)
+   *(InRoot$$Sections)
+   .ANY (+RO)
+   .ANY (+XO)
+  }
+  RW_IRAM1 0x20000000 0x00008000  {  ; RW/ZI Region: SRAM, 32KB
+   .ANY (+RW +ZI)
+  }
+}
+

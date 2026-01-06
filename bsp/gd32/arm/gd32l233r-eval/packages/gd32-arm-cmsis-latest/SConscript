@@ -1,0 +1,28 @@
+import rtconfig
+from building import *
+
+# get current directory
+cwd = GetCurrentDir()
+
+# The set of source files associated with this SConscript file.
+src = Split('''
+GD/GD32L23x/Source/system_gd32l23x.c
+''')
+
+path = [
+    cwd + '/GD/GD32L23x/Include', ]
+
+if rtconfig.PLATFORM in ['armcc', 'armclang']:
+    src += ['GD/GD32L23x/Source/ARM/startup_gd32l233.s']
+elif rtconfig.PLATFORM in ['gcc']:
+    path += [cwd]
+    src += ['GD/GD32L23x/Source/GCC/startup_gd32l233.S']
+
+elif rtconfig.PLATFORM in ['iccarm']:
+    src += ['GD/GD32L23x/Source/IAR/startup_gd32l233.s']
+
+CPPDEFINES = ['USE_STDPERIPH_DRIVER']
+
+group = DefineGroup('Libraries', src, depend = ['SOC_SERIES_GD32L23x'], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+Return('group')

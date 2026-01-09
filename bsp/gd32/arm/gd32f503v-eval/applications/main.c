@@ -348,10 +348,10 @@ static void qspi_sample(void)
 {
     rt_kprintf("\n=== QSPI Test ===\n");
     
-    /* 1. 附加QSPI设备 */
+    /* Attach QSPI device */
     rt_hw_qspi_device_attach(QSPI_BUS_NAME, QSPI_DEVICE_NAME, QSPI_CS_PIN, 4, RT_NULL, RT_NULL);
     
-    /* 2. 查找设备 */
+    /* Find QSPI device */
     qspi_dev = (struct rt_qspi_device *)rt_device_find(QSPI_DEVICE_NAME);
     if (qspi_dev == RT_NULL)
     {
@@ -360,7 +360,7 @@ static void qspi_sample(void)
     }
     rt_kprintf("QSPI device found\n");
     
-    /* 3. 读取Flash ID */
+    /* Read Flash ID */
     rt_kprintf("\n--- Reading Flash ID ---\n");
     if (qspi_read(qspi_dev, 0x9F, 0, 0, 1, qspi_id, 3) == 3)
     {
@@ -372,7 +372,7 @@ static void qspi_sample(void)
         return;
     }
     
-    /* 4. 使能Quad模式 */
+    /* Enable Quad mode */
     rt_kprintf("\n--- Enabling Quad Mode ---\n");
     rt_uint8_t sr2;
     qspi_read(qspi_dev, 0x35, 0, 0, 1, &sr2, 1);
@@ -383,7 +383,7 @@ static void qspi_sample(void)
         rt_kprintf("Quad mode enabled\n");
     }
     
-    /* 5. 准备测试数据 */
+    /* Prepare test data */
     rt_kprintf("\n--- Preparing test data ---\n");
     for (int i = 0; i < QSPI_TEST_SIZE; i++)
     {
@@ -396,7 +396,7 @@ static void qspi_sample(void)
         if ((i + 1) % 16 == 0) rt_kprintf("\n");
     }
     
-    /* 6. 擦除扇区 */
+    /* Erase sector */
     rt_kprintf("\n--- Erasing Sector 0 ---\n");
     qspi_send_cmd(qspi_dev, 0x06);  /* Write Enable */
     qspi_write(qspi_dev, 0x20, 0x000000, 1, RT_NULL, 0);  /* Sector Erase */
@@ -410,7 +410,7 @@ static void qspi_sample(void)
         return;
     }
     
-    /* 7. 写入数据 */
+    /* Write data */
     rt_kprintf("\n--- Writing %d bytes to 0x000000 ---\n", QSPI_TEST_SIZE);
     qspi_send_cmd(qspi_dev, 0x06);  /* Write Enable */
     qspi_write(qspi_dev, 0x02, 0x000000, 1, qspi_test_data, QSPI_TEST_SIZE);  /* Page Program */
@@ -424,7 +424,7 @@ static void qspi_sample(void)
         return;
     }
     
-    /* 8. 单线读取 */
+    /* Single line read */
     rt_kprintf("\n--- Single Line Read (0x03) ---\n");
     if (qspi_read(qspi_dev, 0x03, 0x000000, 0, 1, qspi_buf_single, QSPI_TEST_SIZE) == QSPI_TEST_SIZE)
     {
@@ -436,7 +436,7 @@ static void qspi_sample(void)
         }
     }
     
-    /* 9. 四线读取 */
+    /* Quad line read */
     rt_kprintf("\n--- Quad Line Read (0x6B) ---\n");
     if (qspi_read(qspi_dev, 0x6B, 0x000000, 8, 4, qspi_buf_quad, QSPI_TEST_SIZE) == QSPI_TEST_SIZE)
     {
@@ -448,7 +448,7 @@ static void qspi_sample(void)
         }
     }
     
-    /* 10. 对比验证 */
+    /* Verify */
     rt_kprintf("\n--- Verify ---\n");
     if (rt_memcmp(qspi_buf_single, qspi_buf_quad, QSPI_TEST_SIZE) == 0)
     {

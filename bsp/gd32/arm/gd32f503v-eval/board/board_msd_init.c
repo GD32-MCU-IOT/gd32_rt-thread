@@ -13,7 +13,6 @@
 #include <rtthread.h>
 #include <board.h>
 
-
 #ifdef RT_USING_I2C
 /**
   * @brief  This function initializes the i2c pin.

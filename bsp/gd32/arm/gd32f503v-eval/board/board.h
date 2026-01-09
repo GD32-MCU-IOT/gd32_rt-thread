@@ -15,6 +15,7 @@
 #include "drv_hard_i2c.h"
 #include "drv_usart.h"
 #include "drv_spi.h"
+#include "drv_qspi.h"
 
 /* Internal SRAM memory configuration for GD32F503V */
 /* GD32F503V series contains up to 128KB on-chip SRAM */

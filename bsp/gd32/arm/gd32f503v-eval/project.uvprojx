@@ -337,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>-fno-strict-aliasing</MiscControls>
-              <Define>__RTTHREAD__, GD32F503VG, GD32F50X, USE_STDPERIPH_DRIVER, __CLK_TCK=RT_TICK_PER_SECOND, RT_USING_LIBC, __STDC_LIMIT_MACROS, RT_USING_ARMLIBC</Define>
+              <Define>RT_USING_LIBC, __STDC_LIMIT_MACROS, GD32F50X, USE_STDPERIPH_DRIVER, __CLK_TCK=RT_TICK_PER_SECOND, RT_USING_ARMLIBC, __RTTHREAD__, GD32F503VG</Define>
               <Undefine></Undefine>
-              <IncludePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/include;C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common/extension;C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/posix/io/eventfd;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/smp_call;applications;packages\gd32-arm-cmsis-latest\GD32F50x;C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/posix/ipc;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/include;C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/posix/io/epoll;C:/Users/junying.wang/Desktop/rt-thread-master/components/dfs/dfs_v1/filesystems/devfs;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/include;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/include;C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/common;C:/Users/junying.wang/Desktop/rt-thread-master/components/dfs/dfs_v1/include;C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common/extension/fcntl/octal;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/spi/sfud/inc;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/include;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/spi;C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/posix/io/poll;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/include;board;packages\gd32-arm-series-latest\GD32F50x\GD32F50x_standard_peripheral\Include;C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/cortex-m33;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/include;.;packages\at24cxx;packages\gd32-arm-cmsis-latest\GD32F50x\GD\GD32F50x\Include;C:/Users/junying.wang/Desktop/rt-thread-master/include;..\libraries\gd32_drivers;C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common/include;C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/phy;C:/Users/junying.wang/Desktop/rt-thread-master/components/finsh</IncludePath>
+              <IncludePath>..\libraries\gd32_drivers;.;packages\gd32-arm-cmsis-latest\GD32F50x;..\..\..\..\components\drivers\include;..\..\..\..\libcpu\arm\common;..\..\..\..\components\finsh;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\net\utest;packages\at24cxx;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;board;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\libcpu\arm\cortex-m33;..\..\..\..\components\drivers\phy;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\drivers\smp_call;..\..\..\..\include;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\spi\sfud\inc;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\drivers\spi;packages\gd32-arm-cmsis-latest\GD32F50x\GD\GD32F50x\Include;packages\gd32-arm-series-latest\GD32F50x\GD32F50x_standard_peripheral\Include;applications;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;..\..\..\..\components\libc\posix\ipc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -401,47 +401,42 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Compiler</GroupName>
+          <GroupName>CPU</GroupName>
           <Files>
             <File>
-              <FileName>syscall_mem.c</FileName>
+              <FileName>atomic_arm.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/armlibc\syscall_mem.c</FilePath>
+              <FilePath>..\..\..\..\libcpu\arm\common\atomic_arm.c</FilePath>
             </File>
             <File>
-              <FileName>syscalls.c</FileName>
+              <FileName>div0.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/armlibc\syscalls.c</FilePath>
+              <FilePath>..\..\..\..\libcpu\arm\common\div0.c</FilePath>
             </File>
             <File>
-              <FileName>cctype.c</FileName>
+              <FileName>showmem.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common\cctype.c</FilePath>
+              <FilePath>..\..\..\..\libcpu\arm\common\showmem.c</FilePath>
             </File>
             <File>
-              <FileName>cstdlib.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common\cstdlib.c</FilePath>
+              <FileName>context_rvds.S</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\cortex-m33\context_rvds.S</FilePath>
             </File>
             <File>
-              <FileName>cstring.c</FileName>
+              <FileName>cpuport.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common\cstring.c</FilePath>
+              <FilePath>..\..\..\..\libcpu\arm\cortex-m33\cpuport.c</FilePath>
             </File>
             <File>
-              <FileName>ctime.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common\ctime.c</FilePath>
+              <FileName>syscall_rvds.S</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\cortex-m33\syscall_rvds.S</FilePath>
             </File>
             <File>
-              <FileName>cunistd.c</FileName>
+              <FileName>trustzone.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common\cunistd.c</FilePath>
-            </File>
-            <File>
-              <FileName>cwchar.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/libc/compilers/common\cwchar.c</FilePath>
+              <FilePath>..\..\..\..\libcpu\arm\cortex-m33\trustzone.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -451,7 +446,7 @@
             <File>
               <FileName>device.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/core\device.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\core\device.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -498,7 +493,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -507,7 +502,7 @@
             <File>
               <FileName>dev_i2c_bit_ops.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/i2c\dev_i2c_bit_ops.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\i2c\dev_i2c_bit_ops.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -554,7 +549,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -563,7 +558,7 @@
             <File>
               <FileName>dev_i2c_core.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/i2c\dev_i2c_core.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\i2c\dev_i2c_core.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -610,7 +605,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -619,7 +614,7 @@
             <File>
               <FileName>dev_i2c_dev.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/i2c\dev_i2c_dev.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\i2c\dev_i2c_dev.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -666,7 +661,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -675,7 +670,7 @@
             <File>
               <FileName>completion_comm.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\completion_comm.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\completion_comm.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -722,7 +717,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -731,7 +726,7 @@
             <File>
               <FileName>completion_up.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\completion_up.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\completion_up.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -778,7 +773,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -787,7 +782,7 @@
             <File>
               <FileName>condvar.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\condvar.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\condvar.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -834,7 +829,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -843,7 +838,7 @@
             <File>
               <FileName>dataqueue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\dataqueue.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\dataqueue.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -890,7 +885,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -899,7 +894,7 @@
             <File>
               <FileName>pipe.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\pipe.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\pipe.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -946,7 +941,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -955,7 +950,7 @@
             <File>
               <FileName>ringblk_buf.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\ringblk_buf.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\ringblk_buf.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1002,7 +997,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1011,7 +1006,7 @@
             <File>
               <FileName>ringbuffer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\ringbuffer.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\ringbuffer.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1058,7 +1053,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1067,7 +1062,7 @@
             <File>
               <FileName>waitqueue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\waitqueue.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\waitqueue.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1114,7 +1109,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1123,7 +1118,7 @@
             <File>
               <FileName>workqueue.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/ipc\workqueue.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\ipc\workqueue.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1170,7 +1165,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1179,7 +1174,7 @@
             <File>
               <FileName>dev_pin.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/pin\dev_pin.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\pin\dev_pin.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1226,7 +1221,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1235,7 +1230,7 @@
             <File>
               <FileName>dev_serial.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/serial\dev_serial.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\serial\dev_serial.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1282,7 +1277,63 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+            <File>
+              <FileName>dev_qspi_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\spi\dev_qspi_core.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>1</IncludeInBuild>
+                  <AlwaysBuild>0</AlwaysBuild>
+                  <GenerateAssemblyFile>0</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>0</AssembleAssemblyFile>
+                  <PublicsOnly>0</PublicsOnly>
+                  <StopOnExitCode>3</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <uGnu>2</uGnu>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls>  -std=c99</MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1291,7 +1342,7 @@
             <File>
               <FileName>dev_spi.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/spi\dev_spi.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\spi\dev_spi.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1338,7 +1389,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1347,7 +1398,7 @@
             <File>
               <FileName>dev_spi_core.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/spi\dev_spi_core.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\spi\dev_spi_core.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1394,7 +1445,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1403,7 +1454,7 @@
             <File>
               <FileName>dev_spi_flash_sfud.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/spi\dev_spi_flash_sfud.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\spi\dev_spi_flash_sfud.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1450,7 +1501,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1459,7 +1510,7 @@
             <File>
               <FileName>sfud.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/spi/sfud/src\sfud.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\spi\sfud\src\sfud.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1506,7 +1557,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1515,7 +1566,7 @@
             <File>
               <FileName>sfud_sfdp.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/drivers/spi/sfud/src\sfud_sfdp.c</FilePath>
+              <FilePath>..\..\..\..\components\drivers\spi\sfud\src\sfud_sfdp.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1562,7 +1613,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define>__RT_IPC_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1594,6 +1645,11 @@
               <FilePath>..\libraries\gd32_drivers\drv_hard_i2c.c</FilePath>
             </File>
             <File>
+              <FileName>drv_qspi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\libraries\gd32_drivers\drv_qspi.c</FilePath>
+            </File>
+            <File>
               <FileName>drv_spi.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\libraries\gd32_drivers\drv_spi.c</FilePath>
@@ -1616,7 +1672,7 @@
             <File>
               <FileName>devfs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/dfs/dfs_v1/filesystems/devfs\devfs.c</FilePath>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\filesystems\devfs\devfs.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1663,7 +1719,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define> </Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1672,7 +1728,7 @@
             <File>
               <FileName>dfs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/dfs/dfs_v1/src\dfs.c</FilePath>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1719,7 +1775,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define> </Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1728,7 +1784,7 @@
             <File>
               <FileName>dfs_file.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/dfs/dfs_v1/src\dfs_file.c</FilePath>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_file.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1775,7 +1831,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define> </Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1784,7 +1840,7 @@
             <File>
               <FileName>dfs_fs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/dfs/dfs_v1/src\dfs_fs.c</FilePath>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_fs.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1831,7 +1887,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define> </Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1840,7 +1896,7 @@
             <File>
               <FileName>dfs_posix.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/dfs/dfs_v1/src\dfs_posix.c</FilePath>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_posix.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1887,7 +1943,7 @@
                       <MiscControls>  -std=c99</MiscControls>
                       <Define> </Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1899,29 +1955,29 @@
           <GroupName>Finsh</GroupName>
           <Files>
             <File>
-              <FileName>msh_file.c</FileName>
+              <FileName>cmd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/finsh\msh_file.c</FilePath>
-            </File>
-            <File>
-              <FileName>msh.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/finsh\msh.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
             </File>
             <File>
               <FileName>msh_parse.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/finsh\msh_parse.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
             </File>
             <File>
-              <FileName>cmd.c</FileName>
+              <FileName>msh_file.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/finsh\cmd.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
             </File>
             <File>
               <FileName>shell.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/components/finsh\shell.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\shell.c</FilePath>
+            </File>
+            <File>
+              <FileName>msh.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1931,7 +1987,7 @@
             <File>
               <FileName>clock.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\clock.c</FilePath>
+              <FilePath>..\..\..\..\src\clock.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1978,7 +2034,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -1987,7 +2043,7 @@
             <File>
               <FileName>components.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\components.c</FilePath>
+              <FilePath>..\..\..\..\src\components.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2034,7 +2090,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2043,7 +2099,7 @@
             <File>
               <FileName>cpu_up.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\cpu_up.c</FilePath>
+              <FilePath>..\..\..\..\src\cpu_up.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2090,7 +2146,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2099,7 +2155,7 @@
             <File>
               <FileName>defunct.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\defunct.c</FilePath>
+              <FilePath>..\..\..\..\src\defunct.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2146,7 +2202,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2155,7 +2211,7 @@
             <File>
               <FileName>idle.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\idle.c</FilePath>
+              <FilePath>..\..\..\..\src\idle.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2202,7 +2258,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2211,7 +2267,7 @@
             <File>
               <FileName>ipc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\ipc.c</FilePath>
+              <FilePath>..\..\..\..\src\ipc.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2258,7 +2314,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2267,7 +2323,7 @@
             <File>
               <FileName>irq.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\irq.c</FilePath>
+              <FilePath>..\..\..\..\src\irq.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2314,7 +2370,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2323,7 +2379,7 @@
             <File>
               <FileName>kservice.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\kservice.c</FilePath>
+              <FilePath>..\..\..\..\src\kservice.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2370,7 +2426,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2379,7 +2435,7 @@
             <File>
               <FileName>mem.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\mem.c</FilePath>
+              <FilePath>..\..\..\..\src\mem.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2426,7 +2482,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2435,7 +2491,7 @@
             <File>
               <FileName>mempool.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\mempool.c</FilePath>
+              <FilePath>..\..\..\..\src\mempool.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2482,7 +2538,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2491,7 +2547,7 @@
             <File>
               <FileName>object.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\object.c</FilePath>
+              <FilePath>..\..\..\..\src\object.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2538,7 +2594,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2547,7 +2603,7 @@
             <File>
               <FileName>scheduler_comm.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\scheduler_comm.c</FilePath>
+              <FilePath>..\..\..\..\src\scheduler_comm.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2594,7 +2650,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2603,7 +2659,7 @@
             <File>
               <FileName>scheduler_up.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\scheduler_up.c</FilePath>
+              <FilePath>..\..\..\..\src\scheduler_up.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2650,7 +2706,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2659,7 +2715,7 @@
             <File>
               <FileName>thread.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\thread.c</FilePath>
+              <FilePath>..\..\..\..\src\thread.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2706,7 +2762,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2715,7 +2771,7 @@
             <File>
               <FileName>timer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src\timer.c</FilePath>
+              <FilePath>..\..\..\..\src\timer.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -2762,7 +2818,7 @@
                       <MiscControls> </MiscControls>
                       <Define>__RT_KERNEL_SOURCE__</Define>
                       <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
+                      <IncludePath></IncludePath>
                     </VariousControls>
                   </Cads>
                 </FileArmAds>
@@ -2771,72 +2827,72 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>klibc</GroupName>
+          <GroupName>Libc</GroupName>
           <Files>
             <File>
-              <FileName>kstring.c</FileName>
+              <FileName>syscall_mem.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src/klibc\kstring.c</FilePath>
+              <FilePath>..\..\..\..\components\libc\compilers\armlibc\syscall_mem.c</FilePath>
+            </File>
+            <File>
+              <FileName>syscalls.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\libc\compilers\armlibc\syscalls.c</FilePath>
+            </File>
+            <File>
+              <FileName>cctype.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\libc\compilers\common\cctype.c</FilePath>
+            </File>
+            <File>
+              <FileName>cstdlib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\libc\compilers\common\cstdlib.c</FilePath>
+            </File>
+            <File>
+              <FileName>cstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\libc\compilers\common\cstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>ctime.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\libc\compilers\common\ctime.c</FilePath>
+            </File>
+            <File>
+              <FileName>cunistd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\libc\compilers\common\cunistd.c</FilePath>
+            </File>
+            <File>
+              <FileName>cwchar.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\libc\compilers\common\cwchar.c</FilePath>
             </File>
             <File>
               <FileName>kerrno.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src/klibc\kerrno.c</FilePath>
-            </File>
-            <File>
-              <FileName>rt_vsscanf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src/klibc\rt_vsscanf.c</FilePath>
-            </File>
-            <File>
-              <FileName>rt_vsnprintf_tiny.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src/klibc\rt_vsnprintf_tiny.c</FilePath>
+              <FilePath>..\..\..\..\src\klibc\kerrno.c</FilePath>
             </File>
             <File>
               <FileName>kstdio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/src/klibc\kstdio.c</FilePath>
+              <FilePath>..\..\..\..\src\klibc\kstdio.c</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>libcpu</GroupName>
-          <Files>
             <File>
-              <FileName>atomic_arm.c</FileName>
+              <FileName>kstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/common\atomic_arm.c</FilePath>
+              <FilePath>..\..\..\..\src\klibc\kstring.c</FilePath>
             </File>
             <File>
-              <FileName>div0.c</FileName>
+              <FileName>rt_vsnprintf_tiny.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/common\div0.c</FilePath>
+              <FilePath>..\..\..\..\src\klibc\rt_vsnprintf_tiny.c</FilePath>
             </File>
             <File>
-              <FileName>showmem.c</FileName>
+              <FileName>rt_vsscanf.c</FileName>
               <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/common\showmem.c</FilePath>
-            </File>
-            <File>
-              <FileName>context_rvds.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/cortex-m33\context_rvds.S</FilePath>
-            </File>
-            <File>
-              <FileName>cpuport.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/cortex-m33\cpuport.c</FilePath>
-            </File>
-            <File>
-              <FileName>syscall_rvds.S</FileName>
-              <FileType>2</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/cortex-m33\syscall_rvds.S</FilePath>
-            </File>
-            <File>
-              <FileName>trustzone.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>C:/Users/junying.wang/Desktop/rt-thread-master/libcpu/arm/cortex-m33\trustzone.c</FilePath>
+              <FilePath>..\..\..\..\src\klibc\rt_vsscanf.c</FilePath>
             </File>
           </Files>
         </Group>

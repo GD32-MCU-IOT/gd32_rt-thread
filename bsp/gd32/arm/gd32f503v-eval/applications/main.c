@@ -14,12 +14,13 @@
 
 #define GD32_I2C_EEPROM_TEST
 
-#define GD32_SPI_TEST
+//#define GD32_SPI_TEST
 
-#define GD32_UART_TEST
+//#define GD32_UART_TEST
 
 #define GD32_GPIO_EXTI_TEST
 
+#define GD32_QSPI_TEST
 
 /* defined the LED pins: LED2 and LED4 */
 #define LED2_PIN    GET_PIN(C, 7)   /* LED2 on PC7 */
@@ -67,6 +68,20 @@ static int uart_sample(int argc, char *argv[]);
 static void pin_irq_sample(void);
 #endif
 
+#ifdef GD32_QSPI_TEST
+#define QSPI_BUS_NAME    "qspi0"
+#define QSPI_DEVICE_NAME "qspi00"
+#define QSPI_CS_PIN      GET_PIN(A, 4)
+#define QSPI_TEST_SIZE   256  
+
+struct rt_qspi_device *qspi_dev;
+rt_uint8_t qspi_id[3];
+rt_uint8_t qspi_test_data[QSPI_TEST_SIZE];
+rt_uint8_t qspi_buf_single[QSPI_TEST_SIZE];
+rt_uint8_t qspi_buf_quad[QSPI_TEST_SIZE];
+
+static void qspi_sample(void);
+#endif
 int main(void)
 {
     int count = 1;
@@ -98,6 +113,10 @@ int main(void)
 
 #ifdef GD32_GPIO_EXTI_TEST
     pin_irq_sample();
+#endif
+
+#ifdef GD32_QSPI_TEST
+    qspi_sample();
 #endif
 
     while (count++)
@@ -322,4 +341,134 @@ static void pin_irq_sample(void)
 
     rt_pin_irq_enable(TAMPER_PIN, PIN_IRQ_ENABLE);
 }
+#endif
+
+#ifdef GD32_QSPI_TEST
+static void qspi_sample(void)
+{
+    rt_kprintf("\n=== QSPI Test ===\n");
+    
+    /* 1. 附加QSPI设备 */
+    rt_hw_qspi_device_attach(QSPI_BUS_NAME, QSPI_DEVICE_NAME, QSPI_CS_PIN, 4, RT_NULL, RT_NULL);
+    
+    /* 2. 查找设备 */
+    qspi_dev = (struct rt_qspi_device *)rt_device_find(QSPI_DEVICE_NAME);
+    if (qspi_dev == RT_NULL)
+    {
+        rt_kprintf("QSPI device not found!\n");
+        return;
+    }
+    rt_kprintf("QSPI device found\n");
+    
+    /* 3. 读取Flash ID */
+    rt_kprintf("\n--- Reading Flash ID ---\n");
+    if (qspi_read(qspi_dev, 0x9F, 0, 0, 1, qspi_id, 3) == 3)
+    {
+        rt_kprintf("Flash ID: 0x%02X 0x%02X 0x%02X\n", qspi_id[0], qspi_id[1], qspi_id[2]);
+    }
+    else
+    {
+        rt_kprintf("Read ID failed!\n");
+        return;
+    }
+    
+    /* 4. 使能Quad模式 */
+    rt_kprintf("\n--- Enabling Quad Mode ---\n");
+    rt_uint8_t sr2;
+    qspi_read(qspi_dev, 0x35, 0, 0, 1, &sr2, 1);
+    rt_kprintf("SR2 = 0x%02X (QE=%d)\n", sr2, (sr2 & 0x02) ? 1 : 0);
+    
+    if (qspi_enable_quad(qspi_dev) == RT_EOK)
+    {
+        rt_kprintf("Quad mode enabled\n");
+    }
+    
+    /* 5. 准备测试数据 */
+    rt_kprintf("\n--- Preparing test data ---\n");
+    for (int i = 0; i < QSPI_TEST_SIZE; i++)
+    {
+        qspi_test_data[i] = i & 0xFF;
+    }
+    rt_kprintf("Test data to write (%d bytes):\n", QSPI_TEST_SIZE);
+    for (int i = 0; i < QSPI_TEST_SIZE; i++)
+    {
+        rt_kprintf("%02X ", qspi_test_data[i]);
+        if ((i + 1) % 16 == 0) rt_kprintf("\n");
+    }
+    
+    /* 6. 擦除扇区 */
+    rt_kprintf("\n--- Erasing Sector 0 ---\n");
+    qspi_send_cmd(qspi_dev, 0x06);  /* Write Enable */
+    qspi_write(qspi_dev, 0x20, 0x000000, 1, RT_NULL, 0);  /* Sector Erase */
+    if (qspi_wait_busy(qspi_dev, 3000) == RT_EOK)
+    {
+        rt_kprintf("Sector erase complete\n");
+    }
+    else
+    {
+        rt_kprintf("Sector erase failed!\n");
+        return;
+    }
+    
+    /* 7. 写入数据 */
+    rt_kprintf("\n--- Writing %d bytes to 0x000000 ---\n", QSPI_TEST_SIZE);
+    qspi_send_cmd(qspi_dev, 0x06);  /* Write Enable */
+    qspi_write(qspi_dev, 0x02, 0x000000, 1, qspi_test_data, QSPI_TEST_SIZE);  /* Page Program */
+    if (qspi_wait_busy(qspi_dev, 1000) == RT_EOK)
+    {
+        rt_kprintf("Write complete\n");
+    }
+    else
+    {
+        rt_kprintf("Write failed!\n");
+        return;
+    }
+    
+    /* 8. 单线读取 */
+    rt_kprintf("\n--- Single Line Read (0x03) ---\n");
+    if (qspi_read(qspi_dev, 0x03, 0x000000, 0, 1, qspi_buf_single, QSPI_TEST_SIZE) == QSPI_TEST_SIZE)
+    {
+        rt_kprintf("Single-line read (%d bytes):\n", QSPI_TEST_SIZE);
+        for (int i = 0; i < QSPI_TEST_SIZE; i++)
+        {
+            rt_kprintf("%02X ", qspi_buf_single[i]);
+            if ((i + 1) % 16 == 0) rt_kprintf("\n");
+        }
+    }
+    
+    /* 9. 四线读取 */
+    rt_kprintf("\n--- Quad Line Read (0x6B) ---\n");
+    if (qspi_read(qspi_dev, 0x6B, 0x000000, 8, 4, qspi_buf_quad, QSPI_TEST_SIZE) == QSPI_TEST_SIZE)
+    {
+        rt_kprintf("Quad-line read (%d bytes):\n", QSPI_TEST_SIZE);
+        for (int i = 0; i < QSPI_TEST_SIZE; i++)
+        {
+            rt_kprintf("%02X ", qspi_buf_quad[i]);
+            if ((i + 1) % 16 == 0) rt_kprintf("\n");
+        }
+    }
+    
+    /* 10. 对比验证 */
+    rt_kprintf("\n--- Verify ---\n");
+    if (rt_memcmp(qspi_buf_single, qspi_buf_quad, QSPI_TEST_SIZE) == 0)
+    {
+        rt_kprintf("[OK] Single and Quad read match! (%d bytes)\n", QSPI_TEST_SIZE);
+        if (rt_memcmp(qspi_buf_single, qspi_test_data, QSPI_TEST_SIZE) == 0)
+        {
+            rt_kprintf("[OK] Write/Read verify PASSED!\n");
+        }
+        else
+        {
+            rt_kprintf("[FAIL] Data mismatch!\n");
+        }
+    }
+    else
+    {
+        rt_kprintf("[FAIL] Single and Quad read mismatch!\n");
+    }
+    
+    rt_kprintf("\n=== Test Complete ===\n");
+}
+MSH_CMD_EXPORT(qspi_sample, qspi sample);
+
 #endif

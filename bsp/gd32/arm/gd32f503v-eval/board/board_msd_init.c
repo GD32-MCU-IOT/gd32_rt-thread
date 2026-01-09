@@ -13,6 +13,7 @@
 #include <rtthread.h>
 #include <board.h>
 
+
 #ifdef RT_USING_I2C
 /**
   * @brief  This function initializes the i2c pin.
@@ -133,6 +134,48 @@ void gd32_spi_init(struct gd32_spi *gd32_spi)
 #endif
     default:
         rt_kprintf("invalid SPI peripheral. \r\n");
+        break;
+    }
+}
+#endif
+
+#ifdef RT_USING_QSPI
+/**
+* @brief QSPI Initialization
+* @param gd32_qspi: QSPI BUS
+* @retval None
+*/
+void gd32_qspi_init(struct gd32_qspi_bus *gd32_qspi)
+{
+    switch(gd32_qspi->spi_periph) {
+#ifdef BSP_USING_QSPI
+    case SPI0:
+        /* QSPI GPIO clock */
+        rcu_periph_clock_enable(RCU_GPIOA);
+
+        /* Configure QSPI pins: SCK/MISO/MOSI (AF0) */
+        gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_5);
+        gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_6);
+        gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_7);
+        
+        /* Configure QSPI pins: IO2/IO3 for quad mode (AF5) */
+        gpio_af_set(GPIOA, GPIO_AF_5, GPIO_PIN_2);
+        gpio_af_set(GPIOA, GPIO_AF_5, GPIO_PIN_3);
+
+        gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE,
+                      GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_2 | GPIO_PIN_3);
+        
+        gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_LEVEL3,
+                                GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_2 | GPIO_PIN_3);
+        
+        /* Configure CS pin as GPIO output (software control) */
+        gpio_mode_set(GPIOA, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO_PIN_4);
+        gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_LEVEL3, GPIO_PIN_4);
+        gpio_bit_set(GPIOA, GPIO_PIN_4);
+        break;
+#endif
+    default:
+        rt_kprintf("invalid QSPI peripheral. \r\n");
         break;
     }
 }

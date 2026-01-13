@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2006-2025, RT-Thread Development Team
+ * Copyright (c) 2006-2022, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
- * Date           Author       Notes
- * 2024-01-01     RT-Thread    first version for GD32F50x
- * 2026-01-04     RT-Thread    refactor based on STM32 QSPI driver and GD32 Demo
+ * Date           Author            Notes
+ * 2021-12-20     BruceOu           the first version
  */
 
 #include "drv_qspi.h"
@@ -101,15 +100,8 @@ static rt_err_t gd32_qspi_configure(struct rt_spi_device *device, struct rt_spi_
 
     uint32_t spi_apb_clock;
     uint32_t max_hz = cfg->max_hz;
-    
-    if (bus->spi_periph == SPI1 || bus->spi_periph == SPI2)
-    {
-        spi_apb_clock = rcu_clock_freq_get(CK_APB1);
-    }
-    else
-    {
-        spi_apb_clock = rcu_clock_freq_get(CK_APB2);
-    }
+  
+    spi_apb_clock = rcu_clock_freq_get(CK_APB2);
 
     spi_disable(bus->spi_periph);
     

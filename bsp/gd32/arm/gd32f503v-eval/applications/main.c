@@ -72,13 +72,20 @@ static void pin_irq_sample(void);
 #define QSPI_BUS_NAME    "qspi0"
 #define QSPI_DEVICE_NAME "qspi00"
 #define QSPI_CS_PIN      GET_PIN(A, 4)
-#define QSPI_TEST_SIZE   256  
+#define QSPI_TEST_SIZE   256
 
-struct rt_qspi_device *qspi_dev;
+uint8_t qspi_read_id = 0x9F;
+uint8_t qspi_wren    = 0x06;
+uint8_t qspi_pp      = 0x02;
+uint8_t qspi_read    = 0x03;
+uint8_t qspi_se      = 0x20;
+uint8_t qspi_rdsr1   = 0x05;
+uint8_t qspi_rdsr2   = 0x35;
+uint8_t qspi_wrsr2   = 0x31;
+
+uint8_t qspi_test_data[QSPI_TEST_SIZE];
+uint8_t qspi_buf_single[QSPI_TEST_SIZE];
 rt_uint8_t qspi_id[3];
-rt_uint8_t qspi_test_data[QSPI_TEST_SIZE];
-rt_uint8_t qspi_buf_single[QSPI_TEST_SIZE];
-rt_uint8_t qspi_buf_quad[QSPI_TEST_SIZE];
 
 static void qspi_sample(void);
 #endif
@@ -344,131 +351,104 @@ static void pin_irq_sample(void)
 #endif
 
 #ifdef GD32_QSPI_TEST
+static rt_err_t qspi_enable_quad(struct rt_qspi_device *device)
+{
+    uint8_t sr2, status;
+    uint32_t start = rt_tick_get();
+
+    /* Read SR2, return if QE bit is already set */
+    if (rt_qspi_send_then_recv(device, &qspi_rdsr2, 1, &sr2, 1) != 1) return -RT_ERROR;
+    if (sr2 & 0x02) return RT_EOK;
+
+    /* Write enable, then set QE bit in SR2 */
+    rt_qspi_send(device, &qspi_wren, 1);
+    sr2 |= 0x02;
+    uint8_t cmd[2] = {qspi_wrsr2, sr2};
+    rt_qspi_send(device, cmd, 2);
+
+    /* Wait for WIP bit to clear */
+    while (1)
+    {
+        if (rt_qspi_send_then_recv(device, &qspi_rdsr1, 1, &status, 1) != 1) return -RT_ERROR;
+        if (!(status & 0x01)) return RT_EOK;
+        if ((rt_tick_get() - start) > rt_tick_from_millisecond(1000)) return -RT_ETIMEOUT;
+        rt_thread_mdelay(1);
+    }
+}
+
 static void qspi_sample(void)
 {
-    rt_kprintf("\n=== QSPI Test ===\n");
+    uint8_t erase_cmd[4] = {qspi_se, 0x00, 0x00, 0x00};
+    uint8_t write_cmd[4] = {qspi_pp, 0x00, 0x00, 0x00};
+    uint8_t read_cmd[4] = {qspi_read, 0x00, 0x00, 0x00};
     
+    static struct rt_qspi_device *qspi_dev = RT_NULL;
+    struct rt_qspi_configuration qspi_cfg;
+    
+    for (int i = 0; i < QSPI_TEST_SIZE; i++) {
+        qspi_test_data[i] = i;
+    }
+
     /* Attach QSPI device */
     rt_hw_qspi_device_attach(QSPI_BUS_NAME, QSPI_DEVICE_NAME, QSPI_CS_PIN, 4, RT_NULL, RT_NULL);
-    
-    /* Find QSPI device */
-    qspi_dev = (struct rt_qspi_device *)rt_device_find(QSPI_DEVICE_NAME);
-    if (qspi_dev == RT_NULL)
-    {
-        rt_kprintf("QSPI device not found!\n");
-        return;
-    }
-    rt_kprintf("QSPI device found\n");
-    
-    /* Read Flash ID */
-    rt_kprintf("\n--- Reading Flash ID ---\n");
-    if (qspi_read(qspi_dev, 0x9F, 0, 0, 1, qspi_id, 3) == 3)
-    {
-        rt_kprintf("Flash ID: 0x%02X 0x%02X 0x%02X\n", qspi_id[0], qspi_id[1], qspi_id[2]);
-    }
-    else
-    {
-        rt_kprintf("Read ID failed!\n");
-        return;
-    }
-    
-    /* Enable Quad mode */
-    rt_kprintf("\n--- Enabling Quad Mode ---\n");
-    rt_uint8_t sr2;
-    qspi_read(qspi_dev, 0x35, 0, 0, 1, &sr2, 1);
-    rt_kprintf("SR2 = 0x%02X (QE=%d)\n", sr2, (sr2 & 0x02) ? 1 : 0);
-    
-    if (qspi_enable_quad(qspi_dev) == RT_EOK)
-    {
-        rt_kprintf("Quad mode enabled\n");
-    }
-    
-    /* Prepare test data */
-    rt_kprintf("\n--- Preparing test data ---\n");
-    for (int i = 0; i < QSPI_TEST_SIZE; i++)
-    {
-        qspi_test_data[i] = i & 0xFF;
-    }
-    rt_kprintf("Test data to write (%d bytes):\n", QSPI_TEST_SIZE);
-    for (int i = 0; i < QSPI_TEST_SIZE; i++)
-    {
-        rt_kprintf("%02X ", qspi_test_data[i]);
-        if ((i + 1) % 16 == 0) rt_kprintf("\n");
-    }
-    
-    /* Erase sector */
-    rt_kprintf("\n--- Erasing Sector 0 ---\n");
-    qspi_send_cmd(qspi_dev, 0x06);  /* Write Enable */
-    qspi_write(qspi_dev, 0x20, 0x000000, 1, RT_NULL, 0);  /* Sector Erase */
-    if (qspi_wait_busy(qspi_dev, 3000) == RT_EOK)
-    {
-        rt_kprintf("Sector erase complete\n");
-    }
-    else
-    {
-        rt_kprintf("Sector erase failed!\n");
-        return;
-    }
-    
-    /* Write data */
-    rt_kprintf("\n--- Writing %d bytes to 0x000000 ---\n", QSPI_TEST_SIZE);
-    qspi_send_cmd(qspi_dev, 0x06);  /* Write Enable */
-    qspi_write(qspi_dev, 0x02, 0x000000, 1, qspi_test_data, QSPI_TEST_SIZE);  /* Page Program */
-    if (qspi_wait_busy(qspi_dev, 1000) == RT_EOK)
-    {
-        rt_kprintf("Write complete\n");
-    }
-    else
-    {
-        rt_kprintf("Write failed!\n");
-        return;
-    }
-    
-    /* Single line read */
-    rt_kprintf("\n--- Single Line Read (0x03) ---\n");
-    if (qspi_read(qspi_dev, 0x03, 0x000000, 0, 1, qspi_buf_single, QSPI_TEST_SIZE) == QSPI_TEST_SIZE)
-    {
-        rt_kprintf("Single-line read (%d bytes):\n", QSPI_TEST_SIZE);
-        for (int i = 0; i < QSPI_TEST_SIZE; i++)
-        {
-            rt_kprintf("%02X ", qspi_buf_single[i]);
-            if ((i + 1) % 16 == 0) rt_kprintf("\n");
-        }
-    }
-    
-    /* Quad line read */
-    rt_kprintf("\n--- Quad Line Read (0x6B) ---\n");
-    if (qspi_read(qspi_dev, 0x6B, 0x000000, 8, 4, qspi_buf_quad, QSPI_TEST_SIZE) == QSPI_TEST_SIZE)
-    {
-        rt_kprintf("Quad-line read (%d bytes):\n", QSPI_TEST_SIZE);
-        for (int i = 0; i < QSPI_TEST_SIZE; i++)
-        {
-            rt_kprintf("%02X ", qspi_buf_quad[i]);
-            if ((i + 1) % 16 == 0) rt_kprintf("\n");
-        }
-    }
-    
-    /* Verify */
-    rt_kprintf("\n--- Verify ---\n");
-    if (rt_memcmp(qspi_buf_single, qspi_buf_quad, QSPI_TEST_SIZE) == 0)
-    {
-        rt_kprintf("[OK] Single and Quad read match! (%d bytes)\n", QSPI_TEST_SIZE);
-        if (rt_memcmp(qspi_buf_single, qspi_test_data, QSPI_TEST_SIZE) == 0)
-        {
-            rt_kprintf("[OK] Write/Read verify PASSED!\n");
-        }
-        else
-        {
-            rt_kprintf("[FAIL] Data mismatch!\n");
-        }
-    }
-    else
-    {
-        rt_kprintf("[FAIL] Single and Quad read mismatch!\n");
-    }
-    
-    rt_kprintf("\n=== Test Complete ===\n");
-}
-MSH_CMD_EXPORT(qspi_sample, qspi sample);
 
+    qspi_cfg.parent.data_width = 8;
+    qspi_cfg.parent.mode = RT_SPI_MODE_0 | RT_SPI_MSB;
+    qspi_cfg.parent.max_hz = 50 * 1000 * 1000;  // 50MHz
+    qspi_cfg.qspi_dl_width = 4;
+    qspi_cfg.medium_size = 0;
+    qspi_cfg.ddr_mode = 0;
+
+    qspi_dev = (struct rt_qspi_device *)rt_device_find(QSPI_DEVICE_NAME);
+    if (RT_NULL == qspi_dev)
+    {
+        rt_kprintf("qspi sample run failed! can't find %s device!\n", QSPI_DEVICE_NAME);
+    }
+    
+    /* Configure QSPI device */
+    rt_ssize_t result = rt_spi_configure(&qspi_dev->parent, &qspi_cfg.parent);
+    if (result != RT_EOK)
+    {
+        rt_kprintf("QSPI configure failed: %d\n", result);
+        return;
+    }
+    rt_kprintf("QSPI configured: 50MHz, MODE_0, 4-line\n");
+    
+    /* READ FLASH ID */
+    result = rt_qspi_send_then_recv(qspi_dev, &qspi_read_id, 1, qspi_id, 3);
+    rt_kprintf("use rt_qspi_send_then_recv() read gd25q ID is:%x,%x,%x\n", qspi_id[0], qspi_id[1], qspi_id[2]);
+    
+    /* Enable quad mode */
+    rt_err_t ret = qspi_enable_quad(qspi_dev);
+    rt_kprintf("Enable quad mode: %s\n", ret == RT_EOK ? "OK" : "FAILED");
+    
+    /* WRITE ENABLE */
+    rt_qspi_send(qspi_dev, &qspi_wren, 1);
+    
+    /* ERASE SECTOR */
+    rt_qspi_send(qspi_dev, erase_cmd, 4);
+    rt_thread_mdelay(100);
+    
+    /* WRITE ENABLE */
+    rt_qspi_send(qspi_dev, &qspi_wren, 1);
+    
+    /* WRITE TO PAGE */
+    uint8_t write_buffer[4 + QSPI_TEST_SIZE];
+    memcpy(write_buffer, write_cmd, 4);
+    memcpy(write_buffer + 4, qspi_test_data, QSPI_TEST_SIZE);
+    rt_qspi_send(qspi_dev, write_buffer, 4 + QSPI_TEST_SIZE);
+    rt_thread_mdelay(50);
+    
+    /* READ TO BUFFER */
+    rt_qspi_send_then_recv(qspi_dev, read_cmd, 4, qspi_buf_single, QSPI_TEST_SIZE);
+    rt_thread_mdelay(20);
+
+    if(0 == memcmp(qspi_buf_single, qspi_test_data, QSPI_TEST_SIZE)) {
+        rt_kprintf("qspi flash write and read test success.\r\n");
+    } else {
+        rt_kprintf("qspi flash write and read test failed.\r\n");
+    }
+}
+
+MSH_CMD_EXPORT(qspi_sample, qspi sample);
 #endif

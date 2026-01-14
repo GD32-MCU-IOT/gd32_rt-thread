@@ -331,7 +331,7 @@ rt_err_t rt_hw_qspi_device_attach(const char *bus_name,
                                   void (*exit_qspi_mode)(struct rt_qspi_device *device))
 {
     struct rt_qspi_device *qspi_device = RT_NULL;
-    rt_err_t result = RT_EOK;
+    rt_err_t result;
 
     RT_ASSERT(bus_name != RT_NULL);
     RT_ASSERT(device_name != RT_NULL);
@@ -341,19 +341,22 @@ rt_err_t rt_hw_qspi_device_attach(const char *bus_name,
     if (qspi_device == RT_NULL)
     {
         LOG_E("No memory for QSPI device!");
-        result = -RT_ENOMEM;
-        goto __exit;
+        return -RT_ENOMEM;
     }
 
+    /* Set optional callback functions and line width */
     qspi_device->enter_qspi_mode = enter_qspi_mode;
     qspi_device->exit_qspi_mode = exit_qspi_mode;
     qspi_device->config.qspi_dl_width = data_line_width;
-    qspi_device->config.medium_size = 0;
-    qspi_device->config.ddr_mode = 0;
-    qspi_device->config.parent.data_width = 8;
-    qspi_device->config.parent.mode = RT_SPI_MODE_0 | RT_SPI_MSB;
-    qspi_device->config.parent.max_hz = 2 * 1000 * 1000;
 
+    /* Initialize CS pin before device attach */
+    if (cs_pin != PIN_NONE)
+    {
+        rt_pin_mode(cs_pin, PIN_MODE_OUTPUT);
+        rt_pin_write(cs_pin, PIN_HIGH);
+    }
+
+    /* Attach device to bus */
     result = rt_spi_bus_attach_device_cspin(&qspi_device->parent,
                                             device_name,
                                             bus_name,
@@ -361,42 +364,15 @@ rt_err_t rt_hw_qspi_device_attach(const char *bus_name,
                                             RT_NULL);
     if (result != RT_EOK)
     {
-        goto __exit;
-    }
-
-    if (cs_pin != PIN_NONE)
-    {
-        rt_pin_mode(cs_pin, PIN_MODE_OUTPUT);
-        rt_pin_write(cs_pin, PIN_HIGH);
-    }
-
-    result = rt_spi_configure(&qspi_device->parent, &qspi_device->config.parent);
-    if (result != RT_EOK)
-    {
-        LOG_E("Failed to apply default QSPI configuration");
-        goto __exit;
-    }
-    
-    LOG_I("Default config applied: mode=%d, freq=%dHz, %d-line", 
-          qspi_device->config.parent.mode & (RT_SPI_CPOL | RT_SPI_CPHA),
-          qspi_device->config.parent.max_hz,
-          data_line_width);
-
-__exit:
-    if (result != RT_EOK)
-    {
-        if (qspi_device)
-        {
-            rt_free(qspi_device);
-        }
         LOG_E("Failed to attach QSPI device %s to bus %s", device_name, bus_name);
-    }
-    else
-    {
-        LOG_I("QSPI device %s attached to bus %s successfully", device_name, bus_name);
+        rt_free(qspi_device);
+        return result;
     }
 
-    return result;
+    LOG_D("QSPI device %s attached to bus %s, %d-line (config via rt_spi_configure)", 
+          device_name, bus_name, data_line_width);
+
+    return RT_EOK;
 }
 
 static int rt_hw_qspi_init(void)
@@ -423,106 +399,6 @@ static int rt_hw_qspi_init(void)
 }
 INIT_BOARD_EXPORT(rt_hw_qspi_init);
 
-rt_err_t qspi_send_cmd(struct rt_qspi_device *device, rt_uint8_t cmd)
-{
-    struct rt_qspi_message msg;
-    
-    rt_memset(&msg, 0, sizeof(msg));
-    msg.instruction.content = cmd;
-    msg.instruction.qspi_lines = 1;
-    msg.parent.cs_take = 1;
-    msg.parent.cs_release = 1;
-    
-    rt_qspi_transfer_message(device, &msg);
-    return RT_EOK;
-}
-
-rt_ssize_t qspi_read(struct rt_qspi_device *device, rt_uint8_t cmd, 
-                     rt_uint32_t addr, rt_uint8_t dummy_cycles, rt_uint8_t data_lines,
-                     rt_uint8_t *buf, rt_size_t len)
-{
-    struct rt_qspi_message msg;
-    
-    rt_memset(&msg, 0, sizeof(msg));
-    msg.instruction.content = cmd;
-    msg.instruction.qspi_lines = 1;
-
-    if (cmd != 0x9F && cmd != 0x05 && cmd != 0x35)
-    {
-        msg.address.content = addr;
-        msg.address.size = 24;
-        msg.address.qspi_lines = 1;
-    }
-    
-    msg.dummy_cycles = dummy_cycles;
-    msg.qspi_data_lines = data_lines;
-    msg.parent.recv_buf = buf;
-    msg.parent.length = len;
-    msg.parent.cs_take = 1;
-    msg.parent.cs_release = 1;
-    
-    return rt_qspi_transfer_message(device, &msg);
-}
-
-rt_ssize_t qspi_write(struct rt_qspi_device *device, rt_uint8_t cmd,
-                      rt_uint32_t addr, rt_uint8_t data_lines,
-                      const rt_uint8_t *buf, rt_size_t len)
-{
-    struct rt_qspi_message msg;
-    
-    rt_memset(&msg, 0, sizeof(msg));
-    msg.instruction.content = cmd;
-    msg.instruction.qspi_lines = 1;
-
-    if (cmd == 0x02 || cmd == 0x20 || cmd == 0xD8 || cmd == 0x52)
-    {
-        msg.address.content = addr;
-        msg.address.size = 24;
-        msg.address.qspi_lines = 1;
-    }
-    
-    msg.qspi_data_lines = data_lines;
-    msg.parent.send_buf = buf;
-    msg.parent.length = len;
-    msg.parent.cs_take = 1;
-    msg.parent.cs_release = 1;
-    
-    return rt_qspi_transfer_message(device, &msg);
-}
-
-rt_err_t qspi_wait_busy(struct rt_qspi_device *device, rt_uint32_t timeout_ms)
-{
-    rt_uint32_t start = rt_tick_get();
-    rt_uint8_t status;
-    
-    do {
-        qspi_read(device, 0x05, 0, 0, 1, &status, 1);
-        if ((status & 0x01) == 0)
-            return RT_EOK;
-        
-        rt_thread_mdelay(1);
-        
-        if (timeout_ms > 0 && (rt_tick_get() - start) > rt_tick_from_millisecond(timeout_ms))
-            return -RT_ETIMEOUT;
-    } while (1);
-}
-
-rt_err_t qspi_enable_quad(struct rt_qspi_device *device)
-{
-    rt_uint8_t sr2;
-    
-    qspi_read(device, 0x35, 0, 0, 1, &sr2, 1);
-    
-    if (sr2 & 0x02)
-        return RT_EOK;
-    
-    qspi_send_cmd(device, 0x06);
-    
-    sr2 |= 0x02;
-    qspi_write(device, 0x31, 0, 1, &sr2, 1);
-    
-    return qspi_wait_busy(device, 1000);
-}
 
 #endif /* BSP_USING_QSPI */
 #endif /* RT_USING_QSPI */

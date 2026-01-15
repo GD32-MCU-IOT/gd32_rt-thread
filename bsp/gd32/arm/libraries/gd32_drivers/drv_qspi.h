@@ -28,7 +28,7 @@ struct gd32_qspi_bus
     struct rt_spi_bus *spi_bus;
 };
 
-void gd32_qspi_init(struct gd32_qspi_bus *gd32_qspi);
+void gd32_qspi_gpio_init(struct gd32_qspi_bus *gd32_qspi);
 
 rt_err_t rt_hw_qspi_device_attach(const char *bus_name,
                                   const char *device_name,

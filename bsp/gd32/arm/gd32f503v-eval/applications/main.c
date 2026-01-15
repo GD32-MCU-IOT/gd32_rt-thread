@@ -355,11 +355,23 @@ static rt_err_t qspi_enable_quad(struct rt_qspi_device *device)
     uint32_t start = rt_tick_get();
 
     /* Read SR2, return if QE bit is already set */
-    if (rt_qspi_send_then_recv(device, (uint8_t[]){QSPI_RDSR2}, 1, &sr2, 1) != 1) return -RT_ERROR;
-    if (sr2 & 0x02) return RT_EOK;
+    {
+        uint8_t _cmd = QSPI_RDSR2;
+        if (rt_qspi_send_then_recv(device, &_cmd, 1, &sr2, 1) != 1)
+        {
+            return -RT_ERROR;
+        }
+    }
+    if (sr2 & 0x02)
+    {
+        return RT_EOK;
+    }
 
     /* Write enable, then set QE bit in SR2 */
-    rt_qspi_send(device, (uint8_t[]){QSPI_WREN}, 1);
+    {
+        uint8_t _wren = QSPI_WREN;
+        rt_qspi_send(device, &_wren, 1);
+    }
 
     sr2 |= 0x02;
     uint8_t _cmd2[2] = {QSPI_WRSR2, sr2};
@@ -370,10 +382,19 @@ static rt_err_t qspi_enable_quad(struct rt_qspi_device *device)
     {
         {
             uint8_t _cmd = QSPI_RDSR1;
-            if (rt_qspi_send_then_recv(device, &_cmd, 1, &status, 1) != 1) return -RT_ERROR;
+            if (rt_qspi_send_then_recv(device, &_cmd, 1, &status, 1) != 1)
+            {
+                return -RT_ERROR;
+            }
         }
-        if (!(status & 0x01)) return RT_EOK;
-        if ((rt_tick_get() - start) > rt_tick_from_millisecond(1000)) return -RT_ETIMEOUT;
+        if (!(status & 0x01))
+        {
+            return RT_EOK;
+        }
+        if ((rt_tick_get() - start) > rt_tick_from_millisecond(1000))
+        {
+            return -RT_ETIMEOUT;
+        }
         rt_thread_mdelay(1);
     }
 }
@@ -417,7 +438,10 @@ static void qspi_sample(void)
     rt_kprintf("QSPI configured: 50MHz, MODE_0, 4-line\n");
     
     /* READ FLASH ID */
-    result = rt_qspi_send_then_recv(qspi_dev, (uint8_t[]){QSPI_READ_ID}, 1, qspi_id, 3);
+    {
+        uint8_t _read_id = QSPI_READ_ID;
+        result = rt_qspi_send_then_recv(qspi_dev, &_read_id, 1, qspi_id, 3);
+    }
     rt_kprintf("use rt_qspi_send_then_recv() read gd25q ID is:%x,%x,%x\n", qspi_id[0], qspi_id[1], qspi_id[2]);
     
     /* Enable quad mode */
@@ -425,14 +449,20 @@ static void qspi_sample(void)
     rt_kprintf("Enable quad mode: %s\n", ret == RT_EOK ? "OK" : "FAILED");
     
     /* WRITE ENABLE */
-    rt_qspi_send(qspi_dev, (uint8_t[]){QSPI_WREN}, 1);
+    {
+        uint8_t _wren2 = QSPI_WREN;
+        rt_qspi_send(qspi_dev, &_wren2, 1);
+    }
     
     /* ERASE SECTOR */
     rt_qspi_send(qspi_dev, eaddress, 4);
     rt_thread_mdelay(100);
     
     /* WRITE ENABLE */
-    rt_qspi_send(qspi_dev, (uint8_t[]){QSPI_WREN}, 1);
+    {
+        uint8_t _wren3 = QSPI_WREN;
+        rt_qspi_send(qspi_dev, &_wren3, 1);
+    }
     
     /* WRITE TO PAGE*/
     uint8_t write_buf[4 + QSPI_TEST_SIZE];

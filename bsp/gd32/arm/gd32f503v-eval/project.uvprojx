@@ -337,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>-fno-strict-aliasing</MiscControls>
-              <Define>GD32F503VG, GD32F50X, __CLK_TCK=RT_TICK_PER_SECOND, RT_USING_LIBC, USE_STDPERIPH_DRIVER, __STDC_LIMIT_MACROS, RT_USING_ARMLIBC, __RTTHREAD__</Define>
+              <Define>GD32F503VG, RT_USING_ARMLIBC, GD32F50X, __STDC_LIMIT_MACROS, __RTTHREAD__, RT_USING_LIBC, __CLK_TCK=RT_TICK_PER_SECOND, USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\..\components\drivers\include;..\..\..\..\components\dfs\dfs_v1\include;packages\at24cxx-latest;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\ipc;board;packages\gd32-arm-series-latest\GD32F50x\GD32F50x_standard_peripheral\Include;..\..\..\..\libcpu\arm\common;..\..\..\..\components\net\utest;applications;..\..\..\..\components\libc\posix\io\eventfd;packages\gd32-arm-cmsis-latest\GD32F50x\GD\GD32F50x\Include;packages\gd32-arm-cmsis-latest\GD32F50x;..\..\..\..\components\drivers\smp_call;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\spi;..\..\..\..\components\libc\compilers\common\include;..\libraries\gd32_drivers;..\..\..\..\libcpu\arm\cortex-m33;..\..\..\..\components\drivers\include;..\..\..\..\components\finsh;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\spi\sfud\inc;..\..\..\..\components\drivers\phy;.;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</IncludePath>
+              <IncludePath>.;..\..\..\..\components\drivers\phy;..\libraries\gd32_drivers;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\drivers\spi\sfud\inc;..\..\..\..\components\finsh;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\libc\posix\io\epoll;packages\gd32-arm-cmsis-latest\GD32F50x;..\..\..\..\components\libc\compilers\common\include;packages\gd32-arm-cmsis-latest\GD32F50x\GD\GD32F50x\Include;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\drivers\include;packages\gd32-arm-series-latest\GD32F50x\GD32F50x_standard_peripheral\Include;board;..\..\..\..\components\drivers\include;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\libcpu\arm\cortex-m33;..\..\..\..\components\net\utest;..\..\..\..\components\drivers\include;applications;..\..\..\..\include;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;..\..\..\..\components\drivers\spi;..\..\..\..\components\drivers\smp_call;..\..\..\..\components\drivers\include;packages\at24cxx-latest;..\..\..\..\components\drivers\include;..\..\..\..\libcpu\arm\common</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1955,11 +1955,6 @@
           <GroupName>Finsh</GroupName>
           <Files>
             <File>
-              <FileName>cmd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
-            </File>
-            <File>
               <FileName>shell.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\shell.c</FilePath>
@@ -1970,14 +1965,19 @@
               <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
             </File>
             <File>
-              <FileName>msh_file.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
-            </File>
-            <File>
               <FileName>msh_parse.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
+            </File>
+            <File>
+              <FileName>cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>msh_file.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
             </File>
           </Files>
         </Group>

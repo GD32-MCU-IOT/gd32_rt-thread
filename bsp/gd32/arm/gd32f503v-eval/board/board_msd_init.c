@@ -144,7 +144,7 @@ void gd32_spi_init(struct gd32_spi *gd32_spi)
 * @param gd32_qspi: QSPI BUS
 * @retval None
 */
-void gd32_qspi_init(struct gd32_qspi_bus *gd32_qspi)
+void gd32_qspi_gpio_init(struct gd32_qspi_bus *gd32_qspi)
 {
     switch(gd32_qspi->spi_periph) {
 #ifdef BSP_USING_QSPI

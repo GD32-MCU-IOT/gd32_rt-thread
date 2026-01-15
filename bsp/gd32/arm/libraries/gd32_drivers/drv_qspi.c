@@ -88,7 +88,7 @@ static rt_err_t gd32_qspi_configure(struct rt_spi_device *device, struct rt_spi_
     RT_ASSERT(device != RT_NULL);
     RT_ASSERT(cfg != RT_NULL);
 
-    gd32_qspi_init(bus);
+    gd32_qspi_gpio_init(bus);
 
     if (cfg->data_width > 8)
     {

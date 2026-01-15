@@ -74,18 +74,16 @@ static void pin_irq_sample(void);
 #define QSPI_CS_PIN      GET_PIN(A, 4)
 #define QSPI_TEST_SIZE   256
 
-uint8_t qspi_read_id = 0x9F;
-uint8_t qspi_wren    = 0x06;
-uint8_t qspi_pp      = 0x02;
-uint8_t qspi_read    = 0x03;
-uint8_t qspi_se      = 0x20;
-uint8_t qspi_rdsr1   = 0x05;
-uint8_t qspi_rdsr2   = 0x35;
-uint8_t qspi_wrsr2   = 0x31;
+/* QSPI opcodes */
+#define QSPI_READ_ID   0x9F
+#define QSPI_WREN      0x06
+#define QSPI_RDSR1     0x05
+#define QSPI_RDSR2     0x35
+#define QSPI_WRSR2     0x31
 
+uint8_t qspi_id[3];
 uint8_t qspi_test_data[QSPI_TEST_SIZE];
 uint8_t qspi_buf_single[QSPI_TEST_SIZE];
-rt_uint8_t qspi_id[3];
 
 static void qspi_sample(void);
 #endif
@@ -357,19 +355,23 @@ static rt_err_t qspi_enable_quad(struct rt_qspi_device *device)
     uint32_t start = rt_tick_get();
 
     /* Read SR2, return if QE bit is already set */
-    if (rt_qspi_send_then_recv(device, &qspi_rdsr2, 1, &sr2, 1) != 1) return -RT_ERROR;
+    if (rt_qspi_send_then_recv(device, (uint8_t[]){QSPI_RDSR2}, 1, &sr2, 1) != 1) return -RT_ERROR;
     if (sr2 & 0x02) return RT_EOK;
 
     /* Write enable, then set QE bit in SR2 */
-    rt_qspi_send(device, &qspi_wren, 1);
+    rt_qspi_send(device, (uint8_t[]){QSPI_WREN}, 1);
+
     sr2 |= 0x02;
-    uint8_t cmd[2] = {qspi_wrsr2, sr2};
-    rt_qspi_send(device, cmd, 2);
+    uint8_t _cmd2[2] = {QSPI_WRSR2, sr2};
+    rt_qspi_send(device, _cmd2, 2);
 
     /* Wait for WIP bit to clear */
     while (1)
     {
-        if (rt_qspi_send_then_recv(device, &qspi_rdsr1, 1, &status, 1) != 1) return -RT_ERROR;
+        {
+            uint8_t _cmd = QSPI_RDSR1;
+            if (rt_qspi_send_then_recv(device, &_cmd, 1, &status, 1) != 1) return -RT_ERROR;
+        }
         if (!(status & 0x01)) return RT_EOK;
         if ((rt_tick_get() - start) > rt_tick_from_millisecond(1000)) return -RT_ETIMEOUT;
         rt_thread_mdelay(1);
@@ -378,9 +380,9 @@ static rt_err_t qspi_enable_quad(struct rt_qspi_device *device)
 
 static void qspi_sample(void)
 {
-    uint8_t erase_cmd[4] = {qspi_se, 0x00, 0x00, 0x00};
-    uint8_t write_cmd[4] = {qspi_pp, 0x00, 0x00, 0x00};
-    uint8_t read_cmd[4] = {qspi_read, 0x00, 0x00, 0x00};
+    uint8_t eaddress[4] = {0x20, 0x00, 0x00, 0x00};
+    uint8_t waddress[4] = {0x02, 0x00, 0x00, 0x00};
+    uint8_t raddress[4] = {0x03, 0x00, 0x00, 0x00};
     
     static struct rt_qspi_device *qspi_dev = RT_NULL;
     struct rt_qspi_configuration qspi_cfg;
@@ -415,7 +417,7 @@ static void qspi_sample(void)
     rt_kprintf("QSPI configured: 50MHz, MODE_0, 4-line\n");
     
     /* READ FLASH ID */
-    result = rt_qspi_send_then_recv(qspi_dev, &qspi_read_id, 1, qspi_id, 3);
+    result = rt_qspi_send_then_recv(qspi_dev, (uint8_t[]){QSPI_READ_ID}, 1, qspi_id, 3);
     rt_kprintf("use rt_qspi_send_then_recv() read gd25q ID is:%x,%x,%x\n", qspi_id[0], qspi_id[1], qspi_id[2]);
     
     /* Enable quad mode */
@@ -423,24 +425,24 @@ static void qspi_sample(void)
     rt_kprintf("Enable quad mode: %s\n", ret == RT_EOK ? "OK" : "FAILED");
     
     /* WRITE ENABLE */
-    rt_qspi_send(qspi_dev, &qspi_wren, 1);
+    rt_qspi_send(qspi_dev, (uint8_t[]){QSPI_WREN}, 1);
     
     /* ERASE SECTOR */
-    rt_qspi_send(qspi_dev, erase_cmd, 4);
+    rt_qspi_send(qspi_dev, eaddress, 4);
     rt_thread_mdelay(100);
     
     /* WRITE ENABLE */
-    rt_qspi_send(qspi_dev, &qspi_wren, 1);
+    rt_qspi_send(qspi_dev, (uint8_t[]){QSPI_WREN}, 1);
     
-    /* WRITE TO PAGE */
-    uint8_t write_buffer[4 + QSPI_TEST_SIZE];
-    memcpy(write_buffer, write_cmd, 4);
-    memcpy(write_buffer + 4, qspi_test_data, QSPI_TEST_SIZE);
-    rt_qspi_send(qspi_dev, write_buffer, 4 + QSPI_TEST_SIZE);
+    /* WRITE TO PAGE*/
+    uint8_t write_buf[4 + QSPI_TEST_SIZE];
+    memcpy(write_buf, waddress, 4);
+    memcpy(write_buf + 4, qspi_test_data, QSPI_TEST_SIZE);
+    rt_qspi_send(qspi_dev, write_buf, 4 + QSPI_TEST_SIZE);
     rt_thread_mdelay(50);
     
     /* READ TO BUFFER */
-    rt_qspi_send_then_recv(qspi_dev, read_cmd, 4, qspi_buf_single, QSPI_TEST_SIZE);
+    rt_qspi_send_then_recv(qspi_dev, raddress, 4, qspi_buf_single, QSPI_TEST_SIZE);
     rt_thread_mdelay(20);
 
     if(0 == memcmp(qspi_buf_single, qspi_test_data, QSPI_TEST_SIZE)) {

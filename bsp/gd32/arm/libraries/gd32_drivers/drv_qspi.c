@@ -17,19 +17,17 @@
 
 #include <rtdbg.h>
 
-#ifdef BSP_USING_QSPI
 static struct rt_spi_bus qspi_bus0;
-#endif
-static const struct gd32_qspi_bus gd32_qspi_bus_config[] = {
-#ifdef BSP_USING_QSPI
+
+static const struct gd32_qspi_bus qspi_bus_obj[] = {
     {
         SPI0,
         RCU_SPI0,
         "qspi0",
         &qspi_bus0,
     },
-#endif /* BSP_USING_QSPI */
 };
+#endif /* BSP_USING_QSPI */
 
 static rt_err_t gd32_qspi_configure(struct rt_spi_device *device, struct rt_spi_configuration *cfg);
 static rt_ssize_t gd32_qspi_xfer(struct rt_spi_device *device, struct rt_spi_message *msg);
@@ -323,26 +321,20 @@ static rt_ssize_t gd32_qspi_xfer(struct rt_spi_device *device, struct rt_spi_mes
     return result;
 }
 
-rt_err_t rt_hw_qspi_device_attach(const char *bus_name,
-                                  const char *device_name,
-                                  rt_base_t cs_pin,
-                                  rt_uint8_t data_line_width,
+rt_err_t rt_hw_qspi_device_attach(const char *bus_name, const char *device_name, rt_base_t cs_pin, rt_uint8_t data_line_width,
                                   void (*enter_qspi_mode)(struct rt_qspi_device *device),
                                   void (*exit_qspi_mode)(struct rt_qspi_device *device))
 {
-    struct rt_qspi_device *qspi_device = RT_NULL;
-    rt_err_t result;
-
     RT_ASSERT(bus_name != RT_NULL);
     RT_ASSERT(device_name != RT_NULL);
     RT_ASSERT(data_line_width == 1 || data_line_width == 2 || data_line_width == 4);
-
+    
+    rt_err_t result;
+    struct rt_qspi_device *qspi_device;
+    
+    /* attach the device to qspi bus*/
     qspi_device = (struct rt_qspi_device *)rt_malloc(sizeof(struct rt_qspi_device));
-    if (qspi_device == RT_NULL)
-    {
-        LOG_E("No memory for QSPI device!");
-        return -RT_ENOMEM;
-    }
+    RT_ASSERT(qspi_device != RT_NULL);
 
     /* Set optional callback functions and line width */
     qspi_device->enter_qspi_mode = enter_qspi_mode;
@@ -352,53 +344,43 @@ rt_err_t rt_hw_qspi_device_attach(const char *bus_name,
     /* Initialize CS pin before device attach */
     if (cs_pin != PIN_NONE)
     {
+        /* initialize the cs pin && select the slave*/
         rt_pin_mode(cs_pin, PIN_MODE_OUTPUT);
         rt_pin_write(cs_pin, PIN_HIGH);
     }
 
-    /* Attach device to bus */
-    result = rt_spi_bus_attach_device_cspin(&qspi_device->parent,
-                                            device_name,
-                                            bus_name,
-                                            cs_pin,
-                                            RT_NULL);
+    result = rt_spi_bus_attach_device_cspin(&qspi_device->parent,device_name,bus_name,cs_pin,RT_NULL);
+    
     if (result != RT_EOK)
     {
-        LOG_E("Failed to attach QSPI device %s to bus %s", device_name, bus_name);
-        rt_free(qspi_device);
-        return result;
+        LOG_E("%s attach to %s faild, %d\n", device_name, bus_name, result);
     }
 
-    LOG_D("QSPI device %s attached to bus %s, %d-line (config via rt_spi_configure)", 
-          device_name, bus_name, data_line_width);
+    RT_ASSERT(result == RT_EOK);
 
-    return RT_EOK;
+    LOG_D("%s attach to %s done", device_name, bus_name);
+
+    return result;
 }
 
-static int rt_hw_qspi_init(void)
+int rt_hw_qspi_init(void)
 {
-    rt_err_t result = RT_EOK;
+    int result = 0;
+    int i;
 
-    for (rt_size_t i = 0; i < sizeof(gd32_qspi_bus_config) / sizeof(gd32_qspi_bus_config[0]); i++)
+    for (i = 0; i < sizeof(qspi_bus_obj) / sizeof(qspi_bus_obj[0]); i++)
     {
-        gd32_qspi_bus_config[i].spi_bus->parent.user_data = (void *)&gd32_qspi_bus_config[i];
+        qspi_bus_obj[i].spi_bus->parent.user_data = (void *)&qspi_bus_obj[i];
 
-        result = rt_qspi_bus_register(gd32_qspi_bus_config[i].spi_bus, 
-                                       gd32_qspi_bus_config[i].bus_name, 
-                                       &gd32_qspi_ops);
-        if (result != RT_EOK)
-        {
-            LOG_E("Failed to register QSPI bus %s", gd32_qspi_bus_config[i].bus_name);
-            continue;
-        }
+        result = rt_qspi_bus_register(qspi_bus_obj[i].spi_bus, qspi_bus_obj[i].bus_name, &gd32_qspi_ops);
 
-        LOG_D("%s bus init done", gd32_qspi_bus_config[i].bus_name);
+        RT_ASSERT(result == RT_EOK);
+
+        LOG_D("%s bus init done", qspi_bus_obj[i].bus_name);
     }
 
     return result;
 }
 INIT_BOARD_EXPORT(rt_hw_qspi_init);
 
-
-#endif /* BSP_USING_QSPI */
 #endif /* RT_USING_QSPI */

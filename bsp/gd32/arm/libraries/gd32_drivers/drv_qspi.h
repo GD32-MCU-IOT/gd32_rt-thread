@@ -5,8 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2024-01-01     RT-Thread    first version for GD32F50x
- * 2026-01-04     RT-Thread    refactor based on STM32 QSPI driver and GD32 Demo
+ * 2021-12-20     BruceOu      first implementation
  */
 
 #ifndef __DRV_QSPI_H__

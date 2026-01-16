@@ -14,12 +14,13 @@
 
 #define GD32_I2C_EEPROM_TEST
 
-#define GD32_SPI_TEST
+//#define GD32_SPI_TEST
 
-#define GD32_UART_TEST
+//#define GD32_UART_TEST
 
 #define GD32_GPIO_EXTI_TEST
 
+#define GD32_QSPI_TEST
 
 /* defined the LED pins: LED2 and LED4 */
 #define LED2_PIN    GET_PIN(C, 7)   /* LED2 on PC7 */
@@ -67,6 +68,25 @@ static int uart_sample(int argc, char *argv[]);
 static void pin_irq_sample(void);
 #endif
 
+#ifdef GD32_QSPI_TEST
+#define QSPI_BUS_NAME    "qspi0"
+#define QSPI_DEVICE_NAME "qspi00"
+#define QSPI_CS_PIN      GET_PIN(A, 4)
+#define QSPI_TEST_SIZE   256
+
+/* QSPI opcodes */
+#define QSPI_READ_ID   0x9F
+#define QSPI_WREN      0x06
+#define QSPI_RDSR1     0x05
+#define QSPI_RDSR2     0x35
+#define QSPI_WRSR2     0x31
+
+uint8_t qspi_id[3];
+uint8_t qspi_test_data[QSPI_TEST_SIZE];
+uint8_t qspi_buf_single[QSPI_TEST_SIZE];
+
+static void qspi_sample(void);
+#endif
 int main(void)
 {
     int count = 1;
@@ -98,6 +118,10 @@ int main(void)
 
 #ifdef GD32_GPIO_EXTI_TEST
     pin_irq_sample();
+#endif
+
+#ifdef GD32_QSPI_TEST
+    qspi_sample();
 #endif
 
     while (count++)
@@ -322,4 +346,141 @@ static void pin_irq_sample(void)
 
     rt_pin_irq_enable(TAMPER_PIN, PIN_IRQ_ENABLE);
 }
+#endif
+
+#ifdef GD32_QSPI_TEST
+static rt_err_t qspi_enable_quad(struct rt_qspi_device *device)
+{
+    uint8_t sr2, status;
+    uint32_t start = rt_tick_get();
+
+    /* Read SR2, return if QE bit is already set */
+    {
+        uint8_t _cmd = QSPI_RDSR2;
+        if (rt_qspi_send_then_recv(device, &_cmd, 1, &sr2, 1) != 1)
+        {
+            return -RT_ERROR;
+        }
+    }
+    if (sr2 & 0x02)
+    {
+        return RT_EOK;
+    }
+
+    /* Write enable, then set QE bit in SR2 */
+    {
+        uint8_t _wren = QSPI_WREN;
+        rt_qspi_send(device, &_wren, 1);
+    }
+
+    sr2 |= 0x02;
+    uint8_t _cmd2[2] = {QSPI_WRSR2, sr2};
+    rt_qspi_send(device, _cmd2, 2);
+
+    /* Wait for WIP bit to clear */
+    while (1)
+    {
+        {
+            uint8_t _cmd = QSPI_RDSR1;
+            if (rt_qspi_send_then_recv(device, &_cmd, 1, &status, 1) != 1)
+            {
+                return -RT_ERROR;
+            }
+        }
+        if (!(status & 0x01))
+        {
+            return RT_EOK;
+        }
+        if ((rt_tick_get() - start) > rt_tick_from_millisecond(1000))
+        {
+            return -RT_ETIMEOUT;
+        }
+        rt_thread_mdelay(1);
+    }
+}
+
+static void qspi_sample(void)
+{
+    uint8_t eaddress[4] = {0x20, 0x00, 0x00, 0x00};
+    uint8_t waddress[4] = {0x02, 0x00, 0x00, 0x00};
+    uint8_t raddress[4] = {0x03, 0x00, 0x00, 0x00};
+    
+    static struct rt_qspi_device *qspi_dev = RT_NULL;
+    struct rt_qspi_configuration qspi_cfg;
+    
+    for (int i = 0; i < QSPI_TEST_SIZE; i++) {
+        qspi_test_data[i] = i;
+    }
+
+    /* Attach QSPI device */
+    rt_hw_qspi_device_attach(QSPI_BUS_NAME, QSPI_DEVICE_NAME, QSPI_CS_PIN, 4, RT_NULL, RT_NULL);
+
+    qspi_cfg.parent.data_width = 8;
+    qspi_cfg.parent.mode = RT_SPI_MODE_0 | RT_SPI_MSB;
+    qspi_cfg.parent.max_hz = 50 * 1000 * 1000;  // 50MHz
+    qspi_cfg.qspi_dl_width = 4;
+    qspi_cfg.medium_size = 0;
+    qspi_cfg.ddr_mode = 0;
+
+    qspi_dev = (struct rt_qspi_device *)rt_device_find(QSPI_DEVICE_NAME);
+    if (RT_NULL == qspi_dev)
+    {
+        rt_kprintf("qspi sample run failed! can't find %s device!\n", QSPI_DEVICE_NAME);
+    }
+    
+    /* Configure QSPI device */
+    rt_ssize_t result = rt_spi_configure(&qspi_dev->parent, &qspi_cfg.parent);
+    if (result != RT_EOK)
+    {
+        rt_kprintf("QSPI configure failed: %d\n", result);
+        return;
+    }
+    rt_kprintf("QSPI configured: 50MHz, MODE_0, 4-line\n");
+    
+    /* READ FLASH ID */
+    {
+        uint8_t _read_id = QSPI_READ_ID;
+        result = rt_qspi_send_then_recv(qspi_dev, &_read_id, 1, qspi_id, 3);
+    }
+    rt_kprintf("use rt_qspi_send_then_recv() read gd25q ID is:%x,%x,%x\n", qspi_id[0], qspi_id[1], qspi_id[2]);
+    
+    /* Enable quad mode */
+    rt_err_t ret = qspi_enable_quad(qspi_dev);
+    rt_kprintf("Enable quad mode: %s\n", ret == RT_EOK ? "OK" : "FAILED");
+    
+    /* WRITE ENABLE */
+    {
+        uint8_t _wren2 = QSPI_WREN;
+        rt_qspi_send(qspi_dev, &_wren2, 1);
+    }
+    
+    /* ERASE SECTOR */
+    rt_qspi_send(qspi_dev, eaddress, 4);
+    rt_thread_mdelay(100);
+    
+    /* WRITE ENABLE */
+    {
+        uint8_t _wren3 = QSPI_WREN;
+        rt_qspi_send(qspi_dev, &_wren3, 1);
+    }
+    
+    /* WRITE TO PAGE*/
+    uint8_t write_buf[4 + QSPI_TEST_SIZE];
+    memcpy(write_buf, waddress, 4);
+    memcpy(write_buf + 4, qspi_test_data, QSPI_TEST_SIZE);
+    rt_qspi_send(qspi_dev, write_buf, 4 + QSPI_TEST_SIZE);
+    rt_thread_mdelay(50);
+    
+    /* READ TO BUFFER */
+    rt_qspi_send_then_recv(qspi_dev, raddress, 4, qspi_buf_single, QSPI_TEST_SIZE);
+    rt_thread_mdelay(20);
+
+    if(0 == memcmp(qspi_buf_single, qspi_test_data, QSPI_TEST_SIZE)) {
+        rt_kprintf("qspi flash write and read test success.\r\n");
+    } else {
+        rt_kprintf("qspi flash write and read test failed.\r\n");
+    }
+}
+
+MSH_CMD_EXPORT(qspi_sample, qspi sample);
 #endif

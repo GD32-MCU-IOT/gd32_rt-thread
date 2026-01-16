@@ -242,7 +242,21 @@ menu "On-chip Peripheral Drivers"
                 select BSP_USING_SPI_RX_DMA
                 default n
         endif
+    
+    menuconfig BSP_USING_QSPI
+        bool "Enable QSPI Bus"
+        default n
+        select RT_USING_QSPI
+        if BSP_USING_QSPI
+            config BSP_USING_QSPI0
+                bool "Enable QSPI0"
+                default y
 
+            config BSP_USING_QSPI1
+                bool "Enable QSPI1"
+                default n
+        endif
+                
     menuconfig BSP_USING_I2C
         bool "Enable I2C BUS"
         default n

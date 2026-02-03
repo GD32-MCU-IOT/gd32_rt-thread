@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2025, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -401,7 +401,7 @@ void UART7_IRQHandler(void)
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x)  && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -767,7 +767,7 @@ static const struct gd32_uart uart_obj[] = {
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x)  && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:

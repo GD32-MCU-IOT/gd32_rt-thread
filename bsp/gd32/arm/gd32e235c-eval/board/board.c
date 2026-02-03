@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author         Notes
- * 2025-01-30     RT-Thread      first implementation for GD32E230
+ * 2025-01-30     RT-Thread      first implementation
  */
 #include <stdint.h>
 #include <rthw.h>
@@ -93,4 +93,3 @@ void rt_hw_board_init(void)
 }
 
 /*@}*/
-

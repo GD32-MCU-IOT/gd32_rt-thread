@@ -17,9 +17,10 @@ if os.getenv('RTT_ROOT'):
 # EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
 if  CROSS_TOOL == 'gcc':
     PLATFORM    = 'gcc'
-    EXEC_PATH   = r'/usr/bin'
+    # Use a safe default path that exists; actual compiler path can be provided via RTT_EXEC_PATH
+    EXEC_PATH   = r'C:/Windows/System32'
 elif CROSS_TOOL == 'keil':
-    PLATFORM    = 'armcc'
+    PLATFORM    = 'armclang'
     EXEC_PATH   = r'C:/Keil_v5'
 elif CROSS_TOOL == 'iar':
     PLATFORM = 'iccarm'
@@ -28,7 +29,7 @@ elif CROSS_TOOL == 'iar':
 if os.getenv('RTT_EXEC_PATH'):
     EXEC_PATH = os.getenv('RTT_EXEC_PATH')
 
-BUILD = 'debug'
+BUILD = ''
 
 if PLATFORM == 'gcc':
     # toolchains
@@ -43,7 +44,7 @@ if PLATFORM == 'gcc':
     OBJDUMP = PREFIX + 'objdump'
     OBJCPY = PREFIX + 'objcopy'
 
-    DEVICE = ' -mcpu=cortex-m23 -mthumb -mfloat-abi=soft -ffunction-sections -fdata-sections'
+    DEVICE = ' -mcpu=cortex-m23 -mthumb -ffunction-sections -fdata-sections'
     CFLAGS = DEVICE + ' -Dgcc -DGD32E23X'
     AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb '
     LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread.map,-cref,-u,Reset_Handler -T board/linker_scripts/link.ld'
@@ -60,6 +61,39 @@ if PLATFORM == 'gcc':
     CXXFLAGS = CFLAGS 
 
     POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
+
+elif PLATFORM == 'armclang':
+    # toolchains
+    CC = 'armclang'
+    CXX = 'armclang'
+    AS = 'armasm'
+    AR = 'armar'
+    LINK = 'armlink'
+    TARGET_EXT = 'axf'
+
+    DEVICE = ' --cpu Cortex-M23 '
+    CFLAGS = ' --target=arm-arm-none-eabi -mcpu=cortex-m23 '
+    CFLAGS += ' -c -fno-rtti -funsigned-char -fshort-enums -fshort-wchar '
+    CFLAGS += ' -gdwarf-3 -ffunction-sections '
+    AFLAGS = DEVICE + ' --apcs=interwork '
+    LFLAGS = DEVICE + ' --info sizes --info totals --info unused --info veneers '
+    LFLAGS += ' --list rt-thread.map '
+    LFLAGS += r' --strict --scatter "board\linker_scripts\link.sct" '
+    CFLAGS += ' -I' + EXEC_PATH + '/ARM/ARMCLANG/include'
+    LFLAGS += ' --libpath=' + EXEC_PATH + '/ARM/ARMCLANG/lib'
+
+    EXEC_PATH += '/ARM/ARMCLANG/bin/'
+
+    if BUILD == 'debug':
+        CFLAGS += ' -g -O1' # armclang recommend
+        AFLAGS += ' -g'
+    else:
+        CFLAGS += ' -O2'
+        
+    CXXFLAGS = CFLAGS
+    CFLAGS += ' -std=c99'
+
+    POST_ACTION = 'fromelf --bin $TARGET --output rtthread.bin \nfromelf -z $TARGET'
 
 elif PLATFORM == 'armcc':
     # toolchains
@@ -86,7 +120,7 @@ elif PLATFORM == 'armcc':
         CFLAGS += ' -g -O0'
         AFLAGS += ' -g'
     else:
-        CFLAGS += ' -O2'
+        CFLAGS += ' -O3'
 
     CXXFLAGS = CFLAGS 
     CFLAGS += ' -std=c99'

@@ -11,6 +11,23 @@
 
 #ifdef RT_USING_SPI
 
+/* GD32M53x has different SPI API, SPI driver needs adaptation */
+#if defined(SOC_SERIES_GD32M53x)
+#include "gd32m53x_spi.h"
+
+#define SPI0                            SPI
+#define RCU_SPI0                        RCU_SPI
+
+#define spi_i2s_flag_get(periph, flag)          spi_flag_get(flag)
+#define spi_i2s_data_transmit(periph, data)     spi_data_transmit(data)
+#define spi_i2s_data_receive(periph)            spi_data_receive()
+#define spi_crc_off(periph)                     spi_crc_off()
+#define spi_init(periph, init_struct)           spi_init(init_struct)
+#define spi_enable(periph)                      spi_enable()
+#define spi_disable(periph)                     spi_disable()
+
+#endif /* SOC_SERIES_GD32M53x */
+
 #if defined(BSP_USING_SPI0) || defined(BSP_USING_SPI1) || defined(BSP_USING_SPI2) || defined(BSP_USING_SPI3) || defined(BSP_USING_SPI4) || defined(BSP_USING_SPI5)
 #define LOG_TAG              "drv.spi"
 
@@ -263,7 +280,7 @@ static struct rt_spi_ops gd32_spi_ops =
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32M53x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -362,7 +379,7 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
         LOG_D("CK_APB2 freq: %d\n", rcu_clock_freq_get(CK_APB2));
         LOG_D("max   freq: %d\n", max_hz);
 
-        #if defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32L23x  || (defined SOC_SERIES_GD32F3x0)
+        #if defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32L23x  || (defined SOC_SERIES_GD32F3x0) || defined(SOC_SERIES_GD32M53x)
         spi_src = spi_periph == SPI0? CK_APB2:CK_APB1;
         #else
         if (spi_periph == SPI1 || spi_periph == SPI2)
@@ -690,4 +707,3 @@ INIT_BOARD_EXPORT(rt_hw_spi_init);
 
 #endif /* BSP_USING_SPI0 || BSP_USING_SPI1 || BSP_USING_SPI2 || BSP_USING_SPI3 || BSP_USING_SPI4 || BSP_USING_SPI5 */
 #endif /* RT_USING_SPI */
-

@@ -49,6 +49,8 @@ extern "C" {
 #include "gd32h75e_gpio.h"
 #elif defined SOC_SERIES_GD32C11x
 #include "gd32c11x_gpio.h"
+#elif defined SOC_SERIES_GD32M53x
+#include "gd32m53x_gpio.h"
 #endif
 
 #define __GD32_PORT(port)  GPIO##port
@@ -59,6 +61,12 @@ extern "C" {
                                     GPIO##port, GPIO_PIN_##pin, \
                                     EXTI_SOURCE_GPIO##port,     \
                                     EXTI_SOURCE_PIN##pin,       \
+                                    EXTI_##pin}
+#elif defined SOC_SERIES_GD32M53x
+#define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,      \
+                                    GPIO##port, GPIO_PIN_##pin, \
+                                    0,                          \
+                                    0,                          \
                                     EXTI_##pin}
 #else
 #define GD32_PIN(index, port, pin) {index, RCU_GPIO##port,        \

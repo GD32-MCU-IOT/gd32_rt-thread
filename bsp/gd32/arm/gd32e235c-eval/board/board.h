@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author         Notes
- * 2025-01-30     RT-Thread      first implementation for GD32E230
+ * 2025-01-30     RT-Thread      first implementation
  */
 #ifndef __BOARD_H__
 #define __BOARD_H__
@@ -29,9 +29,9 @@
 #include "drv_hard_i2c.h"
 #endif
 
-/* <o> Internal SRAM memory size[Kbytes] <8> */
+/* <o> Internal SRAM memory size[Kbytes] <8-16> */
 /* <i>Default: 8 */
-/* GD32E230C8T6: 64KB Flash, 8KB SRAM */
+/* GD32E235C8T6: 64KB Flash, 8KB SRAM */
 #define GD32_SRAM_SIZE         8
 #define GD32_SRAM_END          (0x20000000 + GD32_SRAM_SIZE * 1024)
 
@@ -41,7 +41,7 @@ extern int Image$$RW_IRAM1$$ZI$$Limit;
 #elif __ICCARM__
 #pragma section="HEAP"
 #define HEAP_BEGIN    (__segment_end("HEAP"))
-#else /* GCC */
+#else
 extern int __bss_end;
 #define HEAP_BEGIN    (&__bss_end)
 #endif
@@ -49,4 +49,3 @@ extern int __bss_end;
 #define HEAP_END          GD32_SRAM_END
 
 #endif
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2024, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -14,25 +14,20 @@
 
 #define GD32_I2C_EEPROM_TEST
 
-/* Note: The e517z eval board not support SPI flash, if you want to test this function,
- *       please connect the SPI to SPI flash.
- */
-#define GD32_SPI_TEST
-
 #define GD32_UART_TEST
 
 #define GD32_GPIO_EXTI_TEST
 
 
-/* defined the LED pins: LED1 and LED4 */
-#define LED1_PIN    GET_PIN(G, 10)   /* LED1 on PG10 */
-#define LED2_PIN    GET_PIN(G, 11)   /* LED2 on PG11 */
-#define LED3_PIN    GET_PIN(G, 12)   /* LED2 on PG12 */
-#define LED4_PIN    GET_PIN(G, 13)   /* LED2 on PG13 */
+/* defined the LED pins: LED1 to LED4 */
+#define LED1_PIN    GET_PIN(A, 8)   /* LED1 on PA8 */
+#define LED2_PIN    GET_PIN(A, 11)  /* LED2 on PA11 */
+#define LED3_PIN    GET_PIN(A, 12)  /* LED3 on PA12 */
+#define LED4_PIN    GET_PIN(A, 15)  /* LED4 on PA15 */
 
 #ifdef GD32_I2C_EEPROM_TEST
 #include "at24cxx.h"
-#define BUFFER_SIZE    256
+#define BUFFER_SIZE    128
 #define I2C_SERIAL     "hwi2c0"
 rt_uint8_t buf[16];
 rt_uint8_t i2c_buffer_write[BUFFER_SIZE];
@@ -40,24 +35,8 @@ rt_uint8_t i2c_buffer_read[BUFFER_SIZE];
 uint8_t i2c_24c02_test(void);
 #endif
 
-#ifdef GD32_SPI_TEST
-#define BUS_NAME     "spi1"
-#define SPI_NAME     "spi00"
-
-uint8_t send_id = 0x9F;
-uint8_t WREN = 0x06;
-uint8_t WRITE = 0x02;
-uint8_t READ = 0x03;
-uint8_t SE = 0x20;
-uint8_t recei_id[4] = {0};
-uint8_t  tx_buffer[200];
-uint8_t  rx_buffer[200];
-
-static void spi_sample(void);
-#endif
-
 #ifdef GD32_UART_TEST
-#define SAMPLE_UART_NAME    "uart1"
+#define SAMPLE_UART_NAME    "uart0"
 static struct rt_semaphore  rx_sem;
 static rt_device_t serial;
 
@@ -81,7 +60,7 @@ int main(void)
     rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
 
-    rt_kprintf("Hello GD32E517Z!\n");
+    rt_kprintf("Hello GD32E235C!\n");
     rt_kprintf("RT-Thread BSP adaptation successful!\n");
     rt_kprintf("System Clock: %d Hz\n", SystemCoreClock);
 
@@ -91,10 +70,6 @@ int main(void)
     if(i2c_24c02_test() != 0){
         rt_kprintf("I2C-AT24C02 test passed!\n\r");
     }
-#endif
-
-#ifdef GD32_SPI_TEST
-    spi_sample();
 #endif
 
 #ifdef GD32_UART_TEST
@@ -139,72 +114,6 @@ int main(void)
 
     return RT_EOK;
 }
-
-
-#ifdef GD32_SPI_TEST
-
-static void spi_sample(void)
-{
-
-    uint8_t address[4] = {0x20,00,00,04};
-    uint8_t waddress[4] = {0x02,00,00,04};
-    uint8_t raddress[4] = {0x03,00,00,04};
-    
-    static struct rt_spi_device *spi_dev = RT_NULL;
-    struct rt_spi_configuration cfg;
-    
-    for(int i = 0; i < 200; i ++){
-            tx_buffer[i] = i;
-        }
-    
-    spi_dev = (struct rt_spi_device *)rt_malloc(sizeof(struct rt_spi_device));
-    rt_hw_spi_device_attach(BUS_NAME, SPI_NAME, GET_PIN(D, 3));
-    rt_spi_bus_attach_device_cspin(spi_dev, SPI_NAME, BUS_NAME, GET_PIN(A, 4), RT_NULL);
-
-    cfg.data_width = 8;
-    cfg.mode   = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
-    cfg.max_hz =  2 *1000 *1000;
-
-    spi_dev = (struct rt_spi_device *)rt_device_find(SPI_NAME);
-    spi_dev->bus->owner = spi_dev;
-    if (RT_NULL == spi_dev)
-    {
-        rt_kprintf("spi sample run failed! can't find %s device!\n", SPI_NAME);
-    }
-    rt_spi_configure(spi_dev, &cfg);
-
-    /* READ FLASH ID */
-    rt_spi_send_then_recv((struct rt_spi_device *)spi_dev, (uint8_t *)&send_id, 1,(uint8_t *)recei_id, 3);
-    rt_kprintf("use rt_spi_transfer_message() read gd25q ID is:%x,%x,%x\n", recei_id[0], recei_id[1],recei_id[2]);
-
-    /* WRITE ENABLE */
-    rt_spi_transfer((struct rt_spi_device *)spi_dev, (uint8_t *)&WREN,(uint8_t *)recei_id, 1);
-
-    /* ERASE SECTOR */
-    rt_spi_transfer((struct rt_spi_device *)spi_dev, (uint8_t *)address,(uint8_t *)recei_id, 4);
-    rt_thread_mdelay(100);
-
-    /* WRITE ENABLE */
-    rt_spi_transfer((struct rt_spi_device *)spi_dev, (uint8_t *)&WREN,(uint8_t *)recei_id, 1);
-
-    /* WRITE TO PAGE */
-    rt_spi_send_then_send((struct rt_spi_device *)spi_dev, (uint8_t *)waddress, 4,(uint8_t *)tx_buffer, 200);
-    rt_thread_mdelay(50);
-
-    /* READ TO BUFFER */
-    rt_spi_send_then_recv((struct rt_spi_device *)spi_dev, (uint8_t *)raddress, 4,(uint8_t *)rx_buffer, 200);
-    rt_thread_mdelay(20);
-
-    if(0 == memcmp(rx_buffer, tx_buffer, 200)) {
-        rt_kprintf("spi flash write and read test success.\r\n");
-    } else {
-        rt_kprintf("spi flash write and read test failed.\r\n");
-    }
-
-}
-
-MSH_CMD_EXPORT(spi_sample, dspi_sample);
-#endif
 
 #ifdef GD32_I2C_EEPROM_TEST
 
@@ -297,7 +206,7 @@ static int uart_sample(int argc, char *argv[])
     rt_device_set_rx_indicate(serial, uart_input);
     rt_device_write(serial, 0, str, (sizeof(str) - 1));
 
-    rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 1024, 25, 10);
+    rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 256, 25, 10);
 
     if (thread != RT_NULL) {
         rt_thread_startup(thread);

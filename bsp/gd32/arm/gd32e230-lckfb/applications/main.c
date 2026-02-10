@@ -1,100 +1,182 @@
 /*
- * Copyright (c) 2006-2025, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2025-07-28     Yunkun Huang    Init Project
  */
 
 #include <rtthread.h>
 #include <rtdevice.h>
 #include <board.h>
+#include <string.h>
+
+#define GD32_UART_TEST
+
+#define GD32_GPIO_EXTI_TEST
 
 
-#define LED_PIN BSP_LED_PIN
+/* defined the LED pins: LED1 to LED4 */
+#define LED1_PIN    GET_PIN(A, 8)   /* LED1 on PA8 */
+#define LED2_PIN    GET_PIN(A, 11)  /* LED2 on PA11 */
+#define LED3_PIN    GET_PIN(A, 12)  /* LED3 on PA12 */
+#define LED4_PIN    GET_PIN(A, 15)  /* LED4 on PA15 */
 
+#ifdef GD32_UART_TEST
+#define SAMPLE_UART_NAME    "uart0"
+static struct rt_semaphore  rx_sem;
+static rt_device_t serial;
 
-static void led_blink_thread_entry(void *parameter)
-{
-    rt_pin_mode(LED_PIN, PIN_MODE_OUTPUT);
+static int uart_sample(int argc, char *argv[]);
+#endif
 
-    rt_kprintf("LED blink thread started.\n");
+#ifdef GD32_GPIO_EXTI_TEST
+#define WAKEUP_PIN_NUM   GET_PIN(A, 0)
+#define TAMPER_PIN       GET_PIN(C, 13)
 
-    while (1)
-    {
-        rt_pin_write(LED_PIN, PIN_HIGH);
-        rt_thread_mdelay(500);
-
-        rt_pin_write(LED_PIN, PIN_LOW);
-        rt_thread_mdelay(500);
-    }
-}
-
-#define UART_DEVICE_NAME "uart0"
-
-static void uart_send_thread_entry(void *parameter)
-{
-    rt_device_t console_dev;
-    char msg[] = "hello rt-thread\r\n";
-
-    console_dev = rt_console_get_device();
-
-    if (!console_dev)
-    {
-        rt_kprintf("Failed to get console device.\n");
-        return;
-    }
-
-    rt_kprintf("UART send thread started. Will send message every 2 seconds.\n");
-
-    while (1)
-    {
-        rt_device_write(console_dev, 0, msg, (sizeof(msg) - 1));
-        rt_thread_mdelay(2000);
-    }
-}
-
+static void pin_irq_sample(void);
+#endif
 
 int main(void)
 {
-    rt_thread_t led_tid = RT_NULL;
-    rt_thread_t uart_tid = RT_NULL;
+    int count = 1;
 
-    led_tid = rt_thread_create("led_blink",
-                               led_blink_thread_entry,
-                               RT_NULL,
-                               256,
-                               20,
-                               10);
+    /* set LED pin mode to output */
+    rt_pin_mode(LED1_PIN, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
 
-    if (led_tid != RT_NULL)
+    rt_kprintf("Hello GD32E230!\n");
+    rt_kprintf("RT-Thread BSP adaptation successful!\n");
+    rt_kprintf("System Clock: %d Hz\n", SystemCoreClock);
+
+#ifdef GD32_UART_TEST
+    uart_sample(0, 0);
+#endif
+
+#ifdef GD32_GPIO_EXTI_TEST
+    pin_irq_sample();
+#endif
+
+    while (count++)
     {
-        rt_thread_startup(led_tid);
-    }
-    else
-    {
-        rt_kprintf("Failed to create led_blink thread.\n");
+        /* turn on LED1 */
+        rt_pin_write(LED1_PIN, PIN_HIGH);
+        rt_thread_mdelay(500);
+        
+        /* turn off LED1 */
+        rt_pin_write(LED1_PIN, PIN_LOW);
+        
+        /* turn on LED2 */
+        rt_pin_write(LED2_PIN, PIN_HIGH);
+        rt_thread_mdelay(500);
+        
+        /* turn off LED2 */
+        rt_pin_write(LED2_PIN, PIN_LOW);
+        
+        /* turn on LED3 */
+        rt_pin_write(LED3_PIN, PIN_HIGH);
+        rt_thread_mdelay(500);
+        
+        /* turn off LED3 */
+        rt_pin_write(LED3_PIN, PIN_LOW);
+        
+        /* turn on LED4 */
+        rt_pin_write(LED4_PIN, PIN_HIGH);
+        rt_thread_mdelay(500);
+
+        /* turn off LED4 */
+        rt_pin_write(LED4_PIN, PIN_LOW);
+        
     }
 
-    uart_tid = rt_thread_create("uart_send",
-                                uart_send_thread_entry,
-                                RT_NULL,
-                                512,
-                                21,
-                                10);
-
-    if (uart_tid != RT_NULL)
-    {
-        rt_kprintf("uart_send thread created successfully. Starting it up...\n");
-        rt_thread_startup(uart_tid);
-    }
-    else
-    {
-        rt_kprintf("!!! FAILED to create uart_send thread. Not enough memory?\n");
-    }
-
-    return 0;
+    return RT_EOK;
 }
 
+#ifdef GD32_UART_TEST
+/* receive callback */
+static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
+{
+    rt_sem_release(&rx_sem);
+
+    return RT_EOK;
+}
+
+static void serial_thread_entry(void *parameter)
+{
+    char ch;
+
+    while (1) {
+        while (rt_device_read(serial, -1, &ch, 1) != 1) {
+            rt_sem_take(&rx_sem, RT_WAITING_FOREVER);
+        }
+
+        /* echothe recived ch */
+        rt_device_write(serial, 0, &ch, 1);
+    }
+}
+
+static int uart_sample(int argc, char *argv[])
+{
+    rt_err_t ret = RT_EOK;
+    char uart_name[RT_NAME_MAX];
+    char str[] = "hello RT-Thread!\r\n";
+
+    if (argc == 2) {
+        rt_strncpy(uart_name, argv[1], RT_NAME_MAX);
+    } else {
+        rt_strncpy(uart_name, SAMPLE_UART_NAME, RT_NAME_MAX);
+    }
+
+    serial = rt_device_find(uart_name);
+    if (!serial) {
+        rt_kprintf("find %s failed!\n", uart_name);
+        return RT_ERROR;
+    }
+
+    rt_sem_init(&rx_sem, "rx_sem", 0, RT_IPC_FLAG_FIFO);
+    rt_device_open(serial, RT_DEVICE_FLAG_INT_RX);
+    rt_device_set_rx_indicate(serial, uart_input);
+    rt_device_write(serial, 0, str, (sizeof(str) - 1));
+
+    rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 256, 25, 10);
+
+    if (thread != RT_NULL) {
+        rt_thread_startup(thread);
+    } else {
+        ret = RT_ERROR;
+    }
+
+    return ret;
+}
+#endif
+
+#ifdef GD32_GPIO_EXTI_TEST
+
+void wakeup_key_pin_cb(void *args)
+{
+    rt_kprintf("Wakeup key pin pressed!\n");
+}
+
+void tamper_key_pin_cb(void *args)
+{
+    rt_kprintf("Tamper key pin pressed!\n");
+}
+
+static void pin_irq_sample(void)
+{
+    /* Wakeup key interrupt */
+    rt_pin_mode(WAKEUP_PIN_NUM, PIN_MODE_INPUT_PULLUP);
+    rt_pin_attach_irq(WAKEUP_PIN_NUM, PIN_IRQ_MODE_FALLING, wakeup_key_pin_cb, RT_NULL);
+
+    rt_pin_irq_enable(WAKEUP_PIN_NUM, PIN_IRQ_ENABLE);
+
+    /* Tamper key interrupt */
+    rt_pin_mode(TAMPER_PIN, PIN_MODE_INPUT_PULLUP);
+    rt_pin_attach_irq(TAMPER_PIN, PIN_IRQ_MODE_FALLING, tamper_key_pin_cb, RT_NULL);
+
+    rt_pin_irq_enable(TAMPER_PIN, PIN_IRQ_ENABLE);
+}
+#endif

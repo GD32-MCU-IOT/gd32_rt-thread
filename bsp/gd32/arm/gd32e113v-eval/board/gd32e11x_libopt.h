@@ -2,11 +2,11 @@
     \file    gd32e11x_libopt.h
     \brief   library optional for gd32e11x
 
-    \version 2024-01-01, V1.0.0, firmware for GD32E11x
+    \version 2026-01-01, V1.0.0, firmware for GD32E11x
 */
 
 /*
-    Copyright (c) 2024, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:

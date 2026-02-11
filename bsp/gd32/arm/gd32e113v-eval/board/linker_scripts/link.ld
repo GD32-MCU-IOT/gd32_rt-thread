@@ -1,6 +1,6 @@
 /*
  * linker script for GD32E11x with GNU ld
- * RT-Thread 2024-01-01
+ * RT-Thread 2026-01-01
  */
 
 /* Program Entry, set to mark it as "used" and avoid gc */

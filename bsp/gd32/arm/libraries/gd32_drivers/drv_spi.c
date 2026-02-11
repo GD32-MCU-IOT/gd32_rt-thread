@@ -37,7 +37,7 @@ static struct rt_spi_bus spi_bus5;
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32H77x)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -263,7 +263,7 @@ static struct rt_spi_ops gd32_spi_ops =
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32H77x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -277,7 +277,8 @@ static void gd32_spi_init(struct gd32_spi *gd32_spi)
     rcu_periph_clock_enable(gd32_spi->miso_gpio_clk);
     rcu_periph_clock_enable(gd32_spi->mosi_gpio_clk);
 
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx) || (defined SOC_SERIES_GD32E23x)
+#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx) \
+ || defined (SOC_SERIES_GD32E23x)
     /*GPIO pin configuration*/
     gpio_af_set(gd32_spi->sck_spi_port, gd32_spi->alt_func_num, gd32_spi->sck_pin);
     gpio_af_set(gd32_spi->miso_spi_port, gd32_spi->alt_func_num, gd32_spi->miso_pin);
@@ -324,7 +325,7 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
     /* Init SPI */
     gd32_spi_init(spi_device);
 
-#if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E)
+#if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
     /* data_width */
     if(configuration->data_width >=4 && configuration->data_width <= 32)
     {
@@ -445,7 +446,7 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
 #endif
     spi_crc_off(spi_periph);
 
-#if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E)
+#if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
     /* enable SPI byte access */
     spi_byte_access_enable(spi_periph);
     /* enable SPI NSS output */
@@ -514,7 +515,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
 
                 /* Todo: replace register read/write by gd32f4 lib */
                 /* Wait until the transmit buffer is empty */
-                #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E)
+                #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
                 spi_master_transfer_start(spi_periph, SPI_TRANS_START);
                 while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_TP));
                 #else
@@ -524,7 +525,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 spi_i2s_data_transmit(spi_periph, data);
 
                 /* Wait until a data is received */
-                #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E)
+                #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
                 while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RP));
                 #else
                 while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RBNE));
@@ -555,7 +556,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 }
 
                 /* Wait until the transmit buffer is empty */
-                #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E)
+                #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
                 spi_master_transfer_start(spi_periph, SPI_TRANS_START);
                 while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_TP));
                 #else
@@ -565,7 +566,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 spi_i2s_data_transmit(spi_periph, data);
 
                 /* Wait until a data is received */
-                #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E)
+                #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
                 while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RP));
                 #else
                 while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RBNE));
@@ -579,7 +580,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 }
             }
         }
-        #if defined SOC_SERIES_GD32H7xx || defined (SOC_SERIES_GD32H75E)
+        #if defined SOC_SERIES_GD32H7xx || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
         else if(config->data_width <= 32)
         {
             const rt_uint32_t * send_ptr = message->send_buf;

@@ -14,13 +14,16 @@
 #include <string.h>
 
 /* Test feature switches - comment out to disable */
- #define GD32_I2C_EEPROM_TEST
- #define GD32_SPI_TEST
- #define GD32_GPIO_EXTI_TEST
+#define GD32_I2C_EEPROM_TEST
+#define GD32_SPI_TEST
+#define GD32_UART_TEST
+#define GD32_GPIO_EXTI_TEST
 
 /* defined the LED pins according to schematic */
 #define LED1_PIN    GET_PIN(C, 0)   /* LED1 on PC0 */
 #define LED2_PIN    GET_PIN(C, 2)   /* LED2 on PC2 */
+#define LED3_PIN    GET_PIN(E, 0)   /* LED3 on PE0 */
+#define LED4_PIN    GET_PIN(E, 1)   /* LED4 on PE1 */
 
 #ifdef GD32_GPIO_EXTI_TEST
 #define WAKEUP_PIN_NUM   GET_PIN(A, 0)
@@ -50,6 +53,13 @@ static uint8_t rx_buffer[200];
 static void spi_sample(void);
 #endif
 
+#ifdef GD32_UART_TEST
+#define SAMPLE_UART_NAME    "uart1"
+static struct rt_semaphore rx_sem;
+static rt_device_t serial;
+static int uart_sample(int argc, char *argv[]);
+#endif
+
 #ifdef GD32_GPIO_EXTI_TEST
 static void pin_irq_sample(void);
 #endif
@@ -59,6 +69,8 @@ int main(void)
     /* set LED pin mode to output */
     rt_pin_mode(LED1_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
+    rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
 
     rt_kprintf("Hello GD32E113V-EVAL!\n");
     rt_kprintf("RT-Thread BSP adaptation successful!\n");
@@ -79,6 +91,11 @@ int main(void)
     spi_sample();
 #endif
 
+#ifdef GD32_UART_TEST
+    rt_kprintf("\n--- UART Test ---\n");
+    uart_sample(0, 0);
+#endif
+
 #ifdef GD32_GPIO_EXTI_TEST
     rt_kprintf("\n--- GPIO EXTI Test ---\n");
     pin_irq_sample();
@@ -88,17 +105,25 @@ int main(void)
     {
         /* turn on LED1 */
         rt_pin_write(LED1_PIN, PIN_HIGH);
-        rt_thread_mdelay(500);
+        rt_thread_mdelay(250);
         
-        /* turn off LED1 */
+        /* turn off LED1, turn on LED2 */
         rt_pin_write(LED1_PIN, PIN_LOW);
-        
-        /* turn on LED2 */
         rt_pin_write(LED2_PIN, PIN_HIGH);
-        rt_thread_mdelay(500);
+        rt_thread_mdelay(250);
         
-        /* turn off LED2 */
+        /* turn off LED2, turn on LED3 */
         rt_pin_write(LED2_PIN, PIN_LOW);
+        rt_pin_write(LED3_PIN, PIN_HIGH);
+        rt_thread_mdelay(250);
+        
+        /* turn off LED3, turn on LED4 */
+        rt_pin_write(LED3_PIN, PIN_LOW);
+        rt_pin_write(LED4_PIN, PIN_HIGH);
+        rt_thread_mdelay(250);
+        
+        /* turn off LED4 */
+        rt_pin_write(LED4_PIN, PIN_LOW);
     }
 
     return RT_EOK;
@@ -222,6 +247,72 @@ static void spi_sample(void)
 }
 
 MSH_CMD_EXPORT(spi_sample, SPI Flash test sample);
+#endif
+
+#ifdef GD32_UART_TEST
+/**
+ * @brief UART receive callback
+ */
+static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
+{
+    rt_sem_release(&rx_sem);
+    return RT_EOK;
+}
+
+/**
+ * @brief UART receive thread entry
+ */
+static void serial_thread_entry(void *parameter)
+{
+    char ch;
+
+    while (1) {
+        while (rt_device_read(serial, -1, &ch, 1) != 1) {
+            rt_sem_take(&rx_sem, RT_WAITING_FOREVER);
+        }
+        /* echo the received character */
+        rt_device_write(serial, 0, &ch, 1);
+    }
+}
+
+/**
+ * @brief UART echo test sample
+ */
+static int uart_sample(int argc, char *argv[])
+{
+    rt_err_t ret = RT_EOK;
+    char uart_name[RT_NAME_MAX];
+    char str[] = "Hello RT-Thread UART Test!\r\n";
+
+    if (argc == 2) {
+        rt_strncpy(uart_name, argv[1], RT_NAME_MAX);
+    } else {
+        rt_strncpy(uart_name, SAMPLE_UART_NAME, RT_NAME_MAX);
+    }
+
+    serial = rt_device_find(uart_name);
+    if (!serial) {
+        rt_kprintf("UART device %s not found!\n", uart_name);
+        return RT_ERROR;
+    }
+
+    rt_sem_init(&rx_sem, "rx_sem", 0, RT_IPC_FLAG_FIFO);
+    rt_device_open(serial, RT_DEVICE_FLAG_INT_RX);
+    rt_device_set_rx_indicate(serial, uart_input);
+    rt_device_write(serial, 0, str, (sizeof(str) - 1));
+
+    rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 1024, 25, 10);
+    if (thread != RT_NULL) {
+        rt_thread_startup(thread);
+        rt_kprintf("UART %s echo test started. Type to see echo.\n", uart_name);
+    } else {
+        ret = RT_ERROR;
+    }
+
+    return ret;
+}
+
+MSH_CMD_EXPORT(uart_sample, UART echo test sample);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST

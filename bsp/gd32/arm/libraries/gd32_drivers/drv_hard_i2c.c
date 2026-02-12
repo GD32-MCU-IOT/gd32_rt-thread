@@ -654,7 +654,7 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
                     i2c_master_addressing_gd(gd32_i2c->i2c_periph, addr, I2C_MASTER_TRANSMIT_GD);
                     while(i2c_flag_get_gd(gd32_i2c->i2c_periph, I2C_FLAG_I2CBSY_GD));
                     i2c_transfer_byte_number_config_gd(gd32_i2c->i2c_periph, w_total_byte);
-                    /* send a start condition to I2C bus */
+                     /* send a start condition to I2C bus */
                     i2c_start_on_bus_gd(gd32_i2c->i2c_periph);
                 }
 #endif
@@ -794,7 +794,7 @@ int rt_hw_i2c_init(void)
             i2c_master_clock_config_gd(gd_i2c_config[i].i2c_periph, 0x2D, 0x87);
 #endif
 
-            /* enable I2C */
+            /* enable I2C1 */
             i2c_enable_gd(gd_i2c_config[i].i2c_periph);
 #endif
         }
@@ -811,3 +811,4 @@ int rt_hw_i2c_init(void)
 INIT_BOARD_EXPORT(rt_hw_i2c_init);
 
 #endif /* RT_USING_I2C */
+

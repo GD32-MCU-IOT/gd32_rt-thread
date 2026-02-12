@@ -362,7 +362,10 @@ static void gd32_pin_mode(rt_device_t dev, rt_base_t pin, rt_uint8_t mode)
         /* input setting: not pull. */
 #if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32E23x \
  || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32F3x0 || defined SOC_SERIES_GD32F50x \
- || defined SOC_SERIES_GD32G5x3 || defined SOC_SERIES_GD32M53x
+ || defined SOC_SERIES_GD32G5x3
+        pin_mode = GPIO_MODE_INPUT;
+        pin_pupd = GPIO_PUPD_PULLUP | GPIO_PUPD_PULLDOWN;
+#elif defined SOC_SERIES_GD32M53x
         pin_mode = GPIO_MODE_INPUT;
         pin_pupd = GPIO_PUPD_NONE;
 #else
@@ -511,8 +514,8 @@ static const struct gd32m53x_exti_map* gd32m53x_get_exti_map(const struct pin_in
 #endif
 
 /**
-  * @brief  pin attach interrupt
-  * @param  device, pin, mode, hdr, args
+  * @brief  pin irq attach
+  * @param  device, pin, mode
   * @retval None
   */
 static rt_err_t gd32_pin_attach_irq(struct rt_device *device, rt_base_t pin,
@@ -682,7 +685,8 @@ static rt_err_t gd32_pin_irq_enable(struct rt_device *device, rt_base_t pin, rt_
         }
 
 #if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32F5xx \
- || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32G5x3 || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32M53x
+ || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32G5x3 || defined SOC_SERIES_GD32L23x \
+ || defined SOC_SERIES_GD32M53x
         rcu_periph_clock_enable(RCU_SYSCFG);
 #elif defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32F3x0
         rcu_periph_clock_enable(RCU_CFGCMP);

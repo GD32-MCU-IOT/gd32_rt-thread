@@ -444,16 +444,7 @@ static uint8_t gd32_i2c_read(rt_uint32_t i2c_periph, rt_uint8_t *p_buffer, rt_ui
 #endif
         {
             /* wait until the RBNE bit is set */
-            while(!i2c_flag_get_gd(i2c_periph, I2C_FLAG_RBNE_GD))
-            {
-#if defined (SOC_SERIES_GD32M53x)
-                /* If address is NACKed, don't block forever */
-                if (i2c_flag_get_gd(i2c_periph, I2C_FLAG_NACK))
-                {
-                    return 1;
-                }
-#endif
-            }
+            while(!i2c_flag_get_gd(i2c_periph, I2C_FLAG_RBNE_GD));
 
             /* read a byte */
             *p_buffer = i2c_data_receive_gd(i2c_periph);
@@ -501,28 +492,12 @@ static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_
  || defined (SOC_SERIES_GD32G5x3) || defined (SOC_SERIES_GD32M53x)
             /* wait until the transmit data buffer is empty */
             I2C_STAT_GD(i2c_periph) |= I2C_STAT_TBE_GD;
-            while(!i2c_flag_get_gd(i2c_periph, I2C_FLAG_TBE))
-            {
-#if defined (SOC_SERIES_GD32M53x)
-                if (i2c_flag_get_gd(i2c_periph, I2C_FLAG_NACK))
-                {
-                    return 1;
-                }
-#endif
-            }
+            while(!i2c_flag_get_gd(i2c_periph, I2C_FLAG_TBE));
 
             while(data_byte)
             {
                 /* wait until the TI bit is set */
-                while(!i2c_flag_get_gd(i2c_periph, I2C_FLAG_TI_GD))
-                {
-#if defined (SOC_SERIES_GD32M53x)
-                    if (i2c_flag_get_gd(i2c_periph, I2C_FLAG_NACK))
-                    {
-                        return 1;
-                    }
-#endif
-                }
+                while(!i2c_flag_get_gd(i2c_periph, I2C_FLAG_TI_GD));
                 /* data transmission */
                 i2c_data_transmit(i2c_periph, *p_buffer);
                 /* point to the next byte to be written */
@@ -669,13 +644,10 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
                 goto out;
             }
         }else {
-            if(msg->len > 0)
+            if(gd32_i2c_write(gd32_i2c->i2c_periph, msg->buf, msg->len) != 0)
             {
-                if(gd32_i2c_write(gd32_i2c->i2c_periph, msg->buf, msg->len) != 0)
-                {
-                    LOG_E("i2c bus write failed,i2c bus stop!");
-                    goto out;
-                }
+                LOG_E("i2c bus write failed,i2c bus stop!");
+                goto out;
             }
        }
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) \
@@ -721,10 +693,6 @@ out:
  || defined (SOC_SERIES_GD32G5x3) || defined (SOC_SERIES_GD32M53x)
         if(!(msg->flags & RT_I2C_NO_STOP))
         {
-            /* If NACK happens, TC may never be asserted. */
-#if defined (SOC_SERIES_GD32M53x)
-            if (!i2c_flag_get_gd(gd32_i2c->i2c_periph, I2C_FLAG_NACK))
-#endif
             while(!i2c_flag_get_gd(gd32_i2c->i2c_periph, I2C_FLAG_TC_GD));
             /* send a stop condition to I2C bus */
             i2c_stop_on_bus_gd(gd32_i2c->i2c_periph);
@@ -732,12 +700,6 @@ out:
             while(!i2c_flag_get_gd(gd32_i2c->i2c_periph, I2C_FLAG_STPDET_GD));
             /* clear the STPDET bit */
             i2c_flag_clear_gd(gd32_i2c->i2c_periph, I2C_FLAG_STPDET_GD);
-#if defined (SOC_SERIES_GD32M53x)
-            if (i2c_flag_get_gd(gd32_i2c->i2c_periph, I2C_FLAG_NACK))
-            {
-                i2c_flag_clear_gd(gd32_i2c->i2c_periph, I2C_FLAG_NACK);
-            }
-#endif
         }
 #endif
     }

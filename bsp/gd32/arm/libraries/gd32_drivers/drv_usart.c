@@ -62,18 +62,6 @@
 #define USART_FLAG_ORERR           UART_FLAG_ORERR
 #define USART_INT_FLAG_RBNE        UART_INT_FLAG_RBNE
 #define USART_INT_FLAG_TC          UART_INT_FLAG_TC
-
-/* Basic GPIO compatibility helpers */
-#define GPIO_MODE_AF_PP            GPIO_MODE_AF
-#define GPIO_MODE_IN_FLOATING      GPIO_MODE_INPUT
-#define GPIO_OSPEED_50MHZ          GPIO_OSPEED_HIGH
-#define gpio_init(port, mode, speed, pin)                                      \
-    do {                                                                      \
-        gpio_mode_set(port, mode, GPIO_PUPD_NONE, pin);                       \
-        if ((mode) == GPIO_MODE_OUTPUT || (mode) == GPIO_MODE_AF) {            \
-            gpio_output_options_set(port, GPIO_OTYPE_PP, speed, pin);         \
-        }                                                                     \
-    } while (0)
 #endif /* SOC_SERIES_GD32M53x */
 
 #if !defined(BSP_USING_UART0) && !defined(BSP_USING_UART1) && \
@@ -847,6 +835,23 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     rcu_periph_clock_enable(uart->tx_gpio_clk);
     rcu_periph_clock_enable(uart->rx_gpio_clk);
     rcu_periph_clock_enable(uart->uart_clk);
+
+#if defined SOC_SERIES_GD32M53x
+    /* connect port to USARTx_Tx */
+    gpio_af_set(uart->tx_port, uart->tx_af, uart->tx_pin);
+
+    /* connect port to USARTx_Rx */
+    gpio_af_set(uart->rx_port, uart->rx_af, uart->rx_pin);
+
+    /* configure USART Tx as alternate function push-pull */
+    gpio_mode_set(uart->tx_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, uart->tx_pin);
+    gpio_output_options_set(uart->tx_port, GPIO_OTYPE_PP, GPIO_OSPEED_HIGH, uart->tx_pin);
+
+    /* configure USART Rx as alternate function push-pull */
+    gpio_mode_set(uart->rx_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, uart->rx_pin);
+    gpio_output_options_set(uart->rx_port, GPIO_OTYPE_PP, GPIO_OSPEED_HIGH, uart->rx_pin);
+
+#endif
 
 #if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32E23x
     /* connect port to USARTx_Tx */

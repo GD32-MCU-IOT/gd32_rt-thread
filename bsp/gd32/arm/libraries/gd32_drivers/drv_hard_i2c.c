@@ -129,7 +129,7 @@ struct rt_i2c_bus_device i2c5;
 #if defined (SOC_SERIES_GD32F5xx)
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1 || (periph) == I2C2)
 #elif defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32F30x) \
-   || defined (SOC_SERIES_GD32C11x) || defined (SOC_SERIES_GD32E23x)
+   || defined (SOC_SERIES_GD32C11x) || defined (SOC_SERIES_GD32E23x)|| defined (SOC_SERIES_GD32E11x)
 #define IS_I2C_LEGACY(periph)  (1)
 #elif defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32L23x) \
    || defined (SOC_SERIES_GD32F50x) || defined (SOC_SERIES_GD32G5x3) 
@@ -140,7 +140,7 @@ struct rt_i2c_bus_device i2c5;
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x)
 static const struct gd32_i2c_bus gd_i2c_config[] = {
 #ifdef BSP_USING_HARD_I2C0
     {
@@ -321,7 +321,7 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x)
 /**
   * @brief  This function initializes the i2c pin.
   * @param  i2c
@@ -375,7 +375,7 @@ static uint8_t gd32_i2c_read(rt_uint32_t i2c_periph, rt_uint8_t *p_buffer, rt_ui
     {
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
  || defined (SOC_SERIES_GD32E51x )|| defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
- || defined (SOC_SERIES_GD32E23x)
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
         if(IS_I2C_LEGACY(i2c_periph))
         {
             if(3 == data_byte)
@@ -435,7 +435,7 @@ static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_
     {
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
  || defined (SOC_SERIES_GD32C11x) || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) \
- || defined (SOC_SERIES_GD32E23x)
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
         if(IS_I2C_LEGACY(i2c_periph))
         {
             /* data transmission */
@@ -518,8 +518,8 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
         if (!(msg->flags & RT_I2C_NO_START))
         {
     #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
-     || defined (SOC_SERIES_GD32E51x )|| defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
-     || defined (SOC_SERIES_GD32E23x)
+     || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
+     || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
             if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
             {
                 if(msg->flags & RT_I2C_RD)
@@ -630,8 +630,8 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
 
 out:
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
-|| defined (SOC_SERIES_GD32E51x)  || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
-|| defined (SOC_SERIES_GD32E23x)
+ || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
     if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
     {
 
@@ -693,7 +693,7 @@ int rt_hw_i2c_init(void)
         /* configure I2C timing. I2C speed clock=400kHz*/
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
  || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
- || defined (SOC_SERIES_GD32E23x)
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
         if(IS_I2C_LEGACY(gd_i2c_config[i].i2c_periph))
         {
 

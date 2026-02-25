@@ -377,7 +377,7 @@ static void gd32_pin_mode(rt_device_t dev, rt_base_t pin, rt_uint8_t mode)
     {
         gpio_output_options_set(index->gpio_periph, pin_odpp, GPIO_OSPEED_LEVEL3, index->pin);
     }
-#elif defined SOC_SERIES_GD32H7xx|| defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32G5x3 \
+#elif defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32G5x3 \
    || defined SOC_SERIES_GD32H77x 
     gpio_mode_set(index->gpio_periph, pin_mode, pin_pupd, index->pin);
     if(pin_mode == GPIO_MODE_OUTPUT)

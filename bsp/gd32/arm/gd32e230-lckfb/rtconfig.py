@@ -43,9 +43,9 @@ if PLATFORM == 'gcc':
     OBJDUMP = PREFIX + 'objdump'
     OBJCPY = PREFIX + 'objcopy'
 
-    DEVICE = ' -mcpu=cortex-m23 -mthumb -ffunction-sections -fdata-sections'
-    CFLAGS = DEVICE + ' -Dgcc'
-    AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb'
+    DEVICE = ' -mcpu=cortex-m23 -mthumb -mfloat-abi=soft -ffunction-sections -fdata-sections'
+    CFLAGS = DEVICE + ' -Dgcc -DGD32E23X'
+    AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb '
     LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread.map,-cref,-u,Reset_Handler -T board/linker_scripts/link.ld'
 
     CPATH = ''

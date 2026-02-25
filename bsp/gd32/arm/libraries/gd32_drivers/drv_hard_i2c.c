@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2025, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -129,7 +129,7 @@ struct rt_i2c_bus_device i2c5;
 #if defined (SOC_SERIES_GD32F5xx)
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1 || (periph) == I2C2)
 #elif defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32F30x) \
-   || defined (SOC_SERIES_GD32C11x) 
+   || defined (SOC_SERIES_GD32C11x) || defined (SOC_SERIES_GD32E23x)|| defined (SOC_SERIES_GD32E11x)
 #define IS_I2C_LEGACY(periph)  (1)
 #elif defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32L23x) \
    || defined (SOC_SERIES_GD32F50x) || defined (SOC_SERIES_GD32G5x3) || defined (SOC_SERIES_GD32H77x)
@@ -140,7 +140,8 @@ struct rt_i2c_bus_device i2c5;
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32H77x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
+ && !defined(SOC_SERIES_GD32H77x)
 static const struct gd32_i2c_bus gd_i2c_config[] = {
 #ifdef BSP_USING_HARD_I2C0
     {
@@ -321,7 +322,8 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32H77x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
+ && !defined(SOC_SERIES_GD32H77x)
 /**
   * @brief  This function initializes the i2c pin.
   * @param  i2c
@@ -374,7 +376,8 @@ static uint8_t gd32_i2c_read(rt_uint32_t i2c_periph, rt_uint8_t *p_buffer, rt_ui
     while(data_byte)
     {
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
- || defined (SOC_SERIES_GD32E51x )|| defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x)
+ || defined (SOC_SERIES_GD32E51x )|| defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
         if(IS_I2C_LEGACY(i2c_periph))
         {
             if(3 == data_byte)
@@ -433,7 +436,8 @@ static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_
     while(data_byte)
     {
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
- || defined (SOC_SERIES_GD32C11x) || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0)
+ || defined (SOC_SERIES_GD32C11x) || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) \
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
         if(IS_I2C_LEGACY(i2c_periph))
         {
             /* data transmission */
@@ -488,6 +492,7 @@ static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_
 static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_i2c_msg msgs[], rt_uint32_t num)
 {
     static struct rt_i2c_msg *msg;
+    rt_uint16_t addr;
 
     rt_uint32_t i,w_total_byte=0,r_total_byte=0;
     rt_err_t ret = RT_ERROR;
@@ -511,11 +516,12 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
     for(i = 0; i < num; i++)
     {
         msg = &msgs[i];
-        msg->addr <<= 1;
+        addr = msg->addr << 1;
         if (!(msg->flags & RT_I2C_NO_START))
         {
     #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
-     || defined (SOC_SERIES_GD32E51x )|| defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x)
+     || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
+     || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
             if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
             {
                 if(msg->flags & RT_I2C_RD)
@@ -532,7 +538,7 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
                      /* i2c master sends START signal successfully */
                     while(!i2c_flag_get(gd32_i2c->i2c_periph, I2C_FLAG_SBSEND));
 
-                    i2c_master_addressing(gd32_i2c->i2c_periph, msg->addr, I2C_RECEIVER);
+                    i2c_master_addressing(gd32_i2c->i2c_periph, addr, I2C_RECEIVER);
 
                     while(!i2c_flag_get(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND));
                        /* address flag set means i2c slave sends ACK */
@@ -554,7 +560,7 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
                     i2c_start_on_bus(gd32_i2c->i2c_periph);
                     while(!i2c_flag_get(gd32_i2c->i2c_periph, I2C_FLAG_SBSEND));
 
-                    i2c_master_addressing(gd32_i2c->i2c_periph, msg->addr, I2C_TRANSMITTER);
+                    i2c_master_addressing(gd32_i2c->i2c_periph, addr, I2C_TRANSMITTER);
                     while(!i2c_flag_get(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND));
 
                     i2c_flag_clear(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND);
@@ -577,7 +583,7 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
                 if(msg->flags & RT_I2C_RD)
                 {
                      /* configure slave address */
-                    i2c_master_addressing_gd(gd32_i2c->i2c_periph, msg->addr, I2C_MASTER_RECEIVE_GD);
+                    i2c_master_addressing_gd(gd32_i2c->i2c_periph, addr, I2C_MASTER_RECEIVE_GD);
 
                     i2c_transfer_byte_number_config_gd(gd32_i2c->i2c_periph, r_total_byte);
                      /* send a start condition to I2C bus */
@@ -585,7 +591,7 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
 
                 }else {
                      /* configure slave address */
-                    i2c_master_addressing_gd(gd32_i2c->i2c_periph, msg->addr, I2C_MASTER_TRANSMIT_GD);
+                    i2c_master_addressing_gd(gd32_i2c->i2c_periph, addr, I2C_MASTER_TRANSMIT_GD);
                     while(i2c_flag_get_gd(gd32_i2c->i2c_periph, I2C_FLAG_I2CBSY_GD));
                     i2c_transfer_byte_number_config_gd(gd32_i2c->i2c_periph, w_total_byte);
                      /* send a start condition to I2C bus */
@@ -626,7 +632,8 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
 
 out:
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
-|| defined (SOC_SERIES_GD32E51x)  || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x)
+ || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
     if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
     {
 
@@ -687,7 +694,8 @@ int rt_hw_i2c_init(void)
 
         /* configure I2C timing. I2C speed clock=400kHz*/
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
- || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x)
+ || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
         if(IS_I2C_LEGACY(gd_i2c_config[i].i2c_periph))
         {
 

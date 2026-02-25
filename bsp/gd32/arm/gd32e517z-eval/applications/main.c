@@ -81,7 +81,7 @@ int main(void)
     rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
 
-    rt_kprintf("Hello GD32F517Z!\n");
+    rt_kprintf("Hello GD32E517Z!\n");
     rt_kprintf("RT-Thread BSP adaptation successful!\n");
     rt_kprintf("System Clock: %d Hz\n", SystemCoreClock);
 

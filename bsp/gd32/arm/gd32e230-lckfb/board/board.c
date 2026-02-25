@@ -1,17 +1,19 @@
 /*
- * Copyright (c) 2006-2025, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
+ * Change Logs:
+ * Date           Author         Notes
+ * 2025-01-30     RT-Thread      first implementation for GD32E230
  */
-
+#include <stdint.h>
 #include <rthw.h>
 #include <rtthread.h>
-#include "board.h"
-#include "gd32e23x.h"
+#include <board.h>
 
 #ifdef RT_USING_SERIAL
-#if defined(RT_USING_SERIAL_V2)
+#ifdef RT_USING_SERIAL_V2
 #include "drv_usart_v2.h"
 #else
 #include "drv_usart.h"
@@ -25,15 +27,25 @@
  */
 void Error_Handler(void)
 {
-    rt_kprintf("\nError_Handler triggered! System halted.\n");
+    /* USER CODE BEGIN Error_Handler */
+    /* User can add his own implementation to report the HAL error return state */
     while (1)
     {
     }
+    /* USER CODE END Error_Handler */
+}
+
+/**
+ * @brief System Clock Configuration
+ */
+void SystemClock_Config(void)
+{
+    SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
+    NVIC_SetPriority(SysTick_IRQn, 0);
 }
 
 /**
  * @brief  This is the timer interrupt service routine.
- *
  */
 void SysTick_Handler(void)
 {
@@ -48,25 +60,27 @@ void SysTick_Handler(void)
 
 /**
  * @brief This function will initial GD32 board.
- * @note  This function is called from the RT-Thread startup code.
  */
 void rt_hw_board_init(void)
 {
-#ifdef VECT_TAB_RAM
-    SCB->VTOR = 0x20000000;
-#else  /* VECT_TAB_FLASH is the default */
-    SCB->VTOR = 0x08000000;
+    /* NVIC Configuration */
+#define NVIC_VTOR_MASK              0x3FFFFF80
+#ifdef  VECT_TAB_RAM
+    /* Set the Vector Table base location at 0x20000000 */
+    SCB->VTOR  = (0x20000000 & NVIC_VTOR_MASK);
+#else  /* VECT_TAB_FLASH  */
+    /* Set the Vector Table base location at 0x08000000 */
+    SCB->VTOR  = (0x08000000 & NVIC_VTOR_MASK);
 #endif
 
-    SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
-    NVIC_SetPriority(SysTick_IRQn, (1 << __NVIC_PRIO_BITS) - 1);
-
-#ifdef RT_USING_HEAP
-    rt_system_heap_init((void *)HEAP_BEGIN, (void *)HEAP_END);
-#endif
+    SystemClock_Config();
 
 #ifdef RT_USING_SERIAL
     rt_hw_usart_init();
+#endif
+
+#ifdef RT_USING_HEAP
+    rt_system_heap_init((void *)HEAP_BEGIN, (void *)HEAP_END);
 #endif
 
 #ifdef RT_USING_CONSOLE
@@ -77,4 +91,6 @@ void rt_hw_board_init(void)
     rt_components_board_init();
 #endif
 }
+
+/*@}*/
 

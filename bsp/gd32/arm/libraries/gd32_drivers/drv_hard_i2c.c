@@ -558,7 +558,7 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
         if (!(msg->flags & RT_I2C_NO_START))
         {
     #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
-     || defined (SOC_SERIES_GD32E51x )|| defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
+     || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
      || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
             if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
             {
@@ -670,8 +670,8 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
 
 out:
 #if defined (SOC_SERIES_GD32F5xx) || defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F30x) \
-|| defined (SOC_SERIES_GD32E51x)  || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
-|| defined (SOC_SERIES_GD32E23x)  || defined (SOC_SERIES_GD32E11x)
+ || defined (SOC_SERIES_GD32E51x) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32C11x) \
+ || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
     if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
     {
 

@@ -381,8 +381,8 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
         LOG_D("CK_APB2 freq: %d\n", rcu_clock_freq_get(CK_APB2));
         LOG_D("max   freq: %d\n", max_hz);
 
-#if defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32F3x0 \
- || defined SOC_SERIES_GD32M53x
+        #if defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32F3x0 \
+         || defined SOC_SERIES_GD32M53x
         spi_src = spi_periph == SPI0? CK_APB2:CK_APB1;
         #else
         if (spi_periph == SPI1 || spi_periph == SPI2)

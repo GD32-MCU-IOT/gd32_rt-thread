@@ -451,8 +451,8 @@ void UART7_IRQHandler(void)
 
 #endif /* BSP_USING_UART7 */
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x)  && !defined(SOC_SERIES_GD32F3x0) \
- && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x) \
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
+ && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x)
 static const struct gd32_uart uart_obj[] = {
@@ -818,8 +818,8 @@ static const struct gd32_uart uart_obj[] = {
 };
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x)  && !defined(SOC_SERIES_GD32F3x0) \
- && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined (SOC_SERIES_GD32C11x) \
+#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
+ && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x)
 /**
@@ -837,23 +837,6 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     rcu_periph_clock_enable(uart->tx_gpio_clk);
     rcu_periph_clock_enable(uart->rx_gpio_clk);
     rcu_periph_clock_enable(uart->uart_clk);
-
-#if defined SOC_SERIES_GD32M53x
-    /* connect port to USARTx_Tx */
-    gpio_af_set(uart->tx_port, uart->tx_af, uart->tx_pin);
-
-    /* connect port to USARTx_Rx */
-    gpio_af_set(uart->rx_port, uart->rx_af, uart->rx_pin);
-
-    /* configure USART Tx as alternate function push-pull */
-    gpio_mode_set(uart->tx_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, uart->tx_pin);
-    gpio_output_options_set(uart->tx_port, GPIO_OTYPE_PP, GPIO_OSPEED_HIGH, uart->tx_pin);
-
-    /* configure USART Rx as alternate function push-pull */
-    gpio_mode_set(uart->rx_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, uart->rx_pin);
-    gpio_output_options_set(uart->rx_port, GPIO_OTYPE_PP, GPIO_OSPEED_HIGH, uart->rx_pin);
-
-#endif
 
 #if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32E23x
     /* connect port to USARTx_Tx */

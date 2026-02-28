@@ -280,7 +280,8 @@ static struct rt_spi_ops gd32_spi_ops =
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32M53x)
+ && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
+ && !defined(SOC_SERIES_GD32M53x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS

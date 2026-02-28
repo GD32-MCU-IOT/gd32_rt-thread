@@ -745,16 +745,8 @@ int rt_hw_i2c_init(void)
  || defined (SOC_SERIES_GD32G5x3) || defined (SOC_SERIES_GD32L23x) || defined (SOC_SERIES_GD32E51x) \
  || defined (SOC_SERIES_GD32F50x) || defined (SOC_SERIES_GD32M53x)
             
-#if defined (SOC_SERIES_GD32M53x)
-            /* M53x: Ensure I2C is disabled before configuring TIMING (required by hardware) */
-            i2c_disable();
-            /* Configure timing - same as official I2C_EEPROM example */
-            i2c_timing_config_gd(gd_i2c_config[i].i2c_periph, 0x1, 0xA, 0);
-            i2c_master_clock_config_gd(gd_i2c_config[i].i2c_periph, 0x42, 0x2C);
-#else
             i2c_timing_config_gd(gd_i2c_config[i].i2c_periph, 0x1, 0x7, 0);
             i2c_master_clock_config_gd(gd_i2c_config[i].i2c_periph, 0x2D, 0x87);
-#endif
 
             /* enable I2C1 */
             i2c_enable_gd(gd_i2c_config[i].i2c_periph);

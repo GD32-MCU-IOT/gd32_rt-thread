@@ -12,6 +12,58 @@
 
 #ifdef RT_USING_SERIAL
 
+#ifdef SOC_SERIES_GD32M53x
+/* Map legacy USART names to UART for GD32M53x */
+#define USART0                     UART0
+#define USART1                     UART1
+#define USART2                     UART2
+#define USART3                     UART3
+#define USART0_IRQn                UART0_IRQn
+#define USART1_IRQn                UART1_IRQn
+#define USART2_IRQn                UART2_IRQn
+#define USART3_IRQn                UART3_IRQn
+#define RCU_USART0                 RCU_UART0
+#define RCU_USART1                 RCU_UART1
+#define RCU_USART2                 RCU_UART2
+#define RCU_USART3                 RCU_UART3
+
+/* Map USART APIs to UART APIs */
+#define usart_baudrate_set         uart_baudrate_set
+#define usart_word_length_set      uart_word_length_set
+#define usart_stop_bit_set         uart_stop_bit_set
+#define usart_parity_config        uart_parity_config
+#define usart_receive_config       uart_receive_config
+#define usart_transmit_config      uart_transmit_config
+#define usart_enable               uart_enable
+#define usart_disable              uart_disable
+#define usart_interrupt_enable     uart_interrupt_enable
+#define usart_interrupt_disable    uart_interrupt_disable
+#define usart_flag_get             uart_flag_get
+#define usart_flag_clear           uart_flag_clear
+#define usart_data_transmit        uart_data_transmit
+#define usart_data_receive         uart_data_receive
+#define usart_interrupt_flag_get   uart_interrupt_flag_get
+
+/* Map USART enums to UART enums */
+#define USART_WL_9BIT              UART_WL_9BIT
+#define USART_WL_8BIT              UART_WL_8BIT
+#define USART_STB_2BIT             UART_STB_2BIT
+#define USART_STB_1BIT             UART_STB_1BIT
+#define USART_PM_ODD               UART_PM_ODD
+#define USART_PM_EVEN              UART_PM_EVEN
+#define USART_PM_NONE              UART_PM_NONE
+#define USART_RECEIVE_ENABLE       UART_RECEIVE_ENABLE
+#define USART_TRANSMIT_ENABLE      UART_TRANSMIT_ENABLE
+#define USART_INT_RBNE             UART_INT_RBNE
+#define USART_INT_TC               UART_INT_TC
+#define USART_FLAG_RBNE            UART_FLAG_RBNE
+#define USART_FLAG_TBE             UART_FLAG_TBE
+#define USART_FLAG_TC              UART_FLAG_TC
+#define USART_FLAG_ORERR           UART_FLAG_ORERR
+#define USART_INT_FLAG_RBNE        UART_INT_FLAG_RBNE
+#define USART_INT_FLAG_TC          UART_INT_FLAG_TC
+#endif /* SOC_SERIES_GD32M53x */
+
 #if !defined(BSP_USING_UART0) && !defined(BSP_USING_UART1) && \
     !defined(BSP_USING_UART2) && !defined(BSP_USING_UART3) && \
     !defined(BSP_USING_UART4) && !defined(BSP_USING_UART5) && \
@@ -402,7 +454,7 @@ void UART7_IRQHandler(void)
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
- && !defined(SOC_SERIES_GD32H77x)
+ && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -769,7 +821,7 @@ static const struct gd32_uart uart_obj[] = {
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
- && !defined(SOC_SERIES_GD32H77x)
+ && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:

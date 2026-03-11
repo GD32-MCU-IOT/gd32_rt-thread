@@ -149,8 +149,11 @@
 #define RT_UNAMED_PIPE_NUMBER 64
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
-#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
+#define RT_USING_I2C
+#define RT_USING_I2C_BITOPS
+#define RT_USING_SPI
+#define RT_USING_SPI_ISR
 #define RT_USING_PIN
 /* end of Device Drivers */
 
@@ -298,26 +301,6 @@
 
 /* end of Kendryte SDK */
 
-/* WCH HAL & SDK Drivers */
-
-/* end of WCH HAL & SDK Drivers */
-
-/* AT32 HAL & SDK Drivers */
-
-/* end of AT32 HAL & SDK Drivers */
-
-/* HC32 DDL Drivers */
-
-/* end of HC32 DDL Drivers */
-
-/* NXP HAL & SDK Drivers */
-
-/* end of NXP HAL & SDK Drivers */
-
-/* NUVOTON Drivers */
-
-/* end of NUVOTON Drivers */
-
 /* GD32 Drivers */
 
 #define PKG_USING_GD32_ARM_CMSIS_DRIVER
@@ -334,6 +317,8 @@
 /* touch drivers */
 
 /* end of touch drivers */
+#define PKG_USING_AT24CXX
+#define PKG_USING_AT24CXX_LATEST_VERSION
 /* end of peripheral libraries and drivers */
 
 /* AI packages */
@@ -418,6 +403,13 @@
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART0
+#define BSP_USING_UART1
+#define BSP_USING_SPI
+#define BSP_USING_SPI_TX_DMA
+#define BSP_USING_SPI_RX_DMA
+#define BSP_USING_SPI5
+#define BSP_SPI5_TX_USING_DMA
+#define BSP_SPI5_RX_USING_DMA
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

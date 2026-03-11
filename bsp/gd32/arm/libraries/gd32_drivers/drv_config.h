@@ -18,17 +18,20 @@ extern "C" {
 #endif
 
 #if defined(SOC_SERIES_GD32E50x)
-#include "e50x/dma_config.h"
-#include "e50x/uart_config.h"
-#include "e50x/spi_config.h"
+#include "config/e50x/dma_config.h"
+#include "config/e50x/uart_config.h"
+#include "config/e50x/spi_config.h"
+#elif defined(SOC_SERIES_GD32F5xx)
+#include "config/f5xx/dma_config.h"
+#include "config/f5xx/spi_config.h"
 #elif defined(SOC_SERIES_GD32H7xx)
-#include "h75e/dma_config.h"
-#include "h75e/uart_config.h"
-#include "h75e/spi_config.h"
+#include "config/h75e/dma_config.h"
+#include "config/h75e/uart_config.h"
+#include "config/h75e/spi_config.h"
 #elif defined(SOC_SERIES_GD32H5E)
-#include "h75e/dma_config.h"
-#include "h75e/uart_config.h"
-#include "h75e/spi_config.h"
+#include "config/h75e/dma_config.h"
+#include "config/h75e/uart_config.h"
+#include "config/h75e/spi_config.h"
 #endif
 
 #ifdef __cplusplus

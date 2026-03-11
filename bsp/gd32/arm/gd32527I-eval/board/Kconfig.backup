@@ -290,106 +290,28 @@ menu "On-chip Peripheral Drivers"
         default n
         select RT_USING_SPI
         if BSP_USING_SPI
-            config BSP_USING_SPI_TX_DMA
-                bool
-
-            config BSP_USING_SPI_RX_DMA
-                bool
-
             config BSP_USING_SPI0
                 bool "Enable SPI0 BUS"
-                default n
-
-            config BSP_SPI0_TX_USING_DMA
-                bool "Enable SPI0 TX DMA"
-                depends on BSP_USING_SPI0
-                select BSP_USING_SPI_TX_DMA
-                default n
-
-            config BSP_SPI0_RX_USING_DMA
-                bool "Enable SPI0 RX DMA"
-                depends on BSP_USING_SPI0
-                select BSP_USING_SPI_RX_DMA
                 default n
 
             config BSP_USING_SPI1
                 bool "Enable SPI1 BUS"
                 default n
 
-            config BSP_SPI1_TX_USING_DMA
-                bool "Enable SPI1 TX DMA"
-                depends on BSP_USING_SPI1
-                select BSP_USING_SPI_TX_DMA
-                default n
-
-            config BSP_SPI1_RX_USING_DMA
-                bool "Enable SPI1 RX DMA"
-                depends on BSP_USING_SPI1
-                select BSP_USING_SPI_RX_DMA
-                default n
-
             config BSP_USING_SPI2
                 bool "Enable SPI2 BUS"
-                default n
-
-            config BSP_SPI2_TX_USING_DMA
-                bool "Enable SPI2 TX DMA"
-                depends on BSP_USING_SPI2
-                select BSP_USING_SPI_TX_DMA
-                default n
-
-            config BSP_SPI2_RX_USING_DMA
-                bool "Enable SPI2 RX DMA"
-                depends on BSP_USING_SPI2
-                select BSP_USING_SPI_RX_DMA
                 default n
 
             config BSP_USING_SPI3
                 bool "Enable SPI3 BUS"
                 default n
 
-            config BSP_SPI3_TX_USING_DMA
-                bool "Enable SPI3 TX DMA"
-                depends on BSP_USING_SPI3
-                select BSP_USING_SPI_TX_DMA
-                default n
-
-            config BSP_SPI3_RX_USING_DMA
-                bool "Enable SPI3 RX DMA"
-                depends on BSP_USING_SPI3
-                select BSP_USING_SPI_RX_DMA
-                default n
-
             config BSP_USING_SPI4
                 bool "Enable SPI4 BUS"
                 default n
 
-            config BSP_SPI4_TX_USING_DMA
-                bool "Enable SPI4 TX DMA"
-                depends on BSP_USING_SPI4
-                select BSP_USING_SPI_TX_DMA
-                default n
-
-            config BSP_SPI4_RX_USING_DMA
-                bool "Enable SPI4 RX DMA"
-                depends on BSP_USING_SPI4
-                select BSP_USING_SPI_RX_DMA
-                default n
-
             config BSP_USING_SPI5
                 bool "Enable SPI5 BUS"
-                default n
-
-            config BSP_SPI5_TX_USING_DMA
-                bool "Enable SPI5 TX DMA"
-                depends on BSP_USING_SPI5
-                select BSP_USING_SPI_TX_DMA
-                default n
-
-            config BSP_SPI5_RX_USING_DMA
-                bool "Enable SPI5 RX DMA"
-                depends on BSP_USING_SPI5
-                select BSP_USING_SPI_RX_DMA
                 default n
         endif
 

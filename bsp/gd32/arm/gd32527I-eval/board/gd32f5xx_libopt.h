@@ -28,6 +28,7 @@
 #include "gd32f5xx_gpio.h"
 #include "gd32f5xx_syscfg.h"
 #include "gd32f5xx_i2c.h"
+#include "gd32f5xx_i2c_add.h"
 #include "gd32f5xx_ipa.h"
 #include "gd32f5xx_iref.h"
 #include "gd32f5xx_pmu.h"

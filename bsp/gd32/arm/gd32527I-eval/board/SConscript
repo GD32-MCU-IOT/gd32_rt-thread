@@ -12,6 +12,10 @@ board.c
 board_msd_init.c
 ''')
 
+# Add I2C additional peripheral source for GD32F5xx
+if GetDepend(['RT_USING_I2C']):
+    src += [cwd + '/../packages/gd32-arm-series-latest/GD32F5xx/GD32F5xx_standard_peripheral/Source/gd32f5xx_i2c_add.c']
+
 path =  [cwd]
 
 CPPDEFINES = ['GD32F527']

@@ -16,7 +16,8 @@
 
 /* Test Feature Switches - comment out to disable */
 #define GD32_I2C_EEPROM_TEST
-#define GD32_SPI_TEST
+#define GD32_SPI_POLL_TEST
+#define GD32_SPI_DMA_TEST
 #define GD32_UART_TEST
 #define GD32_GPIO_EXTI_TEST
 
@@ -38,7 +39,7 @@
 static uint8_t i2c_24c02_test(void);
 #endif
 
-#ifdef GD32_SPI_TEST
+#if defined(GD32_SPI_POLL_TEST) || defined(GD32_SPI_DMA_TEST)
 #define SPI_BUS_NAME     "spi5"
 #define SPI_DEV_NAME     "spi50"
 #define SPI_CS_PIN       GET_PIN(I, 8)
@@ -46,10 +47,22 @@ static uint8_t i2c_24c02_test(void);
 static uint8_t cmd_read_id = 0x9F;
 static uint8_t cmd_wren = 0x06;
 static uint8_t id_buf[4] = {0};
-static uint8_t tx_buffer[200];
-static uint8_t rx_buffer[200];
 
-static void spi_sample(void);
+static void spi_init_device(void);
+#endif
+
+#ifdef GD32_SPI_POLL_TEST
+/* SPI polling mode test - transfer < 16 bytes */
+#define SPI_POLL_TEST_SIZE    8
+static void spi_poll_sample(void);
+#endif
+
+#ifdef GD32_SPI_DMA_TEST
+/* SPI DMA mode test - transfer >= 16 bytes (driver uses DMA when length >= 16) */
+#define SPI_DMA_TEST_SIZE     200
+static uint8_t tx_buffer[SPI_DMA_TEST_SIZE];
+static uint8_t rx_buffer[SPI_DMA_TEST_SIZE];
+static void spi_dma_sample(void);
 #endif
 
 #ifdef GD32_UART_TEST
@@ -84,9 +97,19 @@ int main(void)
     }
 #endif
 
-#ifdef GD32_SPI_TEST
+#if defined(GD32_SPI_POLL_TEST) || defined(GD32_SPI_DMA_TEST)
     rt_kprintf("\n\r--- SPI Flash Test ---\n\r");
-    spi_sample();
+    spi_init_device();
+#endif
+
+#ifdef GD32_SPI_POLL_TEST
+    rt_kprintf("\n\r=== SPI Polling Mode Test (%d bytes < 16) ===\n\r", SPI_POLL_TEST_SIZE);
+    spi_poll_sample();
+#endif
+
+#ifdef GD32_SPI_DMA_TEST
+    rt_kprintf("\n\r=== SPI DMA Mode Test (%d bytes >= 16) ===\n\r", SPI_DMA_TEST_SIZE);
+    spi_dma_sample();
 #endif
 
 #ifdef GD32_UART_TEST
@@ -163,24 +186,14 @@ static uint8_t i2c_24c02_test(void)
 }
 #endif
 
-#ifdef GD32_SPI_TEST
+#if defined(GD32_SPI_POLL_TEST) || defined(GD32_SPI_DMA_TEST)
 /**
- * @brief SPI Flash (GD25Q16) read/write test - E113 style
+ * @brief Initialize SPI device - shared by polling and DMA tests
  */
-static void spi_sample(void)
+static void spi_init_device(void)
 {
-    uint8_t erase_cmd[4] = {0x20, 0x00, 0x00, 0x00};   /* Sector Erase at 0x000000 */
-    uint8_t write_cmd[4] = {0x02, 0x00, 0x00, 0x00};   /* Page Program at 0x000000 */
-    uint8_t read_cmd[4]  = {0x03, 0x00, 0x00, 0x00};   /* Read Data at 0x000000 */
-
     struct rt_spi_device *spi_dev = RT_NULL;
     struct rt_spi_configuration cfg;
-    int i;
-
-    /* initialize tx buffer with test pattern */
-    for (i = 0; i < 200; i++) {
-        tx_buffer[i] = i;
-    }
 
     /* attach SPI device to bus */
     if (rt_hw_spi_device_attach(SPI_BUS_NAME, SPI_DEV_NAME, SPI_CS_PIN) != RT_EOK) {
@@ -202,11 +215,40 @@ static void spi_sample(void)
     rt_spi_configure(spi_dev, &cfg);
     spi_dev->bus->owner = spi_dev;
 
-    rt_tick_t start, end;
-
     /* Read Flash ID */
     rt_spi_send_then_recv(spi_dev, &cmd_read_id, 1, id_buf, 3);
     rt_kprintf("SPI Flash ID: 0x%02X 0x%02X 0x%02X\n\r", id_buf[0], id_buf[1], id_buf[2]);
+}
+#endif
+
+#ifdef GD32_SPI_POLL_TEST
+/**
+ * @brief SPI Flash (GD25Q16) polling mode test - transfer < 16 bytes
+ */
+static void spi_poll_sample(void)
+{
+    uint8_t erase_cmd[4] = {0x20, 0x00, 0x10, 0x00};   /* Sector Erase at 0x001000 */
+    uint8_t write_cmd[4] = {0x02, 0x00, 0x10, 0x00};   /* Page Program at 0x001000 */
+    uint8_t read_cmd[4]  = {0x03, 0x00, 0x10, 0x00};   /* Read Data at 0x001000 */
+    uint8_t poll_tx[SPI_POLL_TEST_SIZE];
+    uint8_t poll_rx[SPI_POLL_TEST_SIZE];
+
+    struct rt_spi_device *spi_dev = RT_NULL;
+    rt_tick_t start, end;
+    int i;
+
+    /* initialize poll test buffer */
+    for (i = 0; i < SPI_POLL_TEST_SIZE; i++) {
+        poll_tx[i] = i + 0x10;
+    }
+    rt_memset(poll_rx, 0, SPI_POLL_TEST_SIZE);
+
+    /* find SPI device */
+    spi_dev = (struct rt_spi_device *)rt_device_find(SPI_DEV_NAME);
+    if (spi_dev == RT_NULL) {
+        rt_kprintf("[Poll] SPI device %s not found!\n\r", SPI_DEV_NAME);
+        return;
+    }
 
     /* Write Enable */
     rt_spi_transfer(spi_dev, &cmd_wren, id_buf, 1);
@@ -218,28 +260,107 @@ static void spi_sample(void)
     /* Write Enable */
     rt_spi_transfer(spi_dev, &cmd_wren, id_buf, 1);
 
-    /* Write to Page (DMA) */
+    /* Write data using polling mode (< 16 bytes) */
     start = rt_tick_get();
-    rt_spi_send_then_send(spi_dev, write_cmd, 4, tx_buffer, 200);
+    rt_spi_send_then_send(spi_dev, write_cmd, 4, poll_tx, SPI_POLL_TEST_SIZE);
     end = rt_tick_get();
-    rt_kprintf("SPI DMA Write: %d ticks\n\r", end - start);
+    rt_kprintf("[Poll] SPI Write %d bytes: %d ticks\n\r", SPI_POLL_TEST_SIZE, end - start);
     rt_thread_mdelay(50);   /* wait for write to complete */
 
-    /* Read Data (DMA) */
+    /* Read data using polling mode */
     start = rt_tick_get();
-    rt_spi_send_then_recv(spi_dev, read_cmd, 4, rx_buffer, 200);
+    rt_spi_send_then_recv(spi_dev, read_cmd, 4, poll_rx, SPI_POLL_TEST_SIZE);
     end = rt_tick_get();
-    rt_kprintf("SPI DMA Read: %d ticks\n\r", end - start);
+    rt_kprintf("[Poll] SPI Read %d bytes: %d ticks\n\r", SPI_POLL_TEST_SIZE, end - start);
 
     /* Verify data */
-    if (memcmp(rx_buffer, tx_buffer, 200) == 0) {
-        rt_kprintf("SPI DMA Flash test passed!\n\r");
+    if (memcmp(poll_rx, poll_tx, SPI_POLL_TEST_SIZE) == 0) {
+        rt_kprintf("[Poll] SPI Flash test passed!\n\r");
     } else {
-        rt_kprintf("SPI DMA Flash test failed!\n\r");
+        rt_kprintf("[Poll] SPI Flash test failed!\n\r");
+        rt_kprintf("[Poll] TX: ");
+        for (i = 0; i < SPI_POLL_TEST_SIZE; i++) {
+            rt_kprintf("%02X ", poll_tx[i]);
+        }
+        rt_kprintf("\n\r[Poll] RX: ");
+        for (i = 0; i < SPI_POLL_TEST_SIZE; i++) {
+            rt_kprintf("%02X ", poll_rx[i]);
+        }
+        rt_kprintf("\n\r");
     }
 }
 
-MSH_CMD_EXPORT(spi_sample, SPI Flash test sample);
+MSH_CMD_EXPORT(spi_poll_sample, SPI Flash polling mode test);
+#endif
+
+#ifdef GD32_SPI_DMA_TEST
+/**
+ * @brief SPI Flash (GD25Q16) DMA mode test - transfer >= 16 bytes
+ */
+static void spi_dma_sample(void)
+{
+    uint8_t erase_cmd[4] = {0x20, 0x00, 0x00, 0x00};   /* Sector Erase at 0x000000 */
+    uint8_t write_cmd[4] = {0x02, 0x00, 0x00, 0x00};   /* Page Program at 0x000000 */
+    uint8_t read_cmd[4]  = {0x03, 0x00, 0x00, 0x00};   /* Read Data at 0x000000 */
+
+    struct rt_spi_device *spi_dev = RT_NULL;
+    rt_tick_t start, end;
+    int i;
+
+    /* initialize tx buffer with test pattern */
+    for (i = 0; i < SPI_DMA_TEST_SIZE; i++) {
+        tx_buffer[i] = i;
+    }
+    rt_memset(rx_buffer, 0, SPI_DMA_TEST_SIZE);
+
+    /* find SPI device */
+    spi_dev = (struct rt_spi_device *)rt_device_find(SPI_DEV_NAME);
+    if (spi_dev == RT_NULL) {
+        rt_kprintf("[DMA] SPI device %s not found!\n\r", SPI_DEV_NAME);
+        return;
+    }
+
+    /* Write Enable */
+    rt_spi_transfer(spi_dev, &cmd_wren, id_buf, 1);
+
+    /* Erase Sector */
+    rt_spi_transfer(spi_dev, erase_cmd, id_buf, 4);
+    rt_thread_mdelay(100);  /* wait for erase to complete */
+
+    /* Write Enable */
+    rt_spi_transfer(spi_dev, &cmd_wren, id_buf, 1);
+
+    /* Write data using DMA mode (>= 16 bytes) */
+    start = rt_tick_get();
+    rt_spi_send_then_send(spi_dev, write_cmd, 4, tx_buffer, SPI_DMA_TEST_SIZE);
+    end = rt_tick_get();
+    rt_kprintf("[DMA] SPI Write %d bytes: %d ticks\n\r", SPI_DMA_TEST_SIZE, end - start);
+    rt_thread_mdelay(50);   /* wait for write to complete */
+
+    /* Read data using DMA mode */
+    start = rt_tick_get();
+    rt_spi_send_then_recv(spi_dev, read_cmd, 4, rx_buffer, SPI_DMA_TEST_SIZE);
+    end = rt_tick_get();
+    rt_kprintf("[DMA] SPI Read %d bytes: %d ticks\n\r", SPI_DMA_TEST_SIZE, end - start);
+
+    /* Verify data */
+    if (memcmp(rx_buffer, tx_buffer, SPI_DMA_TEST_SIZE) == 0) {
+        rt_kprintf("[DMA] SPI Flash test passed!\n\r");
+    } else {
+        rt_kprintf("[DMA] SPI Flash test failed!\n\r");
+        rt_kprintf("[DMA] First 16 bytes - TX: ");
+        for (i = 0; i < 16; i++) {
+            rt_kprintf("%02X ", tx_buffer[i]);
+        }
+        rt_kprintf("\n\r[DMA] First 16 bytes - RX: ");
+        for (i = 0; i < 16; i++) {
+            rt_kprintf("%02X ", rx_buffer[i]);
+        }
+        rt_kprintf("\n\r");
+    }
+}
+
+MSH_CMD_EXPORT(spi_dma_sample, SPI Flash DMA mode test);
 #endif
 
 #ifdef GD32_UART_TEST

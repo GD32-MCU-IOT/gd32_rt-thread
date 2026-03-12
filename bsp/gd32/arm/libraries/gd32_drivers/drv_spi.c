@@ -32,6 +32,7 @@
 #if defined(BSP_USING_SPI0) || defined(BSP_USING_SPI1) || defined(BSP_USING_SPI2) || defined(BSP_USING_SPI3) || defined(BSP_USING_SPI4) || defined(BSP_USING_SPI5)
 
 #define LOG_TAG              "drv.spi"
+#define DMA_TRANS_MIN_LEN    16  /* only buffer length >= DMA_TRANS_MIN_LEN will use DMA mode */
 
 #include <rtdbg.h>
 
@@ -393,7 +394,6 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     }
     
     /* Configure DMA common parameters */
-    dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.priority = DMA_PRIORITY_HIGH;
@@ -405,6 +405,7 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     {
         dma_deinit(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
         
+        dma_init_struct.periph_memory_width = spi_device->dma_rx->data_width;
         dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
         dma_init_struct.periph_addr = (uint32_t)&SPI_DATA(spi_periph);
         
@@ -419,6 +420,7 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     {
         dma_deinit(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
         
+        dma_init_struct.periph_memory_width = spi_device->dma_tx->data_width;
         dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
         dma_init_struct.periph_addr = (uint32_t)&SPI_DATA(spi_periph);
         
@@ -625,8 +627,6 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
 
 #if defined(BSP_USING_SPI_TX_DMA) || defined(BSP_USING_SPI_RX_DMA)
     /* Use DMA for large transfers if enabled */
-    #define DMA_TRANS_MIN_LEN  16  /* Use DMA when length >= 16 bytes */
-    
     if ((spi_device->dma_tx != RT_NULL || spi_device->dma_rx != RT_NULL) 
         && message->length >= DMA_TRANS_MIN_LEN && config->data_width <= 8)
     {

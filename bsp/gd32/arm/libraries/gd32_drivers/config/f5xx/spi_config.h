@@ -39,6 +39,7 @@ extern "C" {
         .channel = SPI0_TX_DMA_CHANNEL,             \
         .subperiph = SPI0_TX_DMA_SUBPERI,           \
         .irq = SPI0_TX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI0_TX_DMA_CONFIG */
 #endif /* BSP_SPI0_TX_USING_DMA */
@@ -52,6 +53,7 @@ extern "C" {
         .channel = SPI0_RX_DMA_CHANNEL,             \
         .subperiph = SPI0_RX_DMA_SUBPERI,           \
         .irq = SPI0_RX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI0_RX_DMA_CONFIG */
 #endif /* BSP_SPI0_RX_USING_DMA */
@@ -78,6 +80,7 @@ extern "C" {
         .channel = SPI1_TX_DMA_CHANNEL,             \
         .subperiph = SPI1_TX_DMA_SUBPERI,           \
         .irq = SPI1_TX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI1_TX_DMA_CONFIG */
 #endif /* BSP_SPI1_TX_USING_DMA */
@@ -91,6 +94,7 @@ extern "C" {
         .channel = SPI1_RX_DMA_CHANNEL,             \
         .subperiph = SPI1_RX_DMA_SUBPERI,           \
         .irq = SPI1_RX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI1_RX_DMA_CONFIG */
 #endif /* BSP_SPI1_RX_USING_DMA */
@@ -117,6 +121,7 @@ extern "C" {
         .channel = SPI2_TX_DMA_CHANNEL,             \
         .subperiph = SPI2_TX_DMA_SUBPERI,           \
         .irq = SPI2_TX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI2_TX_DMA_CONFIG */
 #endif /* BSP_SPI2_TX_USING_DMA */
@@ -130,6 +135,7 @@ extern "C" {
         .channel = SPI2_RX_DMA_CHANNEL,             \
         .subperiph = SPI2_RX_DMA_SUBPERI,           \
         .irq = SPI2_RX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI2_RX_DMA_CONFIG */
 #endif /* BSP_SPI2_RX_USING_DMA */
@@ -156,6 +162,7 @@ extern "C" {
         .channel = SPI3_TX_DMA_CHANNEL,             \
         .subperiph = SPI3_TX_DMA_SUBPERI,           \
         .irq = SPI3_TX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI3_TX_DMA_CONFIG */
 #endif /* BSP_SPI3_TX_USING_DMA */
@@ -169,6 +176,7 @@ extern "C" {
         .channel = SPI3_RX_DMA_CHANNEL,             \
         .subperiph = SPI3_RX_DMA_SUBPERI,           \
         .irq = SPI3_RX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI3_RX_DMA_CONFIG */
 #endif /* BSP_SPI3_RX_USING_DMA */
@@ -195,6 +203,7 @@ extern "C" {
         .channel = SPI4_TX_DMA_CHANNEL,             \
         .subperiph = SPI4_TX_DMA_SUBPERI,           \
         .irq = SPI4_TX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI4_TX_DMA_CONFIG */
 #endif /* BSP_SPI4_TX_USING_DMA */
@@ -208,6 +217,7 @@ extern "C" {
         .channel = SPI4_RX_DMA_CHANNEL,             \
         .subperiph = SPI4_RX_DMA_SUBPERI,           \
         .irq = SPI4_RX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI4_RX_DMA_CONFIG */
 #endif /* BSP_SPI4_RX_USING_DMA */
@@ -234,6 +244,7 @@ extern "C" {
         .channel = SPI5_TX_DMA_CHANNEL,             \
         .subperiph = SPI5_TX_DMA_SUBPERI,           \
         .irq = SPI5_TX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI5_TX_DMA_CONFIG */
 #endif /* BSP_SPI5_TX_USING_DMA */
@@ -247,6 +258,7 @@ extern "C" {
         .channel = SPI5_RX_DMA_CHANNEL,             \
         .subperiph = SPI5_RX_DMA_SUBPERI,           \
         .irq = SPI5_RX_DMA_IRQ,                     \
+        .data_width = DMA_PERIPH_WIDTH_8BIT,        \
     }
 #endif /* SPI5_RX_DMA_CONFIG */
 #endif /* BSP_SPI5_RX_USING_DMA */

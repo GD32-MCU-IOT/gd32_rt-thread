@@ -64,6 +64,7 @@ struct dma_config
                                                 .rcu        = RCU_DMA##dmax,                    \
                                                 .subperiph  = DMA_SUBPERI##subx,                \
                                                 .irq        = DMA##dmax##_Channel##chx##_IRQn,  \
+                                                .data_width = DMA_PERIPH_WIDTH_8BIT,            \
                                             }
 
 struct dma_config
@@ -74,6 +75,7 @@ struct dma_config
     dma_channel_enum channel;
     dma_subperipheral_enum subperiph;
     IRQn_Type irq;
+    uint32_t data_width;    /* DMA transfer data width: DMA_PERIPH_WIDTH_8BIT/16BIT/32BIT */
 };
 
 #endif

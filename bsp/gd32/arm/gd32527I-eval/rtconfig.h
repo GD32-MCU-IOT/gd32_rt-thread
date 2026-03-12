@@ -410,6 +410,8 @@
 #define BSP_USING_SPI5
 #define BSP_SPI5_TX_USING_DMA
 #define BSP_SPI5_RX_USING_DMA
+#define BSP_USING_I2C
+#define BSP_USING_HARD_I2C0
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

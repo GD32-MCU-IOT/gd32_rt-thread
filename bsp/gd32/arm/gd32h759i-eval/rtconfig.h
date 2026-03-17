@@ -157,6 +157,8 @@
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
+#define RT_USING_SPI
+#define RT_USING_SPI_ISR
 #define RT_USING_PIN
 /* end of Device Drivers */
 
@@ -331,6 +333,10 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
+
+/* HPMicro SDK */
+
+/* end of HPMicro SDK */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -340,6 +346,8 @@
 /* touch drivers */
 
 /* end of touch drivers */
+#define PKG_USING_AT24CXX
+#define PKG_USING_AT24CXX_LATEST_VERSION
 /* end of peripheral libraries and drivers */
 
 /* AI packages */
@@ -415,7 +423,7 @@
 
 /* Hardware Drivers Config */
 
-#define SOC_GD32H759I
+#define SOC_GD32H7XX
 
 /* Onboard Peripheral Drivers */
 
@@ -424,6 +432,11 @@
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART0
+#define BSP_USING_UART1
+#define BSP_USING_SPI
+#define BSP_USING_SPI3
+#define BSP_USING_I2C
+#define BSP_USING_HARD_I2C1
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

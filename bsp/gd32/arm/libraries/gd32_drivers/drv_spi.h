@@ -57,7 +57,6 @@ struct gd32_spi
 #include "drv_config.h"
 #endif
 
-
 struct gd32_spi
 {
     uint32_t spi_periph;

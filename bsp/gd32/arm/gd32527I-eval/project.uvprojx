@@ -336,6 +336,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
+<<<<<<< HEAD
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER, __STDC_LIMIT_MACROS, __CLK_TCK=RT_TICK_PER_SECOND, __RTTHREAD__, GD32F527, RT_USING_LIBC, RT_USING_ARMLIBC</Define>
               <Undefine></Undefine>
@@ -397,6 +398,8 @@
               <FileName>at24cxx.c</FileName>
               <FileType>1</FileType>
               <FilePath>packages\at24cxx-latest\at24cxx.c</FilePath>
+<<<<<<< HEAD
+=======
             </File>
           </Files>
         </Group>
@@ -407,33 +410,77 @@
               <FileName>atomic_arm.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\libcpu\arm\common\atomic_arm.c</FilePath>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>CPU</GroupName>
+          <Files>
             <File>
+<<<<<<< HEAD
+              <FileName>atomic_arm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\common\atomic_arm.c</FilePath>
+=======
               <FileName>div0.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\libcpu\arm\common\div0.c</FilePath>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             </File>
             <File>
+<<<<<<< HEAD
+              <FileName>div0.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\common\div0.c</FilePath>
+=======
               <FileName>showmem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\libcpu\arm\common\showmem.c</FilePath>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             </File>
             <File>
+<<<<<<< HEAD
+              <FileName>showmem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\common\showmem.c</FilePath>
+=======
               <FileName>context_rvds.S</FileName>
               <FileType>2</FileType>
               <FilePath>..\..\..\..\libcpu\arm\cortex-m33\context_rvds.S</FilePath>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             </File>
             <File>
+<<<<<<< HEAD
+              <FileName>context_rvds.S</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\cortex-m33\context_rvds.S</FilePath>
+=======
               <FileName>cpuport.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\libcpu\arm\cortex-m33\cpuport.c</FilePath>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             </File>
             <File>
+<<<<<<< HEAD
+              <FileName>cpuport.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\cortex-m33\cpuport.c</FilePath>
+=======
+              <FileName>syscall_rvds.S</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\cortex-m33\syscall_rvds.S</FilePath>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
+            </File>
+            <File>
+<<<<<<< HEAD
               <FileName>syscall_rvds.S</FileName>
               <FileType>2</FileType>
               <FilePath>..\..\..\..\libcpu\arm\cortex-m33\syscall_rvds.S</FilePath>
             </File>
             <File>
+=======
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
               <FileName>trustzone.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\libcpu\arm\cortex-m33\trustzone.c</FilePath>
@@ -667,6 +714,44 @@
                 </FileArmAds>
               </FileOption>
             </File>
+            <File>
+              <FileName>dev_i2c_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\i2c\dev_i2c_core.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>dev_i2c_dev.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\i2c\dev_i2c_dev.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
             <File>
               <FileName>completion_comm.c</FileName>
               <FileType>1</FileType>
@@ -1396,6 +1481,44 @@
               </FileOption>
             </File>
           </Files>
+          <Files>
+            <File>
+              <FileName>dev_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\spi\dev_spi.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>dev_spi_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\spi\dev_spi_core.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>Drivers</GroupName>
@@ -1416,6 +1539,13 @@
               <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_i2c_add.c</FilePath>
             </File>
             <File>
+              <FileName>board_msd_init.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>board\board_msd_init.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
               <FileName>drv_gpio.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\libraries\gd32_drivers\drv_gpio.c</FilePath>
@@ -1430,6 +1560,20 @@
               <FileType>1</FileType>
               <FilePath>..\libraries\gd32_drivers\drv_spi.c</FilePath>
             </File>
+            <File>
+              <FileName>drv_hard_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\libraries\gd32_drivers\drv_hard_i2c.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>drv_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\libraries\gd32_drivers\drv_spi.c</FilePath>
+            </File>
+          </Files>
+          <Files>
             <File>
               <FileName>drv_usart.c</FileName>
               <FileType>1</FileType>
@@ -1665,6 +1809,44 @@
               </FileOption>
             </File>
           </Files>
+          <Files>
+            <File>
+              <FileName>dfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls>  -std=c99</MiscControls>
+                      <Define> </Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>dfs_file.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_file.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls>  -std=c99</MiscControls>
+                      <Define> </Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>Finsh</GroupName>
@@ -1684,12 +1866,18 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
             </File>
+          </Files>
+          <Files>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             <File>
               <FileName>msh.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
             </File>
             <File>
+<<<<<<< HEAD
+              <FileName>msh.c</FileName>
+=======
               <FileName>msh_parse.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
@@ -2554,31 +2742,61 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\libc\compilers\armlibc\syscalls.c</FilePath>
             </File>
+<<<<<<< HEAD
+=======
+          </Files>
+          <Files>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             <File>
               <FileName>cctype.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\libc\compilers\common\cctype.c</FilePath>
             </File>
+<<<<<<< HEAD
+=======
+          </Files>
+          <Files>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             <File>
               <FileName>cstdlib.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\libc\compilers\common\cstdlib.c</FilePath>
             </File>
+<<<<<<< HEAD
+=======
+          </Files>
+          <Files>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             <File>
               <FileName>cstring.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\libc\compilers\common\cstring.c</FilePath>
             </File>
+<<<<<<< HEAD
+=======
+          </Files>
+          <Files>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             <File>
               <FileName>ctime.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\libc\compilers\common\ctime.c</FilePath>
             </File>
+<<<<<<< HEAD
+=======
+          </Files>
+          <Files>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             <File>
               <FileName>cunistd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\libc\compilers\common\cunistd.c</FilePath>
             </File>
+<<<<<<< HEAD
+=======
+          </Files>
+          <Files>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
             <File>
               <FileName>cwchar.c</FileName>
               <FileType>1</FileType>
@@ -2605,9 +2823,9 @@
               <FilePath>..\..\..\..\src\klibc\rt_vsnprintf_tiny.c</FilePath>
             </File>
             <File>
-              <FileName>rt_vsscanf.c</FileName>
+              <FileName>kstdio.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\src\klibc\rt_vsscanf.c</FilePath>
+              <FilePath>..\..\..\..\src\klibc\kstdio.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2675,9 +2893,118 @@
               <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_usart.c</FilePath>
             </File>
           </Files>
+          <Files>
+            <File>
+              <FileName>rt_vsnprintf_tiny.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\src\klibc\rt_vsnprintf_tiny.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>rt_vsscanf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\src\klibc\rt_vsscanf.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
+<<<<<<< HEAD
           <GroupName>::CMSIS</GroupName>
+=======
+          <GroupName>Libraries</GroupName>
+          <Files>
+            <File>
+              <FileName>startup_gd32f5xx.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>packages\gd32-arm-cmsis-latest\GD32F5xx\GD\GD32F5xx\Source\ARM\startup_gd32f5xx.s</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>system_gd32f5xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-cmsis-latest\GD32F5xx\GD\GD32F5xx\Source\system_gd32f5xx.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_dbg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_dbg.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_dma.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_exti.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_gpio.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_i2c.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_i2c_add.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_i2c_add.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_misc.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_rcu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_rcu.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_spi.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_syscfg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_syscfg.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_usart.c</FilePath>
+            </File>
+          </Files>
+>>>>>>> f1a4cf9edc (feat: Add GD32F527 I2C DMA driver support)
         </Group>
       </Groups>
     </Target>

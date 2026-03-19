@@ -331,6 +331,60 @@ menu "On-chip Peripheral Drivers"
                 depends on BSP_USING_HARD_I2C2
                 select BSP_USING_I2C_RX_DMA
                 default n
+
+            config BSP_USING_HARD_I2C3
+                bool "Enable I2C3 BUS (New I2C)"
+                default n
+                help
+                    I2C3 is a new I2C peripheral that supports both TX and RX DMA
+
+            config BSP_I2C3_TX_USING_DMA
+                bool "Enable I2C3 TX DMA"
+                depends on BSP_USING_HARD_I2C3
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C3_RX_USING_DMA
+                bool "Enable I2C3 RX DMA"
+                depends on BSP_USING_HARD_I2C3
+                select BSP_USING_I2C_RX_DMA
+                default n
+
+            config BSP_USING_HARD_I2C4
+                bool "Enable I2C4 BUS (New I2C)"
+                default n
+                help
+                    I2C4 is a new I2C peripheral that supports both TX and RX DMA
+
+            config BSP_I2C4_TX_USING_DMA
+                bool "Enable I2C4 TX DMA"
+                depends on BSP_USING_HARD_I2C4
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C4_RX_USING_DMA
+                bool "Enable I2C4 RX DMA"
+                depends on BSP_USING_HARD_I2C4
+                select BSP_USING_I2C_RX_DMA
+                default n
+
+            config BSP_USING_HARD_I2C5
+                bool "Enable I2C5 BUS (New I2C)"
+                default n
+                help
+                    I2C5 is a new I2C peripheral that supports both TX and RX DMA
+
+            config BSP_I2C5_TX_USING_DMA
+                bool "Enable I2C5 TX DMA"
+                depends on BSP_USING_HARD_I2C5
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C5_RX_USING_DMA
+                bool "Enable I2C5 RX DMA"
+                depends on BSP_USING_HARD_I2C5
+                select BSP_USING_I2C_RX_DMA
+                default n
         endif
 
     menuconfig BSP_USING_ADC

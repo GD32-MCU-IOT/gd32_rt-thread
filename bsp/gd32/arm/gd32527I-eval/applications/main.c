@@ -216,7 +216,29 @@ static uint8_t i2c_24c02_test(void)
     if (memcmp(i2c_buffer_read, i2c_buffer_write, BUFFER_SIZE) == 0) {
         return 1;
     }
-    rt_kprintf("Data mismatch!\n\r");
+    /* Find first mismatch */
+    for (i = 0; i < BUFFER_SIZE; i++) {
+        if (i2c_buffer_read[i] != i2c_buffer_write[i]) {
+            rt_kprintf("Data mismatch at offset %d: wrote 0x%02X, read 0x%02X\n\r",
+                       i, i2c_buffer_write[i], i2c_buffer_read[i]);
+            break;
+        }
+    }
+    /* Dump first 32 bytes of read buffer */
+    rt_kprintf("Read[0..31]: ");
+    for (i = 0; i < 32 && i < BUFFER_SIZE; i++)
+        rt_kprintf("%02X ", i2c_buffer_read[i]);
+    rt_kprintf("\n\r");
+    /* Dump last 16 bytes of read buffer */
+    rt_kprintf("Read[%d..%d]: ", BUFFER_SIZE > 16 ? BUFFER_SIZE - 16 : 0, BUFFER_SIZE - 1);
+    for (i = (BUFFER_SIZE > 16 ? BUFFER_SIZE - 16 : 0); i < BUFFER_SIZE; i++)
+        rt_kprintf("%02X ", i2c_buffer_read[i]);
+    rt_kprintf("\n\r");
+    /* Dump last 16 bytes of write buffer */
+    rt_kprintf("Writ[%d..%d]: ", BUFFER_SIZE > 16 ? BUFFER_SIZE - 16 : 0, BUFFER_SIZE - 1);
+    for (i = (BUFFER_SIZE > 16 ? BUFFER_SIZE - 16 : 0); i < BUFFER_SIZE; i++)
+        rt_kprintf("%02X ", i2c_buffer_write[i]);
+    rt_kprintf("\n\r");
     return 0;
 }
 #endif

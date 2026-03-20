@@ -20,7 +20,7 @@
           <Cpu>IRAM(0x20000000,0x080000) IROM(0x08000000,0x780000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F5xx_7M -FS08000000 -FL0780000 -FP0($$Device:GD32F527IS$Flash\GD32F5xx_7M.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0GD32F527_7M -FS08000000 -FL0780000 -FP0($$Device:GD32F527IS$Flash\GD32F527_7M.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
           <RegisterFile></RegisterFile>
           <MemoryEnv></MemoryEnv>

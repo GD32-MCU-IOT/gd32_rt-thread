@@ -50,6 +50,7 @@ struct gd32_i2c_bus
 
 #if defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)
 #include "drv_dma.h"
+#include "drv_config.h"
 #endif
 
 struct gd32_i2c_bus

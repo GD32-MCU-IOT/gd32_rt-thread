@@ -22,13 +22,13 @@ extern "C" {
 #include "config/e50x/uart_config.h"
 #include "config/e50x/spi_config.h"
 #elif defined(SOC_SERIES_GD32F5xx)
-#include "config/f5xx/dma_config.h"
-#include "config/f5xx/spi_config.h"
+#include "config/f527/dma_config.h"
+#include "config/f527/spi_config.h"
 #elif defined(SOC_SERIES_GD32H7xx)
 #include "config/h75e/dma_config.h"
 #include "config/h75e/uart_config.h"
 #include "config/h75e/spi_config.h"
-#elif defined(SOC_SERIES_GD32H5E)
+#elif defined(SOC_SERIES_GD32H75E)
 #include "config/h75e/dma_config.h"
 #include "config/h75e/uart_config.h"
 #include "config/h75e/spi_config.h"

@@ -6,7 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2021-08-20     BruceOu      first implementation
- * 2026-03-05     RT-Thread    simplified test cases (E113 style)
+ * 2026-03-05     RT-Thread    simplified test cases
  */
 
 #include <rtthread.h>
@@ -41,7 +41,7 @@ static uint8_t i2c_24c02_test(void);
 
 #if defined(GD32_SPI_POLL_TEST) || defined(GD32_SPI_DMA_TEST)
 #define SPI_BUS_NAME     "spi5"
-#define SPI_DEV_NAME     "spi50"
+#define SPI_DEV_NAME     "spi05"
 #define SPI_CS_PIN       GET_PIN(I, 8)
 
 static uint8_t cmd_read_id = 0x9F;
@@ -52,13 +52,13 @@ static void spi_init_device(void);
 #endif
 
 #ifdef GD32_SPI_POLL_TEST
-/* SPI polling mode test - transfer < 16 bytes */
+/* SPI polling mode test - transfer below BSP_SPI_DMA_TRANS_MIN_LEN */
 #define SPI_POLL_TEST_SIZE    8
 static void spi_poll_sample(void);
 #endif
 
 #ifdef GD32_SPI_DMA_TEST
-/* SPI DMA mode test - transfer >= 16 bytes (driver uses DMA when length >= 16) */
+/* SPI DMA mode test - transfer >= BSP_SPI_DMA_TRANS_MIN_LEN */
 #define SPI_DMA_TEST_SIZE     200
 static uint8_t tx_buffer[SPI_DMA_TEST_SIZE];
 static uint8_t rx_buffer[SPI_DMA_TEST_SIZE];
@@ -103,12 +103,10 @@ int main(void)
 #endif
 
 #ifdef GD32_SPI_POLL_TEST
-    rt_kprintf("\n\r=== SPI Polling Mode Test (%d bytes < 16) ===\n\r", SPI_POLL_TEST_SIZE);
     spi_poll_sample();
 #endif
 
 #ifdef GD32_SPI_DMA_TEST
-    rt_kprintf("\n\r=== SPI DMA Mode Test (%d bytes >= 16) ===\n\r", SPI_DMA_TEST_SIZE);
     spi_dma_sample();
 #endif
 
@@ -299,6 +297,12 @@ MSH_CMD_EXPORT(spi_poll_sample, SPI Flash polling mode test);
  */
 static void spi_dma_sample(void)
 {
+#ifndef BSP_SPI5_USING_DMA
+    rt_kprintf("[DMA] Warning: BSP_SPI5_USING_DMA not enabled!\n\r");
+    rt_kprintf("[DMA] Test will use polling mode instead.\n\r");
+    rt_kprintf("[DMA] Enable 'Enable SPI5 DMA' in menuconfig to use DMA.\n\r\n\r");
+#endif
+
     uint8_t erase_cmd[4] = {0x20, 0x00, 0x00, 0x00};   /* Sector Erase at 0x000000 */
     uint8_t write_cmd[4] = {0x02, 0x00, 0x00, 0x00};   /* Page Program at 0x000000 */
     uint8_t read_cmd[4]  = {0x03, 0x00, 0x00, 0x00};   /* Read Data at 0x000000 */
@@ -334,18 +338,30 @@ static void spi_dma_sample(void)
     start = rt_tick_get();
     rt_spi_send_then_send(spi_dev, write_cmd, 4, tx_buffer, SPI_DMA_TEST_SIZE);
     end = rt_tick_get();
+#ifdef BSP_SPI5_USING_DMA
     rt_kprintf("[DMA] SPI Write %d bytes: %d ticks\n\r", SPI_DMA_TEST_SIZE, end - start);
+#else
+    rt_kprintf("[Poll] SPI Write %d bytes: %d ticks\n\r", SPI_DMA_TEST_SIZE, end - start);
+#endif
     rt_thread_mdelay(50);   /* wait for write to complete */
 
     /* Read data using DMA mode */
     start = rt_tick_get();
     rt_spi_send_then_recv(spi_dev, read_cmd, 4, rx_buffer, SPI_DMA_TEST_SIZE);
     end = rt_tick_get();
+#ifdef BSP_SPI5_USING_DMA
     rt_kprintf("[DMA] SPI Read %d bytes: %d ticks\n\r", SPI_DMA_TEST_SIZE, end - start);
+#else
+    rt_kprintf("[Poll] SPI Read %d bytes: %d ticks\n\r", SPI_DMA_TEST_SIZE, end - start);
+#endif
 
     /* Verify data */
     if (memcmp(rx_buffer, tx_buffer, SPI_DMA_TEST_SIZE) == 0) {
-        rt_kprintf("[DMA] SPI Flash test passed!\n\r");
+#ifdef BSP_SPI5_USING_DMA
+        rt_kprintf("[DMA] SPI Flash test passed! (DMA mode)\n\r");
+#else
+        rt_kprintf("[Poll] SPI Flash test passed! (DMA not enabled)\n\r");
+#endif
     } else {
         rt_kprintf("[DMA] SPI Flash test failed!\n\r");
         rt_kprintf("[DMA] First 16 bytes - TX: ");

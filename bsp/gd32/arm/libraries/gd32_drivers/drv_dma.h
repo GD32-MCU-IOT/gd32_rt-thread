@@ -39,7 +39,7 @@ struct dma_config
 #elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
 /* DMAMUX + MDMA - reqx is DMAMUX request ID or subperipheral index */
 #define DRV_DMA_CONFIG(dmax, chx, reqx)     {                                                   \
-                                                .periph     = DMA##dmax,                         \
+                                                .periph     = DMA##dmax,                        \
                                                 .channel    = DMA_CH##chx,                      \
                                                 .rcu        = RCU_DMA##dmax,                    \
                                                 .request    = (uint32_t)(reqx),                 \

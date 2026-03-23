@@ -68,3 +68,23 @@ extern int __bss_end;
 #define SPI5_RX_DMA_SUBPERI             DMA_SUBPERI1
 #endif
 #endif
+
+/* UART1 TX DMA configuration override */
+#if defined(BSP_UART1_TX_USING_DMA) && !defined(UART1_TX_DMA_PERIPH)
+#define UART1_DMA_TX_IRQHandler         DMA0_Channel6_IRQHandler
+#define UART1_TX_DMA_RCU                RCU_DMA0
+#define UART1_TX_DMA_PERIPH             DMA0
+#define UART1_TX_DMA_CHANNEL            DMA_CH6
+#define UART1_TX_DMA_IRQ                DMA0_Channel6_IRQn
+#define UART1_TX_DMA_SUBPERI            DMA_SUBPERI4
+#endif
+
+/* UART1 RX DMA configuration override */
+#if defined(BSP_UART1_RX_USING_DMA) && !defined(UART1_RX_DMA_PERIPH)
+#define UART1_DMA_RX_IRQHandler         DMA0_Channel5_IRQHandler
+#define UART1_RX_DMA_RCU                RCU_DMA0
+#define UART1_RX_DMA_PERIPH             DMA0
+#define UART1_RX_DMA_CHANNEL            DMA_CH5
+#define UART1_RX_DMA_IRQ                DMA0_Channel5_IRQn
+#define UART1_RX_DMA_SUBPERI            DMA_SUBPERI4
+#endif

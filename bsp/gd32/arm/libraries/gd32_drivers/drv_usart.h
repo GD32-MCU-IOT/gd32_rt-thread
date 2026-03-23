@@ -95,12 +95,13 @@ struct gd32_uart
 
 #ifdef RT_SERIAL_USING_DMA
 #include "drv_dma.h"
+#include "drv_config.h"
 #endif
 
 #ifdef RT_SERIAL_USING_DMA
 typedef struct
 {
-    dma_config *config;
+    struct dma_config *config;
     /* setting receive len */
     rt_size_t setting_recv_len;
     /* last receive index */
@@ -119,10 +120,10 @@ struct gd32_uart
 
 #ifdef RT_SERIAL_USING_DMA
 #ifdef BSP_USING_UART_TX_DMA
-    dma_config *dma_tx;
+    struct dma_config *dma_tx;
 #endif
 #ifdef BSP_USING_UART_RX_DMA
-    dma_config *dma_rx;
+    struct dma_config *dma_rx;
     /* setting receive len */
     rt_size_t setting_recv_len;
     /* last receive index */

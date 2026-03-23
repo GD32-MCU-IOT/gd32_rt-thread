@@ -163,6 +163,16 @@ menu "On-chip Peripheral Drivers"
                 depends on BSP_USING_UART7
                 select BSP_USING_UART_TX_DMA
                 default n
+
+            if BSP_USING_UART_TX_DMA
+                config BSP_UART_DMA_TX_THRESHOLD
+                    int "UART DMA TX minimum transfer length"
+                    range 1 256
+                    default 8
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+            endif
         endif
 
     menuconfig BSP_USING_SPI

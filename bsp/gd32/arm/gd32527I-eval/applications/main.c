@@ -15,10 +15,11 @@
 #include <string.h>
 
 /* Test Feature Switches - comment out to disable */
-#define GD32_I2C_EEPROM_TEST
-#define GD32_SPI_POLL_TEST
-#define GD32_SPI_DMA_TEST
-#define GD32_UART_TEST
+//#define GD32_I2C_EEPROM_TEST
+//#define GD32_SPI_POLL_TEST
+//#define GD32_SPI_DMA_TEST
+//#define GD32_UART_TEST
+#define GD32_UART_DMA_TEST
 #define GD32_GPIO_EXTI_TEST
 
 /* LED pins - GD32F527I-EVAL board (per schematic) */
@@ -66,10 +67,37 @@ static void spi_dma_sample(void);
 #endif
 
 #ifdef GD32_UART_TEST
-#define SAMPLE_UART_NAME    "uart1"
-static struct rt_semaphore rx_sem;
-static rt_device_t serial;
+/* UART basic test: INT_RX single-char echo on uart1 */
+#define UART_INT_NAME      "uart2"
+static struct rt_semaphore uart_int_rx_sem;
+static rt_device_t uart_int_serial;
 static int uart_sample(int argc, char *argv[]);
+#endif
+
+#ifdef GD32_UART_DMA_TEST
+/* UART DMA test: DMA RX + DMA TX echo on uart2 */
+#define UART_DMA_NAME      "uart1"
+#define RX_BUF_SIZE        256
+#define TX_BUF_SIZE        256
+
+static struct rt_semaphore uart_dma_rx_sem;
+static struct rt_semaphore uart_dma_tx_sem;
+static struct rt_mutex uart_dma_tx_mutex;
+static rt_device_t uart_dma_serial;
+static rt_uint8_t rx_buf[RX_BUF_SIZE];
+static rt_uint8_t tx_buf[TX_BUF_SIZE];
+
+/* Statistics */
+static rt_uint32_t total_rx_bytes = 0;
+static rt_uint32_t total_tx_bytes = 0;
+static rt_uint32_t rx_count = 0;
+static rt_uint32_t tx_count = 0;
+
+/* Forward declarations */
+static rt_err_t uart_dma_rx_indicate(rt_device_t dev, rt_size_t size);
+static rt_err_t uart_dma_tx_done(rt_device_t dev, void *buffer);
+static rt_size_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len);
+static void uart_dma_thread_entry(void *parameter);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
@@ -113,6 +141,43 @@ int main(void)
 #ifdef GD32_UART_TEST
     rt_kprintf("\n\r--- UART Test ---\n\r");
     uart_sample(0, 0);
+#endif
+
+#ifdef GD32_UART_DMA_TEST
+    rt_kprintf("\n\r--- UART DMA Test ---\n\r");
+    {
+        char str[] = "hello RT-Thread!\r\n";
+
+        /* find uart device */
+        uart_dma_serial = rt_device_find(UART_DMA_NAME);
+        if (!uart_dma_serial)
+        {
+            rt_kprintf("find %s failed!\n\r", UART_DMA_NAME);
+        }
+        else
+        {
+            /* Initialize semaphores and mutex */
+            rt_sem_init(&uart_dma_rx_sem, "dmarxsem", 0, RT_IPC_FLAG_FIFO);
+            rt_sem_init(&uart_dma_tx_sem, "dmatxsem", 0, RT_IPC_FLAG_FIFO);
+            rt_mutex_init(&uart_dma_tx_mutex, "dmatxmtx", RT_IPC_FLAG_PRIO);
+
+            /* Open with DMA RX + DMA TX */
+            rt_device_open(uart_dma_serial, RT_DEVICE_FLAG_DMA_RX | RT_DEVICE_FLAG_DMA_TX);
+            rt_device_set_rx_indicate(uart_dma_serial, uart_dma_rx_indicate);
+            rt_device_set_tx_complete(uart_dma_serial, uart_dma_tx_done);
+
+            /* Send initial message via DMA */
+            uart_dma_send((const rt_uint8_t *)str, sizeof(str) - 1);
+
+            rt_thread_t thread = rt_thread_create("dmauart", uart_dma_thread_entry, RT_NULL, 1024, 25, 10);
+            if (thread != RT_NULL)
+            {
+                rt_thread_startup(thread);
+                rt_kprintf("UART DMA RX + DMA TX on %s (115200,8N1)\n\r", UART_DMA_NAME);
+                rt_kprintf("Commands: dma_tx <data>, loopback [n], uart_stat, uart_clear\n\r");
+            }
+        }
+    }
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
@@ -380,20 +445,20 @@ MSH_CMD_EXPORT(spi_dma_sample, SPI Flash DMA mode test);
 #endif
 
 #ifdef GD32_UART_TEST
-static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
+static rt_err_t uart_rx_indicate(rt_device_t dev, rt_size_t size)
 {
-    rt_sem_release(&rx_sem);
+    rt_sem_release(&uart_int_rx_sem);
     return RT_EOK;
 }
 
-static void serial_thread_entry(void *parameter)
+static void uart_echo_thread_entry(void *parameter)
 {
     char ch;
     while (1) {
-        while (rt_device_read(serial, -1, &ch, 1) != 1) {
-            rt_sem_take(&rx_sem, RT_WAITING_FOREVER);
+        while (rt_device_read(uart_int_serial, -1, &ch, 1) != 1) {
+            rt_sem_take(&uart_int_rx_sem, RT_WAITING_FOREVER);
         }
-        rt_device_write(serial, 0, &ch, 1);
+        rt_device_write(uart_int_serial, 0, &ch, 1);
     }
 }
 
@@ -405,31 +470,167 @@ static int uart_sample(int argc, char *argv[])
     if (argc == 2) {
         rt_strncpy(uart_name, argv[1], RT_NAME_MAX);
     } else {
-        rt_strncpy(uart_name, SAMPLE_UART_NAME, RT_NAME_MAX);
+        rt_strncpy(uart_name, UART_INT_NAME, RT_NAME_MAX);
     }
 
-    serial = rt_device_find(uart_name);
-    if (!serial) {
+    uart_int_serial = rt_device_find(uart_name);
+    if (!uart_int_serial) {
         rt_kprintf("UART device %s not found!\n\r", uart_name);
         return RT_ERROR;
     }
 
-    rt_sem_init(&rx_sem, "rx_sem", 0, RT_IPC_FLAG_FIFO);
-    rt_device_open(serial, RT_DEVICE_FLAG_INT_RX);
-    rt_device_set_rx_indicate(serial, uart_input);
-    rt_device_write(serial, 0, str, (sizeof(str) - 1));
+    rt_sem_init(&uart_int_rx_sem, "intrxsem", 0, RT_IPC_FLAG_FIFO);
+    rt_device_open(uart_int_serial, RT_DEVICE_FLAG_INT_RX);
+    rt_device_set_rx_indicate(uart_int_serial, uart_rx_indicate);
+    rt_device_write(uart_int_serial, 0, str, (sizeof(str) - 1));
 
-    rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 1024, 25, 10);
+    rt_thread_t thread = rt_thread_create("intuart", uart_echo_thread_entry, RT_NULL, 1024, 25, 10);
     if (thread != RT_NULL) {
         rt_thread_startup(thread);
-        rt_kprintf("UART %s echo test started.\n\r", uart_name);
+        rt_kprintf("UART %s INT_RX echo test started.\n\r", uart_name);
     }
 
     return RT_EOK;
 }
 
-MSH_CMD_EXPORT(uart_sample, UART echo test sample);
+MSH_CMD_EXPORT(uart_sample, UART INT_RX echo test sample);
 #endif
+
+#ifdef GD32_UART_DMA_TEST
+/* TX complete callback */
+static rt_err_t uart_dma_tx_done(rt_device_t dev, void *buffer)
+{
+    rt_sem_release(&uart_dma_tx_sem);
+    return RT_EOK;
+}
+
+/* RX indicate callback */
+static rt_err_t uart_dma_rx_indicate(rt_device_t dev, rt_size_t size)
+{
+    rt_sem_release(&uart_dma_rx_sem);
+    return RT_EOK;
+}
+
+/* DMA TX send with mutex and completion wait */
+static rt_size_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len)
+{
+    rt_size_t sent;
+
+    rt_mutex_take(&uart_dma_tx_mutex, RT_WAITING_FOREVER);
+
+    if (len > TX_BUF_SIZE)
+    {
+        len = TX_BUF_SIZE;
+    }
+    rt_memcpy(tx_buf, buf, len);
+
+    sent = rt_device_write(uart_dma_serial, 0, tx_buf, len);
+    if (sent > 0)
+    {
+        rt_sem_take(&uart_dma_tx_sem, RT_WAITING_FOREVER);
+        tx_count++;
+        total_tx_bytes += sent;
+    }
+
+    rt_mutex_release(&uart_dma_tx_mutex);
+
+    return sent;
+}
+
+static void uart_dma_thread_entry(void *parameter)
+{
+    rt_size_t len;
+
+    while (1)
+    {
+        /* wait for DMA RX data */
+        rt_sem_take(&uart_dma_rx_sem, RT_WAITING_FOREVER);
+
+        /* read data in batch */
+        len = rt_device_read(uart_dma_serial, 0, rx_buf, RX_BUF_SIZE);
+        if (len > 0)
+        {
+            rx_count++;
+            total_rx_bytes += len;
+
+            /* Print to console */
+            rt_kprintf("[RX#%d] %d bytes: ", rx_count, len);
+
+            /* Echo back using DMA TX */
+            uart_dma_send(rx_buf, len);
+        }
+    }
+}
+
+/* DMA TX test command: dma_tx <data> */
+static void uart_dma_tx_test(int argc, char *argv[])
+{
+    if (argc < 2)
+    {
+        rt_kprintf("Usage: dma_tx <data>\n");
+        return;
+    }
+
+    const char *data = argv[1];
+    rt_size_t len = strlen(data);
+
+    rt_kprintf("DMA TX: sending %d bytes\n", len);
+    uart_dma_send((const rt_uint8_t *)data, len);
+    uart_dma_send((const rt_uint8_t *)"\r\n", 2);
+    rt_kprintf("DMA TX done!\n");
+}
+MSH_CMD_EXPORT_ALIAS(uart_dma_tx_test, dma_tx, DMA TX test <data>);
+
+/* Loopback test: send data and verify echo */
+static void uart_loopback_test(int argc, char *argv[])
+{
+    rt_uint8_t test_buf[64];
+    int i, count = 10;
+
+    if (argc > 1)
+    {
+        count = atoi(argv[1]);
+    }
+
+    rt_kprintf("Loopback test: %d iterations\n", count);
+    rt_kprintf("Connect TX(PA2) to RX(PA3) externally!\n");
+
+    for (i = 0; i < count; i++)
+    {
+        /* Fill with pattern */
+        rt_snprintf((char *)test_buf, sizeof(test_buf), "TEST%04d\r\n", i);
+
+        /* Send via DMA */
+        uart_dma_send(test_buf, strlen((char *)test_buf));
+
+        /* Small delay for echo processing */
+        rt_thread_mdelay(50);
+    }
+
+    rt_kprintf("Loopback test done! Check uart_stat for results.\n");
+}
+MSH_CMD_EXPORT_ALIAS(uart_loopback_test, loopback, Loopback test [count]);
+
+/* Show statistics */
+static void uart_stat(int argc, char *argv[])
+{
+    rt_kprintf("UART Statistics (DMA RX + DMA TX):\n");
+    rt_kprintf("  RX count: %d, bytes: %d\n", rx_count, total_rx_bytes);
+    rt_kprintf("  TX count: %d, bytes: %d\n", tx_count, total_tx_bytes);
+}
+MSH_CMD_EXPORT_ALIAS(uart_stat, uart_stat, Show UART statistics);
+
+/* Clear statistics */
+static void uart_stat_clear(int argc, char *argv[])
+{
+    total_rx_bytes = 0;
+    total_tx_bytes = 0;
+    rx_count = 0;
+    tx_count = 0;
+    rt_kprintf("Statistics cleared.\n");
+}
+MSH_CMD_EXPORT_ALIAS(uart_stat_clear, uart_clear, Clear UART statistics);
+#endif /* GD32_UART_DMA_TEST */
 
 #ifdef GD32_GPIO_EXTI_TEST
 void wakeup_key_pin_cb(void *args)

@@ -52,8 +52,9 @@ struct gd32_spi
 };
 #else
 
-#if defined(BSP_USING_SPI_TX_DMA) || defined(BSP_USING_SPI_RX_DMA)
+#if defined(BSP_USING_SPI_DMA)
 #include "drv_dma.h"
+#include "drv_config.h"
 #endif
 
 
@@ -64,10 +65,8 @@ struct gd32_spi
     IRQn_Type irqn;
     char *bus_name;
     struct rt_spi_bus *spi_bus;
-#ifdef BSP_USING_SPI_TX_DMA
+#ifdef BSP_USING_SPI_DMA
     struct dma_config *dma_tx;
-#endif
-#ifdef BSP_USING_SPI_RX_DMA
     struct dma_config *dma_rx;
 #endif
 };

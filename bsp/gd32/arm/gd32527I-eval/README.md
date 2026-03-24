@@ -11,9 +11,10 @@
 | **片上外设** | **支持情况** | **备注**                           |
 |:-------- |:--------:|:-------------------------------- |
 | GPIO     | 支持       | PA0, PA1... ---> PIN: 0, 1...113 |
-| UART     | 支持       | UART0 - UART7                    |
-| **扩展模块** | **支持情况** | **备注**                           |
-| 暂无       | 暂不支持     | 暂不支持                             |
+| UART     | 支持       | UART0 - UART7            |
+| SPI      | 支持       | SPI0 - SPI5，支持 DMA              |
+| I2C      | 支持       | I2C0 - I2C2，硬件 I2C      |
+
 
 ## 二 使用说明
 
@@ -72,10 +73,3 @@ msh />
 ## 3.5 注意事项
 
 若MDK编译无法运行请更行MDK至较新的版本，在MDK538版本测试通过。
-
-## 四 联系人信息
-
-维护人:
-
-- [yuanzihao](https://github.com/zihao-yuan/), 邮箱：<y@yzh.email>
-- [Guozhanxin](https://github.com/Guozhanxin)

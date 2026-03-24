@@ -277,9 +277,9 @@ get_sp_done
 
 #if defined ( __ARMVFP__ )
     TST     lr, #0x10                               ; if(!EXC_RETURN[4])
-    BNE     skip_push_fpu
+    BNE     skip_push_fpu_hf
     VSTMDB  r0!, {d8 - d15}                         ; push FPU register s16~s31
-skip_push_fpu
+skip_push_fpu_hf
 #endif
 
     STMFD   r0!, {r4 - r11}                         ; push r4 - r11 register

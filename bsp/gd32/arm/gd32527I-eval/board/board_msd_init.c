@@ -49,6 +49,30 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
         gpio_output_options_set(GPIOH, GPIO_OTYPE_OD, GPIO_OSPEED_MAX, GPIO_PIN_7 | GPIO_PIN_8);
         break;
 #endif
+#ifdef BSP_USING_HARD_I2C3
+    case I2C3:
+        rcu_periph_clock_enable(RCU_GPIOF);
+        gpio_af_set(GPIOF, GPIO_AF_4, GPIO_PIN_14 | GPIO_PIN_15);
+        gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_14 | GPIO_PIN_15);
+        gpio_output_options_set(GPIOF, GPIO_OTYPE_OD, GPIO_OSPEED_MAX, GPIO_PIN_14 | GPIO_PIN_15);
+        break;
+#endif
+#ifdef BSP_USING_HARD_I2C4
+    case I2C4:
+        rcu_periph_clock_enable(RCU_GPIOG);
+        gpio_af_set(GPIOG, GPIO_AF_6, GPIO_PIN_7 | GPIO_PIN_8);
+        gpio_mode_set(GPIOG, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_7 | GPIO_PIN_8);
+        gpio_output_options_set(GPIOG, GPIO_OTYPE_OD, GPIO_OSPEED_MAX, GPIO_PIN_7 | GPIO_PIN_8);
+        break;
+#endif
+#ifdef BSP_USING_HARD_I2C5
+    case I2C5:
+        rcu_periph_clock_enable(RCU_GPIOH);
+        gpio_af_set(GPIOH, GPIO_AF_4, GPIO_PIN_14 | GPIO_PIN_15);
+        gpio_mode_set(GPIOH, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_14 | GPIO_PIN_15);
+        gpio_output_options_set(GPIOH, GPIO_OTYPE_OD, GPIO_OSPEED_MAX, GPIO_PIN_14 | GPIO_PIN_15);
+        break;
+#endif
     default:
         break;
     }

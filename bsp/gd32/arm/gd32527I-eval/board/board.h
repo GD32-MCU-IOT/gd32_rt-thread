@@ -48,3 +48,23 @@ extern int __bss_end;
 
 #endif
 
+#ifdef BSP_USING_SPI_DMA
+#if defined(BSP_SPI5_USING_DMA) && !defined(SPI5_TX_DMA_PERIPH)
+#define SPI5_TX_DMA_PERIPH              DMA1
+#define SPI5_DMA_TX_IRQHandler          DMA1_Channel5_IRQHandler
+#define SPI5_TX_DMA_RCU                 RCU_DMA1
+#define SPI5_TX_DMA_CHANNEL             DMA_CH5
+#define SPI5_TX_DMA_IRQ                 DMA1_Channel5_IRQn
+#define SPI5_TX_DMA_SUBPERI             DMA_SUBPERI1
+#endif
+
+/* SPI5 RX: DMA1 channel6, subperi1 */
+#if defined(BSP_SPI5_USING_DMA) && !defined(SPI5_RX_DMA_PERIPH)
+#define SPI5_RX_DMA_PERIPH              DMA1
+#define SPI5_DMA_RX_IRQHandler          DMA1_Channel6_IRQHandler
+#define SPI5_RX_DMA_RCU                 RCU_DMA1
+#define SPI5_RX_DMA_CHANNEL             DMA_CH6
+#define SPI5_RX_DMA_IRQ                 DMA1_Channel6_IRQn
+#define SPI5_RX_DMA_SUBPERI             DMA_SUBPERI1
+#endif
+#endif

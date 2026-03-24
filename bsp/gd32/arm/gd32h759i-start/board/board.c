@@ -1,16 +1,22 @@
 /*
- * Copyright (c) 2006-2024 RT-Thread Development Team
+ * Copyright (c) 2006-2026 RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2021-08-20     BruceOu      first implementation
+ * 2026-03-17     RT-Thread    first implementation
  */
 #include <stdint.h>
 #include <rthw.h>
 #include <rtthread.h>
 #include <board.h>
+
+#ifdef RT_USING_SERIAL_V2
+#include "drv_usart_v2.h"
+#else
+#include "drv_usart.h"
+#endif
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -32,6 +38,7 @@ void Error_Handler(void)
 void SystemClock_Config(void)
 {
     SysTick_Config(SystemCoreClock / RT_TICK_PER_SECOND);
+    NVIC_SetPriority(SysTick_IRQn, 0);
 }
 
 /**
@@ -54,16 +61,6 @@ void SysTick_Handler(void)
  */
 void rt_hw_board_init()
 {
-    /* NVIC Configuration */
-#define NVIC_VTOR_MASK              0x3FFFFF80
-#ifdef  VECT_TAB_RAM
-    /* Set the Vector Table base location at 0x10000000 */
-    SCB->VTOR  = (0x10000000 & NVIC_VTOR_MASK);
-#else  /* VECT_TAB_FLASH  */
-    /* Set the Vector Table base location at 0x08000000 */
-    SCB->VTOR  = (0x08000000 & NVIC_VTOR_MASK);
-#endif
-
     /* Enable IChace */
     rt_hw_cpu_icache_enable();
 
@@ -76,17 +73,17 @@ void rt_hw_board_init()
     rt_hw_usart_init();
 #endif
 
-#ifdef RT_USING_COMPONENTS_INIT
-    rt_components_board_init();
+#ifdef BSP_USING_SDRAM
+    rt_system_heap_init((void *)EXT_SDRAM_BEGIN, (void *)EXT_SDRAM_END);
+#else
+    rt_system_heap_init((void *)HEAP_BEGIN, (void *)HEAP_END);
 #endif
 
 #ifdef RT_USING_CONSOLE
     rt_console_set_device(RT_CONSOLE_DEVICE_NAME);
 #endif
 
-#ifdef RT_USING_HEAP
-    rt_system_heap_init((void *)HEAP_BEGIN, (void *)HEAP_END);
+#ifdef RT_USING_COMPONENTS_INIT
+    rt_components_board_init();
 #endif
 }
-
-/*@}*/

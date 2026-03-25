@@ -70,5 +70,10 @@ objs = PrepareBuilding(env, RTT_ROOT, has_libcpu=False)
 # include libraries
 objs.extend(SConscript(os.path.join(libraries_path_prefix, 'gd32_drivers', 'SConscript')))
 
+# Fix: Ensure all groups with LIBS also have LIBPATH to avoid KeyError in MDK project generation
+for group in objs:
+    if isinstance(group, dict) and 'LIBS' in group and 'LIBPATH' not in group:
+        group['LIBPATH'] = []
+
 # make a building
 DoBuilding(TARGET, objs)

@@ -1,18 +1,20 @@
 /*
- * Copyright (c) 2006-2025 RT-Thread Development Team
+ * Copyright (c) 2006-2026 RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2021-08-20     BruceOu      first implementation
+ * 2026-03-17     RT-Thread    first implementation
  */
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
 #include "gd32h7xx.h"
-#include "drv_usart.h"
 #include "drv_gpio.h"
+#include "drv_hard_i2c.h"
+#include "drv_usart.h"
+#include "drv_spi.h"
 
 #include "gd32h7xx_exti.h"
 

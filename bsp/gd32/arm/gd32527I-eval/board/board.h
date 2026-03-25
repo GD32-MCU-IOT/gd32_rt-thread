@@ -46,8 +46,6 @@ extern int __bss_end;
 
 #define HEAP_END          GD32_SRAM_END
 
-#endif
-
 #ifdef BSP_USING_SPI_DMA
 #if defined(BSP_SPI5_USING_DMA) && !defined(SPI5_TX_DMA_PERIPH)
 #define SPI5_TX_DMA_PERIPH              DMA1
@@ -68,3 +66,5 @@ extern int __bss_end;
 #define SPI5_RX_DMA_SUBPERI             DMA_SUBPERI1
 #endif
 #endif
+
+#endif /* __BOARD_H__ */

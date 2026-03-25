@@ -684,7 +684,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart0_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart0_rxdma,
 #endif
 #endif
@@ -702,7 +702,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart1_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart1_rxdma,
 #endif
 #endif
@@ -720,7 +720,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart2_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart2_rxdma,
 #endif
 #endif
@@ -738,7 +738,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart3_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart3_rxdma,
 #endif
 #endif
@@ -756,7 +756,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart4_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart4_rxdma,
 #endif
 #endif
@@ -774,7 +774,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart5_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart5_rxdma,
 #endif
 #endif
@@ -792,7 +792,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart6_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart6_rxdma,
 #endif
 #endif

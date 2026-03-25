@@ -28,69 +28,45 @@ menu "On-chip Peripheral Drivers"
         default y
         select RT_USING_SERIAL
         if BSP_USING_UART
+            config BSP_USING_UART_TX_DMA
+                bool
+                select RT_SERIAL_USING_DMA
+
+            config BSP_USING_UART_RX_DMA
+                bool
+                select RT_SERIAL_USING_DMA
+
             config BSP_USING_UART0
                 bool "Enable UART0"
                 default y
 
             config BSP_UART0_RX_USING_DMA
                 bool "Enable UART0 RX DMA"
-                depends on BSP_USING_UART0 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART0
+                select BSP_USING_UART_RX_DMA
                 default n
 
             config BSP_UART0_TX_USING_DMA
                 bool "Enable UART0 TX DMA"
-                depends on BSP_USING_UART0 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART0
+                select BSP_USING_UART_TX_DMA
                 default n
-
-            config BSP_UART0_DMA_PING_BUFSIZE
-                int "Set UART0 RX DMA ping-pong buffer size"
-                range 16 65535
-                depends on BSP_USING_UART0 && RT_USING_SERIAL_V2 && BSP_UART0_RX_USING_DMA
-                default 64
-
-            config BSP_UART0_RX_BUFSIZE
-                int "Set UART0 RX buffer size"
-                range 64 65535
-                depends on BSP_USING_UART0 && RT_USING_SERIAL_V2
-                default 128
-
-            config BSP_UART0_TX_BUFSIZE
-                int "Set UART0 TX buffer size"
-                range 0 65535
-                depends on BSP_USING_UART0 && RT_USING_SERIAL_V2
-                default 128
 
             config BSP_USING_UART1
                 bool "Enable UART1"
-                default y
+                default n
 
             config BSP_UART1_RX_USING_DMA
                 bool "Enable UART1 RX DMA"
-                depends on BSP_USING_UART1 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART1
+                select BSP_USING_UART_RX_DMA
                 default n
 
             config BSP_UART1_TX_USING_DMA
                 bool "Enable UART1 TX DMA"
-                depends on BSP_USING_UART1 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART1
+                select BSP_USING_UART_TX_DMA
                 default n
-
-            config BSP_UART1_DMA_PING_BUFSIZE
-                int "Set UART1 RX DMA ping-pong buffer size"
-                range 16 65535
-                depends on BSP_USING_UART1 && RT_USING_SERIAL_V2 && BSP_UART1_RX_USING_DMA
-                default 64
-
-            config BSP_UART1_RX_BUFSIZE
-                int "Set UART1 RX buffer size"
-                range 64 65535
-                depends on BSP_USING_UART1 && RT_USING_SERIAL_V2
-                default 128
-
-            config BSP_UART1_TX_BUFSIZE
-                int "Set UART1 TX buffer size"
-                range 0 65535
-                depends on BSP_USING_UART1 && RT_USING_SERIAL_V2
-                default 128
 
             config BSP_USING_UART2
                 bool "Enable UART2"
@@ -98,31 +74,15 @@ menu "On-chip Peripheral Drivers"
 
             config BSP_UART2_RX_USING_DMA
                 bool "Enable UART2 RX DMA"
-                depends on BSP_USING_UART2 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART2
+                select BSP_USING_UART_RX_DMA
                 default n
 
             config BSP_UART2_TX_USING_DMA
                 bool "Enable UART2 TX DMA"
-                depends on BSP_USING_UART2 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART2
+                select BSP_USING_UART_TX_DMA
                 default n
-
-            config BSP_UART2_DMA_PING_BUFSIZE
-                int "Set UART2 RX DMA ping-pong buffer size"
-                range 16 65535
-                depends on BSP_USING_UART2 && RT_USING_SERIAL_V2 && BSP_UART2_RX_USING_DMA
-                default 64
-
-            config BSP_UART2_RX_BUFSIZE
-                int "Set UART2 RX buffer size"
-                range 64 65535
-                depends on BSP_USING_UART2 && RT_USING_SERIAL_V2
-                default 128
-
-            config BSP_UART2_TX_BUFSIZE
-                int "Set UART2 TX buffer size"
-                range 0 65535
-                depends on BSP_USING_UART2 && RT_USING_SERIAL_V2
-                default 128
 
             config BSP_USING_UART3
                 bool "Enable UART3"
@@ -130,31 +90,15 @@ menu "On-chip Peripheral Drivers"
 
             config BSP_UART3_RX_USING_DMA
                 bool "Enable UART3 RX DMA"
-                depends on BSP_USING_UART3 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART3
+                select BSP_USING_UART_RX_DMA
                 default n
 
             config BSP_UART3_TX_USING_DMA
                 bool "Enable UART3 TX DMA"
-                depends on BSP_USING_UART3 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART3
+                select BSP_USING_UART_TX_DMA
                 default n
-
-            config BSP_UART3_DMA_PING_BUFSIZE
-                int "Set UART3 RX DMA ping-pong buffer size"
-                range 16 65535
-                depends on BSP_USING_UART3 && RT_USING_SERIAL_V2 && BSP_UART3_RX_USING_DMA
-                default 64
-
-            config BSP_UART3_RX_BUFSIZE
-                int "Set UART3 RX buffer size"
-                range 64 65535
-                depends on BSP_USING_UART3 && RT_USING_SERIAL_V2
-                default 128
-
-            config BSP_UART3_TX_BUFSIZE
-                int "Set UART3 TX buffer size"
-                range 0 65535
-                depends on BSP_USING_UART3 && RT_USING_SERIAL_V2
-                default 128
 
             config BSP_USING_UART4
                 bool "Enable UART4"
@@ -162,31 +106,15 @@ menu "On-chip Peripheral Drivers"
 
             config BSP_UART4_RX_USING_DMA
                 bool "Enable UART4 RX DMA"
-                depends on BSP_USING_UART4 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART4
+                select BSP_USING_UART_RX_DMA
                 default n
 
             config BSP_UART4_TX_USING_DMA
                 bool "Enable UART4 TX DMA"
-                depends on BSP_USING_UART4 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART4
+                select BSP_USING_UART_TX_DMA
                 default n
-
-            config BSP_UART4_DMA_PING_BUFSIZE
-                int "Set UART4 RX DMA ping-pong buffer size"
-                range 16 65535
-                depends on BSP_USING_UART4 && RT_USING_SERIAL_V2 && BSP_UART4_RX_USING_DMA
-                default 64
-
-            config BSP_UART4_RX_BUFSIZE
-                int "Set UART4 RX buffer size"
-                range 64 65535
-                depends on BSP_USING_UART4 && RT_USING_SERIAL_V2
-                default 128
-
-            config BSP_UART4_TX_BUFSIZE
-                int "Set UART4 TX buffer size"
-                range 0 65535
-                depends on BSP_USING_UART4 && RT_USING_SERIAL_V2
-                default 128
 
             config BSP_USING_UART5
                 bool "Enable UART5"
@@ -194,31 +122,15 @@ menu "On-chip Peripheral Drivers"
 
             config BSP_UART5_RX_USING_DMA
                 bool "Enable UART5 RX DMA"
-                depends on BSP_USING_UART5 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART5
+                select BSP_USING_UART_RX_DMA
                 default n
 
             config BSP_UART5_TX_USING_DMA
                 bool "Enable UART5 TX DMA"
-                depends on BSP_USING_UART5 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART5
+                select BSP_USING_UART_TX_DMA
                 default n
-
-            config BSP_UART5_DMA_PING_BUFSIZE
-                int "Set UART5 RX DMA ping-pong buffer size"
-                range 16 65535
-                depends on BSP_USING_UART5 && RT_USING_SERIAL_V2 && BSP_UART5_RX_USING_DMA
-                default 64
-
-            config BSP_UART5_RX_BUFSIZE
-                int "Set UART5 RX buffer size"
-                range 64 65535
-                depends on BSP_USING_UART5 && RT_USING_SERIAL_V2
-                default 128
-
-            config BSP_UART5_TX_BUFSIZE
-                int "Set UART5 TX buffer size"
-                range 0 65535
-                depends on BSP_USING_UART5 && RT_USING_SERIAL_V2
-                default 128
 
             config BSP_USING_UART6
                 bool "Enable UART6"
@@ -226,63 +138,31 @@ menu "On-chip Peripheral Drivers"
 
             config BSP_UART6_RX_USING_DMA
                 bool "Enable UART6 RX DMA"
-                depends on BSP_USING_UART6 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART6
+                select BSP_USING_UART_RX_DMA
                 default n
 
             config BSP_UART6_TX_USING_DMA
                 bool "Enable UART6 TX DMA"
-                depends on BSP_USING_UART6 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART6
+                select BSP_USING_UART_TX_DMA
                 default n
 
-            config BSP_UART6_DMA_PING_BUFSIZE
-                int "Set UART6 RX DMA ping-pong buffer size"
-                range 16 65535
-                depends on BSP_USING_UART6 && RT_USING_SERIAL_V2 && BSP_UART6_RX_USING_DMA
-                default 64
-
-            config BSP_UART6_RX_BUFSIZE
-                int "Set UART6 RX buffer size"
-                range 64 65535
-                depends on BSP_USING_UART6 && RT_USING_SERIAL_V2
-                default 128
-
-            config BSP_UART6_TX_BUFSIZE
-                int "Set UART6 TX buffer size"
-                range 0 65535
-                depends on BSP_USING_UART6 && RT_USING_SERIAL_V2
-                default 128
-
-                config BSP_USING_UART7
+            config BSP_USING_UART7
                 bool "Enable UART7"
                 default n
 
             config BSP_UART7_RX_USING_DMA
                 bool "Enable UART7 RX DMA"
-                depends on BSP_USING_UART7 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART7
+                select BSP_USING_UART_RX_DMA
                 default n
 
             config BSP_UART7_TX_USING_DMA
                 bool "Enable UART7 TX DMA"
-                depends on BSP_USING_UART7 && RT_USING_SERIAL_V2 && RT_SERIAL_USING_DMA
+                depends on BSP_USING_UART7
+                select BSP_USING_UART_TX_DMA
                 default n
-
-            config BSP_UART7_DMA_PING_BUFSIZE
-                int "Set UART7 RX DMA ping-pong buffer size"
-                range 16 65535
-                depends on BSP_USING_UART7 && RT_USING_SERIAL_V2 && BSP_UART7_RX_USING_DMA
-                default 64
-
-            config BSP_UART7_RX_BUFSIZE
-                int "Set UART7 RX buffer size"
-                range 64 65535
-                depends on BSP_USING_UART7 && RT_USING_SERIAL_V2
-                default 128
-
-            config BSP_UART7_TX_BUFSIZE
-                int "Set UART7 TX buffer size"
-                range 0 65535
-                depends on BSP_USING_UART7 && RT_USING_SERIAL_V2
-                default 128
         endif
 
     menuconfig BSP_USING_SPI
@@ -290,28 +170,145 @@ menu "On-chip Peripheral Drivers"
         default n
         select RT_USING_SPI
         if BSP_USING_SPI
+            config BSP_USING_SPI_DMA
+                bool
+
             config BSP_USING_SPI0
                 bool "Enable SPI0 BUS"
+                default n
+
+            config BSP_SPI0_USING_DMA
+                bool "Enable SPI0 DMA"
+                depends on BSP_USING_SPI0
+                select BSP_USING_SPI_DMA
                 default n
 
             config BSP_USING_SPI1
                 bool "Enable SPI1 BUS"
                 default n
 
+            config BSP_SPI1_USING_DMA
+                bool "Enable SPI1 DMA"
+                depends on BSP_USING_SPI1
+                select BSP_USING_SPI_DMA
+                default n
+
             config BSP_USING_SPI2
                 bool "Enable SPI2 BUS"
+                default n
+
+            config BSP_SPI2_USING_DMA
+                bool "Enable SPI2 DMA"
+                depends on BSP_USING_SPI2
+                select BSP_USING_SPI_DMA
                 default n
 
             config BSP_USING_SPI3
                 bool "Enable SPI3 BUS"
                 default n
 
+            config BSP_SPI3_USING_DMA
+                bool "Enable SPI3 DMA"
+                depends on BSP_USING_SPI3
+                select BSP_USING_SPI_DMA
+                default n
+
             config BSP_USING_SPI4
                 bool "Enable SPI4 BUS"
                 default n
 
+            config BSP_SPI4_USING_DMA
+                bool "Enable SPI4 DMA"
+                depends on BSP_USING_SPI4
+                select BSP_USING_SPI_DMA
+                default n
+
             config BSP_USING_SPI5
                 bool "Enable SPI5 BUS"
+                default n
+
+            config BSP_SPI5_USING_DMA
+                bool "Enable SPI5 DMA"
+                depends on BSP_USING_SPI5
+                select BSP_USING_SPI_DMA
+                default n
+
+            if BSP_USING_SPI_DMA
+                config BSP_SPI_DMA_TRANS_MIN_LEN
+                    int "SPI DMA minimum transfer length"
+                    range 4 65535
+                    default 16
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+
+                config BSP_SPI_DMA_TIMEOUT
+                    int "SPI DMA transfer timeout (ms)"
+                    range 1 60000
+                    default 1000
+                    help
+                        Maximum wait time for a SPI DMA transfer to complete.
+                        The driver reports a timeout once this limit is reached.
+            endif
+        endif
+
+    menuconfig BSP_USING_I2C
+        bool "Enable I2C BUS"
+        default n
+        select RT_USING_I2C
+        if BSP_USING_I2C
+            config BSP_USING_I2C_TX_DMA
+                bool
+
+            config BSP_USING_I2C_RX_DMA
+                bool
+
+            config BSP_USING_HARD_I2C0
+                bool "Enable I2C0 BUS"
+                default n
+
+            config BSP_I2C0_TX_USING_DMA
+                bool "Enable I2C0 TX DMA"
+                depends on BSP_USING_HARD_I2C0
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C0_RX_USING_DMA
+                bool "Enable I2C0 RX DMA"
+                depends on BSP_USING_HARD_I2C0
+                select BSP_USING_I2C_RX_DMA
+                default n
+
+            config BSP_USING_HARD_I2C1
+                bool "Enable I2C1 BUS"
+                default n
+
+            config BSP_I2C1_TX_USING_DMA
+                bool "Enable I2C1 TX DMA"
+                depends on BSP_USING_HARD_I2C1
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C1_RX_USING_DMA
+                bool "Enable I2C1 RX DMA"
+                depends on BSP_USING_HARD_I2C1
+                select BSP_USING_I2C_RX_DMA
+                default n
+
+            config BSP_USING_HARD_I2C2
+                bool "Enable I2C2 BUS"
+                default n
+
+            config BSP_I2C2_TX_USING_DMA
+                bool "Enable I2C2 TX DMA"
+                depends on BSP_USING_HARD_I2C2
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C2_RX_USING_DMA
+                bool "Enable I2C2 RX DMA"
+                depends on BSP_USING_HARD_I2C2
+                select BSP_USING_I2C_RX_DMA
                 default n
         endif
 

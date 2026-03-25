@@ -55,7 +55,7 @@ static struct rt_spi_bus spi_bus5;
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32H7xx)
+ && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -197,76 +197,103 @@ static const struct gd32_spi spi_bus_obj[] = {
 
 #else
 
-static const struct gd32_spi spi_bus_obj[] = {
+/* Static DMA configurations - safer than compound literals for IAR/older compilers */
+#ifdef BSP_SPI0_USING_DMA
+static struct dma_config spi0_dma_tx_cfg = SPI0_TX_DMA_CONFIG;
+static struct dma_config spi0_dma_rx_cfg = SPI0_RX_DMA_CONFIG;
+#endif
+#ifdef BSP_SPI1_USING_DMA
+static struct dma_config spi1_dma_tx_cfg = SPI1_TX_DMA_CONFIG;
+static struct dma_config spi1_dma_rx_cfg = SPI1_RX_DMA_CONFIG;
+#endif
+#ifdef BSP_SPI2_USING_DMA
+static struct dma_config spi2_dma_tx_cfg = SPI2_TX_DMA_CONFIG;
+static struct dma_config spi2_dma_rx_cfg = SPI2_RX_DMA_CONFIG;
+#endif
+#ifdef BSP_SPI3_USING_DMA
+static struct dma_config spi3_dma_tx_cfg = SPI3_TX_DMA_CONFIG;
+static struct dma_config spi3_dma_rx_cfg = SPI3_RX_DMA_CONFIG;
+#endif
+#ifdef BSP_SPI4_USING_DMA
+static struct dma_config spi4_dma_tx_cfg = SPI4_TX_DMA_CONFIG;
+static struct dma_config spi4_dma_rx_cfg = SPI4_RX_DMA_CONFIG;
+#endif
+#ifdef BSP_SPI5_USING_DMA
+static struct dma_config spi5_dma_tx_cfg = SPI5_TX_DMA_CONFIG;
+static struct dma_config spi5_dma_rx_cfg = SPI5_RX_DMA_CONFIG;
+#endif
+
+static struct gd32_spi spi_bus_obj[] = {
 
 #ifdef BSP_USING_SPI0
     {
-        SPI0,
-        RCU_SPI0,
-        SPI0_IRQn,
-        "spi0",
-        &spi_bus0,
+        .spi_periph = SPI0,
+        .spi_clk = RCU_SPI0,
+        .irqn = SPI0_IRQn,
+        .bus_name = "spi0",
+        .spi_bus = &spi_bus0,
     },
 #endif /* BSP_USING_SPI0 */
 
 #ifdef BSP_USING_SPI1
     {
-        SPI1,
-        RCU_SPI1,
-#if defined(SOC_SERIES_GD32E51x) 
-        SPI1_I2S1ADD_IRQn,
+        .spi_periph = SPI1,
+        .spi_clk = RCU_SPI1,
+#if defined(SOC_SERIES_GD32E51x)
+        .irqn = SPI1_I2S1ADD_IRQn,
 #else
-        SPI1_IRQn,
+        .irqn = SPI1_IRQn,
 #endif
-        "spi1",
-        &spi_bus1,
+        .bus_name = "spi1",
+        .spi_bus = &spi_bus1,
     },
 #endif /* BSP_USING_SPI1 */
 
 #ifdef BSP_USING_SPI2
     {
-        SPI2,
-        RCU_SPI2,
-#if defined(SOC_SERIES_GD32E51x) 
-        SPI2_I2S2ADD_IRQn,
+        .spi_periph = SPI2,
+        .spi_clk = RCU_SPI2,
+#if defined(SOC_SERIES_GD32E51x)
+        .irqn = SPI2_I2S2ADD_IRQn,
 #else
-        SPI2_IRQn,
+        .irqn = SPI2_IRQn,
 #endif
-        "spi2",
-        &spi_bus2,
+        .bus_name = "spi2",
+        .spi_bus = &spi_bus2,
     },
 #endif /* BSP_USING_SPI2 */
 
 #ifdef BSP_USING_SPI3
     {
-        SPI3,
-        RCU_SPI3,
-        SPI3_IRQn,
-        "spi3",
-        &spi_bus3,
+        .spi_periph = SPI3,
+        .spi_clk = RCU_SPI3,
+        .irqn = SPI3_IRQn,
+        .bus_name = "spi3",
+        .spi_bus = &spi_bus3,
     },
 #endif /* BSP_USING_SPI3 */
 
 #ifdef BSP_USING_SPI4
     {
-        SPI4,
-        RCU_SPI4,
-        SPI4_IRQn,
-        "spi4",
-        &spi_bus4,
+        .spi_periph = SPI4,
+        .spi_clk = RCU_SPI4,
+        .irqn = SPI4_IRQn,
+        .bus_name = "spi4",
+        .spi_bus = &spi_bus4,
     },
 #endif /* BSP_USING_SPI4 */
 
 #ifdef BSP_USING_SPI5
     {
-        SPI5,
-        RCU_SPI5,
-        SPI5_IRQn,
-        "spi5",
-        &spi_bus5,
+        .spi_periph = SPI5,
+        .spi_clk = RCU_SPI5,
+        .irqn = SPI5_IRQn,
+        .bus_name = "spi5",
+        .spi_bus = &spi_bus5,
     },
 #endif /* BSP_USING_SPI5 */
 };
+
 #endif
 
 /* private rt-thread spi ops function */
@@ -282,7 +309,7 @@ static struct rt_spi_ops gd32_spi_ops =
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx)
+ && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -296,7 +323,7 @@ static void gd32_spi_init(struct gd32_spi *gd32_spi)
     rcu_periph_clock_enable(gd32_spi->miso_gpio_clk);
     rcu_periph_clock_enable(gd32_spi->mosi_gpio_clk);
 
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32F5xx) \
+#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) \
  || defined (SOC_SERIES_GD32E23x)
     /*GPIO pin configuration*/
     gpio_af_set(gd32_spi->sck_spi_port, gd32_spi->alt_func_num, gd32_spi->sck_pin);
@@ -330,6 +357,152 @@ static void gd32_spi_init(struct gd32_spi *gd32_spi)
 }
 #endif
 
+#if defined(BSP_USING_SPI_DMA)
+static void gd32_spi_dma_init(struct gd32_spi *spi_device)
+{
+    dma_single_data_parameter_struct dma_init_struct;
+    uint32_t spi_periph = spi_device->spi_periph;
+    
+    /* Enable DMA clock */
+    if (spi_device->dma_tx != RT_NULL && spi_device->dma_tx->periph == DMA0)
+    {
+        rcu_periph_clock_enable(RCU_DMA0);
+    }
+    if (spi_device->dma_tx != RT_NULL && spi_device->dma_tx->periph == DMA1)
+    {
+        rcu_periph_clock_enable(RCU_DMA1);
+    }
+    if (spi_device->dma_rx != RT_NULL && spi_device->dma_rx->periph == DMA0)
+    {
+        rcu_periph_clock_enable(RCU_DMA0);
+    }
+    if (spi_device->dma_rx != RT_NULL && spi_device->dma_rx->periph == DMA1)
+    {
+        rcu_periph_clock_enable(RCU_DMA1);
+    }
+    
+    /* Configure DMA common parameters */
+    dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
+    dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
+    dma_init_struct.priority = DMA_PRIORITY_HIGH;
+    dma_init_struct.memory0_addr = 0;
+    dma_init_struct.number = 0;
+    
+    /* RX DMA configuration */
+    if (spi_device->dma_rx != RT_NULL)
+    {
+        dma_deinit(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+        
+        dma_init_struct.periph_memory_width = spi_device->dma_rx->data_width;
+        dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
+        dma_init_struct.periph_addr = (uint32_t)&SPI_DATA(spi_periph);
+        
+        dma_single_data_mode_init(spi_device->dma_rx->periph, spi_device->dma_rx->channel, &dma_init_struct);
+        dma_channel_subperipheral_select(spi_device->dma_rx->periph, spi_device->dma_rx->channel, spi_device->dma_rx->subperiph);
+        dma_circulation_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+        dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+    }
+    
+    /* TX DMA configuration */
+    if (spi_device->dma_tx != RT_NULL)
+    {
+        dma_deinit(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+        
+        dma_init_struct.periph_memory_width = spi_device->dma_tx->data_width;
+        dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
+        dma_init_struct.periph_addr = (uint32_t)&SPI_DATA(spi_periph);
+        
+        dma_single_data_mode_init(spi_device->dma_tx->periph, spi_device->dma_tx->channel, &dma_init_struct);
+        dma_channel_subperipheral_select(spi_device->dma_tx->periph, spi_device->dma_tx->channel, spi_device->dma_tx->subperiph);
+        dma_circulation_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+        dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+    }
+}
+
+/**
+ * @brief Disable DMA channels and clear flags
+ * @param spi_device: SPI device structure
+ * @param spi_periph: SPI peripheral
+ * @retval None
+ */
+rt_inline void gd32_spi_dma_cleanup(struct gd32_spi *spi_device, uint32_t spi_periph)
+{
+    if (spi_device->dma_rx != RT_NULL)
+    {
+        dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+        dma_flag_clear(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_FLAG_FTF);
+        spi_dma_disable(spi_periph, SPI_DMA_RECEIVE);
+    }
+
+    if (spi_device->dma_tx != RT_NULL)
+    {
+        dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+        dma_flag_clear(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_FLAG_FTF);
+        spi_dma_disable(spi_periph, SPI_DMA_TRANSMIT);
+    }
+}
+
+/**
+ * @brief Initialize SPI DMA configuration
+ * @param spi_device: SPI device structure
+ * @retval None
+ */
+static void gd32_spi_dma_config_init(struct gd32_spi *spi_device)
+{
+    if (spi_device == RT_NULL)
+    {
+        return;
+    }
+    
+    /* Default to NULL */
+    spi_device->dma_tx = RT_NULL;
+    spi_device->dma_rx = RT_NULL;
+    
+#ifdef BSP_SPI0_USING_DMA
+    if (spi_device->spi_periph == SPI0)
+    {
+        spi_device->dma_tx = &spi0_dma_tx_cfg;
+        spi_device->dma_rx = &spi0_dma_rx_cfg;
+    }
+#endif
+#ifdef BSP_SPI1_USING_DMA
+    if (spi_device->spi_periph == SPI1)
+    {
+        spi_device->dma_tx = &spi1_dma_tx_cfg;
+        spi_device->dma_rx = &spi1_dma_rx_cfg;
+    }
+#endif
+#ifdef BSP_SPI2_USING_DMA
+    if (spi_device->spi_periph == SPI2)
+    {
+        spi_device->dma_tx = &spi2_dma_tx_cfg;
+        spi_device->dma_rx = &spi2_dma_rx_cfg;
+    }
+#endif
+#ifdef BSP_SPI3_USING_DMA
+    if (spi_device->spi_periph == SPI3)
+    {
+        spi_device->dma_tx = &spi3_dma_tx_cfg;
+        spi_device->dma_rx = &spi3_dma_rx_cfg;
+    }
+#endif
+#ifdef BSP_SPI4_USING_DMA
+    if (spi_device->spi_periph == SPI4)
+    {
+        spi_device->dma_tx = &spi4_dma_tx_cfg;
+        spi_device->dma_rx = &spi4_dma_rx_cfg;
+    }
+#endif
+#ifdef BSP_SPI5_USING_DMA
+    if (spi_device->spi_periph == SPI5)
+    {
+        spi_device->dma_tx = &spi5_dma_tx_cfg;
+        spi_device->dma_rx = &spi5_dma_rx_cfg;
+    }
+#endif
+}
+#endif
+
 static rt_err_t spi_configure(struct rt_spi_device* device,
                           struct rt_spi_configuration* configuration)
 {
@@ -341,8 +514,16 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
     RT_ASSERT(device != RT_NULL);
     RT_ASSERT(configuration != RT_NULL);
 
-    /* Init SPI */
+    /* Call board-level SPI GPIO initialization */
     gd32_spi_init(spi_device);
+    
+#if defined(BSP_USING_SPI_DMA)
+    /* Call board-level DMA initialization if DMA is enabled */
+    if (spi_device->dma_tx != RT_NULL || spi_device->dma_rx != RT_NULL)
+    {
+        gd32_spi_dma_init(spi_device);
+    }
+#endif
 
 #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
     /* data_width */
@@ -515,6 +696,122 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
           (uint32_t)message->send_buf,
           (uint32_t)message->recv_buf, message->length);
 
+#if defined(BSP_USING_SPI_DMA)
+    /* Use DMA for large transfers if enabled */
+    if ((spi_device->dma_tx != RT_NULL || spi_device->dma_rx != RT_NULL)
+        && message->length >= BSP_SPI_DMA_TRANS_MIN_LEN && config->data_width <= 8)
+    {
+        const rt_uint8_t * send_ptr = message->send_buf;
+        rt_uint8_t * recv_ptr = message->recv_buf;
+        rt_uint32_t size = message->length;
+        
+        /* Prepare dummy buffer for TX or RX only transfers */
+        static rt_uint8_t dummy_tx = 0xFF;
+        static rt_uint8_t dummy_rx = 0;
+        
+        LOG_D("spi DMA transfer start: %d", size);
+        
+        /* Configure RX DMA */
+        if (spi_device->dma_rx != RT_NULL)
+        {
+            dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+            
+            if (recv_ptr != RT_NULL)
+            {
+                dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, 
+                                         DMA_MEMORY_0, (uint32_t)recv_ptr);
+                dma_memory_address_generation_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_MEMORY_INCREASE_ENABLE);
+            }
+            else
+            {
+                dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, 
+                                         DMA_MEMORY_0, (uint32_t)&dummy_rx);
+                dma_memory_address_generation_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_MEMORY_INCREASE_DISABLE);
+            }
+            
+            dma_transfer_number_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, size);
+            dma_interrupt_enable(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_CHXCTL_FTFIE);
+            dma_channel_enable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+            spi_dma_enable(spi_periph, SPI_DMA_RECEIVE);
+        }
+        
+        /* Configure TX DMA */
+        if (spi_device->dma_tx != RT_NULL)
+        {
+            dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+            
+            if (send_ptr != RT_NULL)
+            {
+                dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, 
+                                         DMA_MEMORY_0, (uint32_t)send_ptr);
+                dma_memory_address_generation_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_MEMORY_INCREASE_ENABLE);
+            }
+            else
+            {
+                dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, 
+                                         DMA_MEMORY_0, (uint32_t)&dummy_tx);
+                dma_memory_address_generation_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_MEMORY_INCREASE_DISABLE);
+            }
+            
+            dma_transfer_number_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, size);
+            dma_interrupt_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_CHXCTL_FTFIE);
+            dma_channel_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+            spi_dma_enable(spi_periph, SPI_DMA_TRANSMIT);
+        }
+        
+        /* Wait for transfer complete with timeout */
+        rt_tick_t timeout = rt_tick_from_millisecond(BSP_SPI_DMA_TIMEOUT);
+        rt_tick_t start = rt_tick_get();
+        
+        while (1)
+        {
+            rt_bool_t tx_done = RT_TRUE;
+            rt_bool_t rx_done = RT_TRUE;
+            
+            if (spi_device->dma_tx != RT_NULL)
+            {
+                tx_done = (dma_flag_get(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_FLAG_FTF) == SET);
+            }
+            
+            if (spi_device->dma_rx != RT_NULL)
+            {
+                rx_done = (dma_flag_get(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_FLAG_FTF) == SET);
+            }
+            
+            if (tx_done && rx_done)
+            {
+                break;
+            }
+            
+            if (rt_tick_get() - start > timeout)
+            {
+                LOG_E("%s DMA transfer timeout", spi_device->bus_name);
+                gd32_spi_dma_cleanup(spi_device, spi_periph);
+                return -RT_EIO;
+            }
+            
+            rt_thread_mdelay(1);
+        }
+        
+        /* Wait for SPI idle with timeout */
+        start = rt_tick_get();
+        while (RESET != spi_i2s_flag_get(spi_periph, SPI_FLAG_TRANS))
+        {
+            if (rt_tick_get() - start > timeout)
+            {
+                LOG_E("%s SPI idle timeout", spi_device->bus_name);
+                gd32_spi_dma_cleanup(spi_device, spi_periph);
+                return -RT_EIO;
+            }
+        }
+        
+        /* Disable DMA and clear flags */
+        gd32_spi_dma_cleanup(spi_device, spi_periph);
+        
+        LOG_D("spi DMA transfer finish");
+    }
+    else
+#endif /* BSP_USING_SPI_DMA */
     {
         if(config->data_width <= 8)
         {
@@ -695,6 +992,11 @@ int rt_hw_spi_init(void)
 
     for (i = 0; i < sizeof(spi_bus_obj) / sizeof(spi_bus_obj[0]); i++)
     {
+        /* Initialize DMA configuration */
+        #ifdef BSP_USING_SPI_DMA
+        gd32_spi_dma_config_init(&spi_bus_obj[i]);
+        #endif
+        
         spi_bus_obj[i].spi_bus->parent.user_data = (void *)&spi_bus_obj[i];
 
         result = rt_spi_bus_register(spi_bus_obj[i].spi_bus, spi_bus_obj[i].bus_name, &gd32_spi_ops);

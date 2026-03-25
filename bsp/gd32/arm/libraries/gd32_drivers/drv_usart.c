@@ -454,7 +454,8 @@ void UART7_IRQHandler(void)
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
- && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx)
+ && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
+ && !defined(SOC_SERIES_GD32F5xx)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -683,7 +684,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart0_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart0_rxdma,
 #endif
 #endif
@@ -701,7 +702,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart1_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart1_rxdma,
 #endif
 #endif
@@ -719,7 +720,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart2_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart2_rxdma,
 #endif
 #endif
@@ -737,7 +738,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart3_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart3_rxdma,
 #endif
 #endif
@@ -755,7 +756,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart4_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart4_rxdma,
 #endif
 #endif
@@ -773,7 +774,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart5_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart5_rxdma,
 #endif
 #endif
@@ -791,7 +792,7 @@ static const struct gd32_uart uart_obj[] = {
 #ifdef BSP_USING_UART_TX_DMA
         &uart6_txdma,
 #endif
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_USING_UART_RX_DMA
         &uart6_rxdma,
 #endif
 #endif
@@ -821,7 +822,8 @@ static const struct gd32_uart uart_obj[] = {
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
- && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx)
+ && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
+ && !defined(SOC_SERIES_GD32F5xx)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:
@@ -838,7 +840,7 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     rcu_periph_clock_enable(uart->rx_gpio_clk);
     rcu_periph_clock_enable(uart->uart_clk);
 
-#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32F5xx || defined SOC_SERIES_GD32E23x
+#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32E23x
     /* connect port to USARTx_Tx */
     gpio_af_set(uart->tx_port, uart->tx_af, uart->tx_pin);
 

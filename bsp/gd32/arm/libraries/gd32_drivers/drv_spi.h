@@ -30,7 +30,7 @@ struct gd32_spi_cs
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32H7xx)
+ && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx)
 struct gd32_spi
 {
     uint32_t spi_periph;
@@ -52,8 +52,9 @@ struct gd32_spi
 };
 #else
 
-#if defined(BSP_USING_SPI_TX_DMA) || defined(BSP_USING_SPI_RX_DMA)
+#if defined(BSP_USING_SPI_DMA)
 #include "drv_dma.h"
+#include "drv_config.h"
 #endif
 
 
@@ -64,10 +65,8 @@ struct gd32_spi
     IRQn_Type irqn;
     char *bus_name;
     struct rt_spi_bus *spi_bus;
-#ifdef BSP_USING_SPI_TX_DMA
+#ifdef BSP_USING_SPI_DMA
     struct dma_config *dma_tx;
-#endif
-#ifdef BSP_USING_SPI_RX_DMA
     struct dma_config *dma_rx;
 #endif
 };

@@ -15,6 +15,9 @@
 #include "drv_gpio.h"
 
 #include "gd32f5xx_exti.h"
+#include "drv_hard_i2c.h"
+#include "drv_usart.h"
+#include "drv_spi.h"
 
 #define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
@@ -43,5 +46,25 @@ extern int __bss_end;
 
 #define HEAP_END          GD32_SRAM_END
 
+#ifdef BSP_USING_SPI_DMA
+#if defined(BSP_SPI5_USING_DMA) && !defined(SPI5_TX_DMA_PERIPH)
+#define SPI5_TX_DMA_PERIPH              DMA1
+#define SPI5_DMA_TX_IRQHandler          DMA1_Channel5_IRQHandler
+#define SPI5_TX_DMA_RCU                 RCU_DMA1
+#define SPI5_TX_DMA_CHANNEL             DMA_CH5
+#define SPI5_TX_DMA_IRQ                 DMA1_Channel5_IRQn
+#define SPI5_TX_DMA_SUBPERI             DMA_SUBPERI1
 #endif
 
+/* SPI5 RX: DMA1 channel6, subperi1 */
+#if defined(BSP_SPI5_USING_DMA) && !defined(SPI5_RX_DMA_PERIPH)
+#define SPI5_RX_DMA_PERIPH              DMA1
+#define SPI5_DMA_RX_IRQHandler          DMA1_Channel6_IRQHandler
+#define SPI5_RX_DMA_RCU                 RCU_DMA1
+#define SPI5_RX_DMA_CHANNEL             DMA_CH6
+#define SPI5_RX_DMA_IRQ                 DMA1_Channel6_IRQn
+#define SPI5_RX_DMA_SUBPERI             DMA_SUBPERI1
+#endif
+#endif
+
+#endif /* __BOARD_H__ */

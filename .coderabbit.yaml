@@ -5,8 +5,6 @@ reviews:
   profile: "chill"
   request_changes_workflow: true
   high_level_summary: true
-  review_status: true
-  collapse_walkthrough: true
   poem: false
   review_status: true
   collapse_walkthrough: false

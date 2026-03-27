@@ -1,0 +1,204 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "zh-CN"
+early_access: false
+reviews:
+  profile: "chill"
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "bsp/gd32/**/libraries/**"
+    - "bsp/gd32/*/gd*/board/**"
+    - "bsp/gd32/*/gd*/applications/**"
+    - "bsp/gd32/*/gd*/Kconfig"
+    - "bsp/gd32/*/gd*/SConscript"
+    - "bsp/gd32/*/gd*/SConstruct"
+    - "bsp/gd32/*/gd*/rtconfig.py"
+    - "bsp/gd32/*/gd*/.config"
+    - "bsp/gd32/*/gd*/cconfig.h"
+    - ".github/workflows/**"
+    - "tools/**"
+    - "!documentation/**"
+    - "!examples/**"
+    - "!**/*.md"
+    - "!**/*.txt"
+  path_instructions:
+    - path: "bsp/gd32/**/libraries/**"
+      instructions: |
+        Treat files under libraries as strict-review shared GD32 public driver files.
+
+        Use the "各系列已有公用外设驱动修改检查 / 新增公用外设驱动检查 / 公用配置文件检查" items from the GD32 RTT adaptation review template as mandatory review guidance.
+
+        Review objective:
+        - shared drivers must satisfy the new MCU adaptation without regressing any already supported GD32 series
+        - changes should be minimal, compatibility-preserving, and easy to reason about
+        - comments should prioritize correctness, compatibility, and maintainability over formatting noise
+
+        Mandatory checks for modified shared drivers:
+        1. Compatibility:
+           - Verify the change does not silently break already supported GD32 series, boards, or peripherals.
+           - Check compile-time branching, macro guards, SoC detection, register differences, and fallback paths.
+        2. Minimal change principle:
+           - Prefer localized changes over broad rewrites.
+           - If logic changes are substantial, especially more than about 5 lines of functional change, require the PR to explain why the change is necessary, what behavior changes, and why alternatives were rejected.
+        3. RT-Thread framework alignment:
+           - Verify device registration, ops structure, init flow, probe/attach style, naming, and error-code behavior match RT-Thread conventions.
+        4. Shared configuration impact:
+           - For files such as drv_config, drv_dma.h, and similar shared headers, verify macros, defaults, include paths, feature switches, and per-series mappings are correct.
+           - Flag any configuration change that can alter behavior for unrelated series or peripherals.
+        5. Hardware correctness:
+           - Check clock enable order, GPIO alternate-function mapping, DMA request/channel selection, IRQ enable order, timeout handling, and volatile/register access semantics.
+           - Check cache/DMA interactions and memory barrier assumptions when relevant.
+        6. Lifecycle and resource handling:
+           - Check init/deinit symmetry, resource release, repeated init safety, error unwind paths, and null/error handling.
+
+        Mandatory checks for newly added shared drivers:
+        1. Verify the implementation follows the RT-Thread driver framework rather than board-specific shortcuts.
+        2. Check whether the file structure, APIs, and control flow are complete and comparable to existing RT-Thread vendor drivers.
+        3. Check extensibility for future GD32 series instead of hard-coding a single target.
+        4. Require a concise explanation of file purpose, structure, supported scenarios, and usage assumptions if the PR description does not provide it.
+
+        Review decision rules:
+        - Do not approve if there is a credible cross-series regression risk, unclear macro mapping, missing error path, or unexplained large shared-driver rewrite.
+        - Ask for test or build evidence if the change affects a shared path used by multiple GD32 series.
+
+        Review output requirements:
+        - Provide issue comments in both English and Chinese.
+        - Classify issues by Critical/严重, Major/主要, Minor/次要, or Suggestion/建议.
+        - Prioritize bugs, regressions, build breakages, and compatibility risks over style comments.
+
+    - path: "bsp/gd32/*/gd*/board/**"
+      instructions: &gd32_board_level_instructions |
+        Treat explicitly matched board-level files under bsp/gd32/*/gd*/... as strict-review board-level adaptation files.
+
+        Do not apply this rule to shared drivers under libraries. Files under libraries must be reviewed only by the dedicated shared-driver rule.
+
+        Use the "BSP板级支持" and PR-level items from the GD32 RTT adaptation review template as mandatory review guidance.
+        Convert the checklist into concrete comments tied to the changed file and the affected board.
+
+        Board-level files include, but are not limited to:
+        - applications/main.c
+        - applications/SConscript
+        - board/**
+        - board/linker_scripts/**
+        - Kconfig
+        - SConscript
+        - SConstruct
+        - rtconfig.py
+        - linker scripts for GCC, Keil, and IAR
+        - package integration and startup files under the board BSP tree
+
+        Mandatory checks for board-level files:
+        1. Consistency with peer BSPs:
+           - Check whether the file remains aligned with similar GD32 series unless deviation is explicitly justified.
+           - Flag unnecessary divergence from peer BSP layout, build scripts, or startup structure.
+        2. Memory and linker correctness:
+           - Verify board.h SRAM size and memory definitions match the target MCU.
+           - Verify GCC, Keil, and IAR linker scripts define Flash and SRAM correctly.
+           - Check that linker script structure is consistent and does not accidentally change section placement or startup behavior.
+        3. Board initialization correctness:
+           - Check board.c and other board init files for clock setup, peripheral init order, pinmux, and board-specific feature enablement.
+           - Check board_msd_init.c or similar files for exact pin/peripheral mapping accuracy.
+        4. Kconfig and feature exposure:
+           - Verify SOC description, symbols, and peripheral options are correct.
+           - Flag broken defaults, impossible dependencies, duplicated symbols, or options that expose unsupported peripherals.
+        5. Toolchain and build scripts:
+           - Verify rtconfig.py CPU core, DEVICE macros, FPU settings, compiler version assumptions, and optimization logic.
+           - GCC should default to O0 for debug builds and O2 otherwise unless there is a clear justification.
+           - Check SConstruct and SConscript changes for include paths, source lists, and package wiring mistakes.
+        6. Firmware/package integration:
+           - Check package directory structure, chip macro definitions, CMSIS include path handling, and startup file adaptation.
+           - Flag any change that works only in one IDE or one build path but breaks others.
+        7. PR-level evidence:
+           - Check whether the PR description identifies the verified BSP and relevant .config changes.
+           - Check whether CI passed and whether the PR includes test evidence for the claimed board or configuration.
+           - Ask for evidence instead of assuming correctness when logs, screenshots, or build results are missing.
+
+        Review decision rules:
+        - Do not approve if memory sizes, linker scripts, CPU/FPU macros, startup files, or Kconfig symbols look inconsistent with the target MCU.
+        - Do not approve if the PR changes board-level scripts or initialization order without clear justification and verification evidence.
+        - Flag unnecessary file churn, copied content that diverges from peer BSPs, and changes that appear to affect CI or build reproducibility.
+
+        General embedded priorities:
+        1. Real-time safety: flag blocking calls, busy loops, heavy computation, long critical sections,
+           or dynamic allocation in interrupt context.
+        2. Resource correctness: check clock enable order, GPIO/DMA/UART/SPI/I2C dependencies,
+           missing deinit paths, memory leaks, and unreleased resources.
+        3. Build integrity: check Kconfig/SConscript/include path changes that may break BSP build matrix.
+        4. Hardware semantics: pay attention to volatile access, register bit operations,
+           timeout handling, DMA/cache interactions, interrupt priority assumptions,
+           and initialization ordering.
+
+        Review style requirements:
+        - Provide review feedback in both English and Chinese when raising an issue.
+        - Focus on bugs, regressions, race conditions, memory/resource issues, configuration mistakes, and build breakages.
+        - Avoid low-value comments on formatting unless they hide a real bug or violate RT-Thread style.
+        - When uncertain due to missing hardware context, explicitly state the assumption and ask for verification evidence.
+
+        Review comment format:
+        [Category/类别]: Brief description / 简要描述
+
+        English: Detailed explanation of the issue and suggested improvement.
+        中文：问题的详细说明和改进建议。
+
+        Severity mapping:
+        - Critical/严重: may cause crash, corruption, deadlock, or broken hardware behavior.
+        - Major/主要: significant bug, regression, or performance issue.
+        - Minor/次要: style, maintainability, or small optimization issue.
+        - Suggestion/建议: optional improvement.
+
+        For PR titles touching GD32 code, prefer format:
+        [GD32][SUBSYSTEM] Concise English description
+
+    - path: "bsp/gd32/*/gd*/applications/**"
+      instructions: *gd32_board_level_instructions
+
+    - path: "bsp/gd32/*/gd*/Kconfig"
+      instructions: *gd32_board_level_instructions
+
+    - path: "bsp/gd32/*/gd*/SConscript"
+      instructions: *gd32_board_level_instructions
+
+    - path: "bsp/gd32/*/gd*/SConstruct"
+      instructions: *gd32_board_level_instructions
+
+    - path: "bsp/gd32/*/gd*/rtconfig.py"
+      instructions: *gd32_board_level_instructions
+
+    - path: "bsp/gd32/*/gd*/.config"
+      instructions: *gd32_board_level_instructions
+
+    - path: "bsp/gd32/*/gd*/cconfig.h"
+      instructions: *gd32_board_level_instructions
+
+    - path: ".github/workflows/**"
+      instructions: |
+        Review GitHub Actions changes for security and CI reliability.
+
+        Focus on:
+        - least-privilege permissions
+        - safe use of pull_request vs pull_request_target
+        - secret exposure risks
+        - shell robustness and quoting
+        - cache correctness and concurrency behavior
+        - compatibility with fork-based pull requests
+
+    - path: "tools/**"
+      instructions: |
+        Review scripts for portability, failure handling, reproducibility, and safe filesystem operations.
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: auto
+  pull_requests:
+    scope: auto
+  issues:
+    scope: auto

@@ -19,7 +19,7 @@ if GetDepend(['RT_USING_SERIAL']):
     else:
         src += ['drv_usart.c']
 
-# add i2c hard drivers.       
+# add i2c hard drivers.
 if GetDepend(['RT_USING_I2C']):
     if GetDepend('BSP_USING_HARD_I2C0') or GetDepend('BSP_USING_HARD_I2C1') or GetDepend('BSP_USING_HARD_I2C2') or GetDepend('BSP_USING_HARD_I2C3') or GetDepend('BSP_USING_HARD_I2C4') or GetDepend('BSP_USING_HARD_I2C5'):
         src += ['drv_hard_i2c.c']
@@ -56,10 +56,16 @@ if GetDepend('RT_USING_HWTIMER'):
 if GetDepend('RT_USING_ADC'):
     src += ['drv_adc.c']
 
-# add sdio drivers.
-if GetDepend('RT_USING_SDIO'):
+# add sdio / emmc / sd drivers.
+if GetDepend('BSP_USING_EMMC') and GetDepend('BSP_USING_SD'):
+    raise RuntimeError('BSP_USING_EMMC and BSP_USING_SD are mutually exclusive on SDIO0')
+elif GetDepend('BSP_USING_EMMC'):
+    src += ['drv_emmc_h7.c']
+elif GetDepend('BSP_USING_SD'):
+    src += ['drv_sd_h7.c']
+elif GetDepend('RT_USING_SDIO') and GetDepend('BSP_USING_SDIO'):
     src += ['drv_sdio.c']
-    
+
 # add pwm drivers.
 if GetDepend('RT_USING_PWM'):
     src += ['drv_pwm.c']
@@ -71,6 +77,10 @@ if GetDepend('RT_USING_CAN'):
 # add sdram drivers.
 if GetDepend('BSP_USING_SDRAM'):
     src += ['drv_sdram.c']
+
+# add ethercat drivers.
+if GetDepend('BSP_USING_ETH'):
+    src += ['drv_enet.c', 'synopsys_emac.c' ]
 
 path = [cwd]
 

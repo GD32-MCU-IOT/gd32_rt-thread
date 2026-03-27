@@ -149,6 +149,7 @@
 #define RT_UNAMED_PIPE_NUMBER 64
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
+#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
@@ -301,6 +302,26 @@
 
 /* end of Kendryte SDK */
 
+/* WCH HAL & SDK Drivers */
+
+/* end of WCH HAL & SDK Drivers */
+
+/* AT32 HAL & SDK Drivers */
+
+/* end of AT32 HAL & SDK Drivers */
+
+/* HC32 DDL Drivers */
+
+/* end of HC32 DDL Drivers */
+
+/* NXP HAL & SDK Drivers */
+
+/* end of NXP HAL & SDK Drivers */
+
+/* NUVOTON Drivers */
+
+/* end of NUVOTON Drivers */
+
 /* GD32 Drivers */
 
 #define PKG_USING_GD32_ARM_CMSIS_DRIVER
@@ -308,6 +329,10 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
+
+/* HPMicro SDK */
+
+/* end of HPMicro SDK */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -402,8 +427,15 @@
 
 #define BSP_USING_GPIO
 #define BSP_USING_UART
+#define BSP_SERIAL_USING_TX_DMA
+#define BSP_USING_UART_TX_DMA
+#define BSP_USING_UART_RX_DMA
 #define BSP_USING_UART0
 #define BSP_USING_UART1
+#define BSP_USING_UART2
+#define BSP_UART2_RX_USING_DMA
+#define BSP_UART2_TX_USING_DMA
+#define BSP_UART_DMA_TX_THRESHOLD 8
 #define BSP_USING_SPI
 #define BSP_USING_SPI_DMA
 #define BSP_USING_SPI5

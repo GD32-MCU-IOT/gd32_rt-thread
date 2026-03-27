@@ -28,9 +28,13 @@ menu "On-chip Peripheral Drivers"
         default y
         select RT_USING_SERIAL
         if BSP_USING_UART
+            config BSP_SERIAL_USING_TX_DMA
+                bool
+
             config BSP_USING_UART_TX_DMA
                 bool
                 select RT_SERIAL_USING_DMA
+                select BSP_SERIAL_USING_TX_DMA
 
             config BSP_USING_UART_RX_DMA
                 bool
@@ -163,6 +167,16 @@ menu "On-chip Peripheral Drivers"
                 depends on BSP_USING_UART7
                 select BSP_USING_UART_TX_DMA
                 default n
+
+            if BSP_USING_UART_TX_DMA
+                config BSP_UART_DMA_TX_THRESHOLD
+                    int "UART DMA TX minimum transfer length"
+                    range 1 256
+                    default 8
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+            endif
         endif
 
     menuconfig BSP_USING_SPI

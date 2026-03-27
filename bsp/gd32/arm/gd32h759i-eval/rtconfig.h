@@ -208,6 +208,130 @@
 
 /* end of RT-Thread Utestcases */
 
+/* RT-Thread Kernel */
+
+/* klibc options */
+
+/* rt_vsnprintf options */
+
+/* end of rt_vsnprintf options */
+
+/* rt_vsscanf options */
+
+/* end of rt_vsscanf options */
+
+/* rt_memset options */
+
+/* end of rt_memset options */
+
+/* rt_memcpy options */
+
+/* end of rt_memcpy options */
+
+/* rt_memmove options */
+
+/* end of rt_memmove options */
+
+/* rt_memcmp options */
+
+/* end of rt_memcmp options */
+
+/* rt_strstr options */
+
+/* end of rt_strstr options */
+
+/* rt_strcasecmp options */
+
+/* end of rt_strcasecmp options */
+
+/* rt_strncpy options */
+
+/* end of rt_strncpy options */
+
+/* rt_strcpy options */
+
+/* end of rt_strcpy options */
+
+/* rt_strncmp options */
+
+/* end of rt_strncmp options */
+
+/* rt_strcmp options */
+
+/* end of rt_strcmp options */
+
+/* rt_strlen options */
+
+/* end of rt_strlen options */
+
+/* rt_strnlen options */
+
+/* end of rt_strnlen options */
+/* end of klibc options */
+
+/* kservice options */
+
+/* end of kservice options */
+
+/* Inter-Thread communication */
+
+/* end of Inter-Thread communication */
+
+/* Memory Management */
+
+/* end of Memory Management */
+/* end of RT-Thread Kernel */
+
+/* RT-Thread Components */
+
+/* DFS: device virtual file system */
+
+/* end of DFS: device virtual file system */
+
+/* Device Drivers */
+
+/* end of Device Drivers */
+
+/* C/C++ and POSIX layer */
+
+/* ISO-ANSI C layer */
+
+/* Timezone and Daylight Saving Time */
+
+/* end of Timezone and Daylight Saving Time */
+/* end of ISO-ANSI C layer */
+
+/* POSIX (Portable Operating System Interface) layer */
+
+/* Interprocess Communication (IPC) */
+
+/* Socket is in the 'Network' category */
+
+/* end of Interprocess Communication (IPC) */
+/* end of POSIX (Portable Operating System Interface) layer */
+/* end of C/C++ and POSIX layer */
+
+/* Network */
+
+/* end of Network */
+
+/* Memory protection */
+
+/* end of Memory protection */
+
+/* Utilities */
+
+/* end of Utilities */
+
+/* Using USB legacy version */
+
+/* end of Using USB legacy version */
+/* end of RT-Thread Components */
+
+/* RT-Thread Utestcases */
+
+/* end of RT-Thread Utestcases */
+
 /* RT-Thread online packages */
 
 /* IoT - internet of things */
@@ -306,26 +430,6 @@
 
 /* end of Kendryte SDK */
 
-/* WCH HAL & SDK Drivers */
-
-/* end of WCH HAL & SDK Drivers */
-
-/* AT32 HAL & SDK Drivers */
-
-/* end of AT32 HAL & SDK Drivers */
-
-/* HC32 DDL Drivers */
-
-/* end of HC32 DDL Drivers */
-
-/* NXP HAL & SDK Drivers */
-
-/* end of NXP HAL & SDK Drivers */
-
-/* NUVOTON Drivers */
-
-/* end of NUVOTON Drivers */
-
 /* GD32 Drivers */
 
 #define PKG_USING_GD32_ARM_CMSIS_DRIVER
@@ -333,10 +437,6 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
-
-/* HPMicro SDK */
-
-/* end of HPMicro SDK */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -434,7 +534,11 @@
 #define BSP_USING_UART0
 #define BSP_USING_UART1
 #define BSP_USING_SPI
+#define BSP_USING_SPI_DMA
 #define BSP_USING_SPI3
+#define BSP_SPI3_USING_DMA
+#define BSP_SPI_DMA_TRANS_MIN_LEN 16
+#define BSP_SPI_DMA_TIMEOUT 1000
 #define BSP_USING_I2C
 #define BSP_USING_HARD_I2C1
 #define BSP_USING_GD_DBG

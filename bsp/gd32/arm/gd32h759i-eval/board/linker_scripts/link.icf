@@ -42,3 +42,4 @@ place in ROM_region   { readonly };
 place in RAM_region   { readwrite,
                         block CSTACK, block HEAP };
 place in DTCMRAM_region  { section .dtcmram };
+place in ITCMRAM_region  { section .itcmram };

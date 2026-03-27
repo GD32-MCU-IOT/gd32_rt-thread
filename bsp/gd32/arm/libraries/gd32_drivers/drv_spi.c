@@ -380,8 +380,14 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     {
         rcu_periph_clock_enable(RCU_DMA1);
     }
-    
+
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+    /* H7xx requires DMAMUX clock */
+    rcu_periph_clock_enable(RCU_DMAMUX);
+#endif
+
     /* Configure DMA common parameters */
+    dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.priority = DMA_PRIORITY_HIGH;
@@ -395,10 +401,17 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
         
         dma_init_struct.periph_memory_width = spi_device->dma_rx->data_width;
         dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+        dma_init_struct.periph_addr = (uint32_t)&SPI_RDATA(spi_periph);
+        dma_init_struct.request = spi_device->dma_rx->request;
+#else
         dma_init_struct.periph_addr = (uint32_t)&SPI_DATA(spi_periph);
+#endif
         
         dma_single_data_mode_init(spi_device->dma_rx->periph, spi_device->dma_rx->channel, &dma_init_struct);
+#if !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32H77x)
         dma_channel_subperipheral_select(spi_device->dma_rx->periph, spi_device->dma_rx->channel, spi_device->dma_rx->subperiph);
+#endif
         dma_circulation_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
         dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
     }
@@ -410,10 +423,17 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
         
         dma_init_struct.periph_memory_width = spi_device->dma_tx->data_width;
         dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+        dma_init_struct.periph_addr = (uint32_t)&SPI_TDATA(spi_periph);
+        dma_init_struct.request = spi_device->dma_tx->request;
+#else
         dma_init_struct.periph_addr = (uint32_t)&SPI_DATA(spi_periph);
+#endif
         
         dma_single_data_mode_init(spi_device->dma_tx->periph, spi_device->dma_tx->channel, &dma_init_struct);
+#if !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32H77x)
         dma_channel_subperipheral_select(spi_device->dma_tx->periph, spi_device->dma_tx->channel, spi_device->dma_tx->subperiph);
+#endif
         dma_circulation_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
         dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
     }
@@ -710,6 +730,17 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         static rt_uint8_t dummy_rx = 0;
         
         LOG_D("spi DMA transfer start: %d", size);
+
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+        /* H7xx requires setting the data frame number before DMA transfer */
+        spi_current_data_num_config(spi_periph, size);
+#endif
+
+        /* DCache coherency: clean TX buffer so DMA reads correct data from RAM */
+        if (send_ptr != RT_NULL)
+        {
+            rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, (void *)send_ptr, size);
+        }
         
         /* Configure RX DMA */
         if (spi_device->dma_rx != RT_NULL)
@@ -758,6 +789,11 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
             dma_channel_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
             spi_dma_enable(spi_periph, SPI_DMA_TRANSMIT);
         }
+
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+        /* H7xx requires explicit master transfer start */
+        spi_master_transfer_start(spi_periph, SPI_TRANS_START);
+#endif
         
         /* Wait for transfer complete with timeout */
         rt_tick_t timeout = rt_tick_from_millisecond(BSP_SPI_DMA_TIMEOUT);
@@ -785,28 +821,22 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
             
             if (rt_tick_get() - start > timeout)
             {
-                LOG_E("%s DMA transfer timeout", spi_device->bus_name);
+				LOG_E("%s DMA transfer timeout", spi_device->bus_name);
                 gd32_spi_dma_cleanup(spi_device, spi_periph);
                 return -RT_EIO;
             }
             
             rt_thread_mdelay(1);
         }
-        
-        /* Wait for SPI idle with timeout */
-        start = rt_tick_get();
-        while (RESET != spi_i2s_flag_get(spi_periph, SPI_FLAG_TRANS))
-        {
-            if (rt_tick_get() - start > timeout)
-            {
-                LOG_E("%s SPI idle timeout", spi_device->bus_name);
-                gd32_spi_dma_cleanup(spi_device, spi_periph);
-                return -RT_EIO;
-            }
-        }
-        
+
         /* Disable DMA and clear flags */
         gd32_spi_dma_cleanup(spi_device, spi_periph);
+
+        /* DCache coherency: invalidate RX buffer so CPU reads fresh data from RAM */
+        if (recv_ptr != RT_NULL)
+        {
+            rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, (void *)recv_ptr, size);
+        }
         
         LOG_D("spi DMA transfer finish");
     }

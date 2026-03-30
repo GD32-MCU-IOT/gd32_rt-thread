@@ -12,6 +12,28 @@
 
 #ifdef RT_USING_SERIAL
 
+#ifndef USART_TRANSMIT_DMA_ENABLE
+#define USART_TRANSMIT_DMA_ENABLE USART_DENT_ENABLE
+#endif
+#ifndef USART_TRANSMIT_DMA_DISABLE
+#define USART_TRANSMIT_DMA_DISABLE USART_DENT_DISABLE
+#endif
+#ifndef USART_RECEIVE_DMA_ENABLE
+#define USART_RECEIVE_DMA_ENABLE USART_DENR_ENABLE
+#endif
+#ifndef USART_RECEIVE_DMA_DISABLE
+#define USART_RECEIVE_DMA_DISABLE USART_DENR_DISABLE
+#endif
+
+/* USART data register address macros for DMA configuration */
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E)
+#define USART_DATA_TX(usartx) (&USART_TDATA(usartx))
+#define USART_DATA_RX(usartx) (&USART_RDATA(usartx))
+#else
+#define USART_DATA_TX(usartx) (&USART_DATA(usartx))
+#define USART_DATA_RX(usartx) (&USART_DATA(usartx))
+#endif
+
 #ifdef SOC_SERIES_GD32M53x
 /* Map legacy USART names to UART for GD32M53x */
 #define USART0                     UART0
@@ -79,378 +101,111 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag);
 static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag);
 static void dma_rx_done_isr(struct rt_serial_device *serial);
 
-extern void Error_Handler(void);
+/* DMA TX threshold: transfers smaller than this use polling instead of DMA */
+#ifdef BSP_UART_DMA_TX_THRESHOLD
+#define GD32_DMA_TX_THRESHOLD   BSP_UART_DMA_TX_THRESHOLD
+#else
+#define GD32_DMA_TX_THRESHOLD   8
+#endif
+#endif /* RT_SERIAL_USING_DMA - forward declarations */
+
+/* Polling TX timeout in milliseconds */
+#ifdef BSP_UART_POLL_TX_TIMEOUT_MS
+#define GD32_POLL_TX_TIMEOUT_MS BSP_UART_POLL_TX_TIMEOUT_MS
+#else
+#define GD32_POLL_TX_TIMEOUT_MS 1000
 #endif
 
 static void GD32_UART_IRQHandler(struct rt_serial_device *serial);
 
+/*******************************************************************************
+ * Serial device and DMA config declarations
+ * (Moved before uart_obj to satisfy initialization dependencies)
+ ******************************************************************************/
 #if defined(BSP_USING_UART0)
 struct rt_serial_device serial0;
-
-#if defined(RT_SERIAL_USING_DMA)
-gd32_uart_dma uart0_rxdma = {
-    DMA0,
-    DMA_CH0,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_USART0_RX,
+#if defined(BSP_UART0_RX_USING_DMA)
+static struct dma_config uart0_dma_rx_config = UART0_DMA_RX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA0_Channel0_IRQn,
-    0,
-};
-gd32_uart_dma uart0_txdma = {
-    DMA1,
-    DMA_CH0,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_USART0_TX,
+#if defined(BSP_UART0_TX_USING_DMA)
+static struct dma_config uart0_dma_tx_config = UART0_DMA_TX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA1_Channel0_IRQn,
-    0,
-};
-
-void DMA0_Channel0_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_rx_done_isr(&serial0);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
-void DMA1_Channel0_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_flag_clear(DMA1, DMA_CH0, DMA_FLAG_FTF);
-    dma_flag_clear(DMA1, DMA_CH0, DMA_FLAG_HTF);
-    dma_flag_clear(DMA1, DMA_CH0, DMA_FLAG_FEE);
-    dma_flag_clear(DMA1, DMA_CH0, DMA_FLAG_TAE);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-#endif /* RT_SERIAL_USING_DMA */
-
-void USART0_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    GD32_UART_IRQHandler(&serial0);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
 #endif /* BSP_USING_UART0 */
 
 #if defined(BSP_USING_UART1)
 struct rt_serial_device serial1;
-
-#if defined(RT_SERIAL_USING_DMA)
-gd32_uart_dma uart1_rxdma = {
-    DMA0,
-    DMA_CH1,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_USART1_RX,
+#if defined(BSP_UART1_RX_USING_DMA)
+struct dma_config uart1_rxdma = UART1_DMA_RX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA0_Channel1_IRQn,
-    0,
-};
-
-void DMA0_Channel1_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_rx_done_isr(&serial1);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-#endif /* RT_SERIAL_USING_DMA */
-
-void USART1_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    GD32_UART_IRQHandler(&serial1);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
+#if defined(BSP_UART1_TX_USING_DMA)
+struct dma_config uart1_txdma = UART1_DMA_TX_CONFIG;
+#endif
 #endif /* BSP_USING_UART1 */
 
 #if defined(BSP_USING_UART2)
 struct rt_serial_device serial2;
-
-#if defined(RT_SERIAL_USING_DMA)
-gd32_uart_dma uart2_rxdma = {
-    DMA0,
-    DMA_CH2,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_USART2_RX,
+#if defined(BSP_UART2_RX_USING_DMA)
+struct dma_config uart2_rxdma = UART2_DMA_RX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA0_Channel2_IRQn,
-    0,
-};
-gd32_uart_dma uart2_txdma = {
-    DMA1,
-    DMA_CH2,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_USART2_TX,
+#if defined(BSP_UART2_TX_USING_DMA)
+struct dma_config uart2_txdma = UART2_DMA_TX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA1_Channel2_IRQn,
-    0,
-};
-
-void DMA0_Channel2_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_rx_done_isr(&serial2);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
-void DMA1_Channel2_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_flag_clear(DMA1, DMA_CH2, DMA_FLAG_FTF);
-    dma_flag_clear(DMA1, DMA_CH2, DMA_FLAG_HTF);
-    dma_flag_clear(DMA1, DMA_CH2, DMA_FLAG_FEE);
-    dma_flag_clear(DMA1, DMA_CH2, DMA_FLAG_TAE);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-#endif /* RT_SERIAL_USING_DMA */
-
-void USART2_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    GD32_UART_IRQHandler(&serial2);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
 #endif /* BSP_USING_UART2 */
 
 #if defined(BSP_USING_UART3)
 struct rt_serial_device serial3;
-
-#if defined(RT_SERIAL_USING_DMA)
-gd32_uart_dma uart3_rxdma = {
-    DMA0,
-    DMA_CH3,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_UART3_RX,
+#if defined(BSP_UART3_RX_USING_DMA)
+struct dma_config uart3_rxdma = UART3_DMA_RX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA0_Channel3_IRQn,
-    0,
-};
-
-void DMA0_Channel3_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_rx_done_isr(&serial3);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-#endif /* RT_SERIAL_USING_DMA */
-
-void UART3_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    GD32_UART_IRQHandler(&serial3);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
+#if defined(BSP_UART3_TX_USING_DMA)
+struct dma_config uart3_txdma = UART3_DMA_TX_CONFIG;
+#endif
 #endif /* BSP_USING_UART3 */
 
 #if defined(BSP_USING_UART4)
 struct rt_serial_device serial4;
-
-#if defined(RT_SERIAL_USING_DMA)
-gd32_uart_dma uart4_rxdma = {
-    DMA0,
-    DMA_CH4,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_UART4_RX,
+#if defined(BSP_UART4_RX_USING_DMA)
+struct dma_config uart4_rxdma = UART4_DMA_RX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA0_Channel4_IRQn,
-    0,
-};
-
-void DMA0_Channel4_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_rx_done_isr(&serial4);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-#endif /* RT_SERIAL_USING_DMA */
-
-void UART4_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    GD32_UART_IRQHandler(&serial4);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
+#if defined(BSP_UART4_TX_USING_DMA)
+struct dma_config uart4_txdma = UART4_DMA_TX_CONFIG;
+#endif
 #endif /* BSP_USING_UART4 */
 
 #if defined(BSP_USING_UART5)
 struct rt_serial_device serial5;
-
-#if defined(RT_SERIAL_USING_DMA)
-gd32_uart_dma uart5_rxdma = {
-    DMA0,
-    DMA_CH5,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_USART5_RX,
+#if defined(BSP_UART5_RX_USING_DMA)
+struct dma_config uart5_rxdma = UART5_DMA_RX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA0_Channel5_IRQn,
-    0,
-};
-
-void DMA0_Channel5_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_rx_done_isr(&serial5);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-#endif /* RT_SERIAL_USING_DMA */
-
-void USART5_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    GD32_UART_IRQHandler(&serial5);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
+#if defined(BSP_UART5_TX_USING_DMA)
+struct dma_config uart5_txdma = UART5_DMA_TX_CONFIG;
+#endif
 #endif /* BSP_USING_UART5 */
 
 #if defined(BSP_USING_UART6)
 struct rt_serial_device serial6;
-
-#if defined(RT_SERIAL_USING_DMA)
-gd32_uart_dma uart6_rxdma = {
-    DMA0,
-    DMA_CH6,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_UART6_RX,
+#if defined(BSP_UART6_RX_USING_DMA)
+struct dma_config uart6_rxdma = UART6_DMA_RX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA0_Channel6_IRQn,
-    0,
-};
-
-void DMA0_Channel6_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_rx_done_isr(&serial6);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-#endif /* RT_SERIAL_USING_DMA */
-
-void UART6_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    GD32_UART_IRQHandler(&serial6);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
+#if defined(BSP_UART6_TX_USING_DMA)
+struct dma_config uart6_txdma = UART6_DMA_TX_CONFIG;
+#endif
 #endif /* BSP_USING_UART6 */
 
 #if defined(BSP_USING_UART7)
 struct rt_serial_device serial7;
-
-#if defined(RT_SERIAL_USING_DMA)
-gd32_uart_dma uart7_rxdma = {
-    DMA0,
-    DMA_CH7,
-#ifdef SOC_SERIES_GD32H7xx
-    DMA_REQUEST_UART7_RX,
+#if defined(BSP_UART7_RX_USING_DMA)
+struct dma_config uart7_rxdma = UART7_DMA_RX_CONFIG;
 #endif
-    DMA_INTF_FTFIF,
-    DMA0_Channel7_IRQn,
-    0,
-};
-
-void DMA0_Channel7_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    dma_rx_done_isr(&serial7);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-#endif /* RT_SERIAL_USING_DMA */
-
-void UART7_IRQHandler(void)
-{
-    /* enter interrupt */
-    rt_interrupt_enter();
-
-    GD32_UART_IRQHandler(&serial7);
-
-    /* leave interrupt */
-    rt_interrupt_leave();
-}
-
+#if defined(BSP_UART7_TX_USING_DMA)
+struct dma_config uart7_txdma = UART7_DMA_TX_CONFIG;
+#endif
 #endif /* BSP_USING_UART7 */
 
+/*******************************************************************************
+ * uart_obj array definitions
+ * (Moved before DMA helper functions for better code organization)
+ ******************************************************************************/
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
@@ -482,7 +237,7 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart0_rxdma,
-#ifdef RT_SERIAL_USING_TX_DMA
+#ifdef BSP_SERIAL_USING_TX_DMA
         &uart0_txdma,
 #endif
 #endif
@@ -543,7 +298,7 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart2_rxdma,
-#ifdef RT_SERIAL_USING_TX_DMA
+#ifdef BSP_SERIAL_USING_TX_DMA
         &uart2_txdma,
 #endif
 #endif
@@ -621,6 +376,9 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart5_rxdma,
+#ifdef BSP_SERIAL_USING_TX_DMA
+        &uart5_txdma,
+#endif
 #endif
         &serial5,
         "uart5",
@@ -644,6 +402,9 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart6_rxdma,
+#ifdef BSP_SERIAL_USING_TX_DMA
+        &uart6_txdma,
+#endif
 #endif
         &serial6,
         "uart6",
@@ -664,6 +425,9 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart7_rxdma,
+#ifdef BSP_SERIAL_USING_TX_DMA
+        &uart7_txdma,
+#endif
 #endif
         &serial7,
         "uart7",
@@ -672,7 +436,7 @@ static const struct gd32_uart uart_obj[] = {
 };
 
 #else
-static const struct gd32_uart uart_obj[] = {
+static struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
         USART0,                                /* uart peripheral index */
@@ -681,11 +445,11 @@ static const struct gd32_uart uart_obj[] = {
         "uart0",
         &serial0,
 #ifdef RT_SERIAL_USING_DMA
-#ifdef BSP_USING_UART_TX_DMA
-        &uart0_txdma,
+#ifdef BSP_UART0_TX_USING_DMA
+        &uart0_dma_tx_config,
 #endif
-#ifdef BSP_USING_UART_RX_DMA
-        &uart0_rxdma,
+#ifdef BSP_UART0_RX_USING_DMA
+        &uart0_dma_rx_config,
 #endif
 #endif
     },
@@ -699,10 +463,10 @@ static const struct gd32_uart uart_obj[] = {
         "uart1",
         &serial1,
 #ifdef RT_SERIAL_USING_DMA
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_UART1_TX_USING_DMA
         &uart1_txdma,
 #endif
-#ifdef BSP_USING_UART_RX_DMA
+#ifdef BSP_UART1_RX_USING_DMA
         &uart1_rxdma,
 #endif
 #endif
@@ -717,10 +481,10 @@ static const struct gd32_uart uart_obj[] = {
         "uart2",
         &serial2,
 #ifdef RT_SERIAL_USING_DMA
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_UART2_TX_USING_DMA
         &uart2_txdma,
 #endif
-#ifdef BSP_USING_UART_RX_DMA
+#ifdef BSP_UART2_RX_USING_DMA
         &uart2_rxdma,
 #endif
 #endif
@@ -735,10 +499,10 @@ static const struct gd32_uart uart_obj[] = {
         "uart3",
         &serial3,
 #ifdef RT_SERIAL_USING_DMA
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_UART3_TX_USING_DMA
         &uart3_txdma,
 #endif
-#ifdef BSP_USING_UART_RX_DMA
+#ifdef BSP_UART3_RX_USING_DMA
         &uart3_rxdma,
 #endif
 #endif
@@ -753,10 +517,10 @@ static const struct gd32_uart uart_obj[] = {
         "uart4",
         &serial4,
 #ifdef RT_SERIAL_USING_DMA
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_UART4_TX_USING_DMA
         &uart4_txdma,
 #endif
-#ifdef BSP_USING_UART_RX_DMA
+#ifdef BSP_UART4_RX_USING_DMA
         &uart4_rxdma,
 #endif
 #endif
@@ -771,10 +535,10 @@ static const struct gd32_uart uart_obj[] = {
         "uart5",
         &serial5,
 #ifdef RT_SERIAL_USING_DMA
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_UART5_TX_USING_DMA
         &uart5_txdma,
 #endif
-#ifdef BSP_USING_UART_RX_DMA
+#ifdef BSP_UART5_RX_USING_DMA
         &uart5_rxdma,
 #endif
 #endif
@@ -789,10 +553,10 @@ static const struct gd32_uart uart_obj[] = {
         "uart6",
         &serial6,
 #ifdef RT_SERIAL_USING_DMA
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_UART6_TX_USING_DMA
         &uart6_txdma,
 #endif
-#ifdef BSP_USING_UART_RX_DMA
+#ifdef BSP_UART6_RX_USING_DMA
         &uart6_rxdma,
 #endif
 #endif
@@ -807,10 +571,10 @@ static const struct gd32_uart uart_obj[] = {
         "uart7",
         &serial7,
 #ifdef RT_SERIAL_USING_DMA
-#ifdef BSP_USING_UART_TX_DMA
+#ifdef BSP_UART7_TX_USING_DMA
         &uart7_txdma,
 #endif
-#ifdef BSP_USING_UART_RX_DMA
+#ifdef BSP_UART7_RX_USING_DMA
         &uart7_rxdma,
 #endif
 #endif
@@ -818,6 +582,267 @@ static const struct gd32_uart uart_obj[] = {
     #endif
 };
 #endif
+
+/*******************************************************************************
+ * DMA helper functions
+ ******************************************************************************/
+#ifdef RT_SERIAL_USING_DMA
+static void dma_tx_done_isr(uint32_t dma_periph, dma_channel_enum dma_ch)
+{
+    dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_FTF);
+    dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_HTF);
+    dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_FEE);
+    dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_TAE);
+}
+
+static void Error_Handler(void)
+{
+    RT_ASSERT(0);
+}
+#endif
+
+/*******************************************************************************
+ * ISR handlers
+ ******************************************************************************/
+#if defined(BSP_USING_UART0)
+
+#if defined(BSP_UART0_RX_USING_DMA)
+void UART0_DMA_RX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_rx_done_isr(&serial0);
+    rt_interrupt_leave();
+}
+#endif
+
+#if defined(BSP_UART0_TX_USING_DMA)
+void UART0_DMA_TX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_tx_done_isr(UART0_TX_DMA_PERIPH, UART0_TX_DMA_CHANNEL);
+    rt_interrupt_leave();
+}
+#endif
+
+void USART0_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    GD32_UART_IRQHandler(&serial0);
+    rt_interrupt_leave();
+}
+
+#endif /* BSP_USING_UART0 */
+
+#if defined(BSP_USING_UART1)
+
+#if defined(BSP_UART1_RX_USING_DMA)
+void UART1_DMA_RX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_rx_done_isr(&serial1);
+    rt_interrupt_leave();
+}
+#endif
+
+#ifdef BSP_UART1_TX_USING_DMA
+void UART1_DMA_TX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_tx_done_isr(UART1_TX_DMA_PERIPH, UART1_TX_DMA_CHANNEL);
+    rt_interrupt_leave();
+}
+#endif /* RT_SERIAL_USING_DMA */
+
+void USART1_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    GD32_UART_IRQHandler(&serial1);
+    rt_interrupt_leave();
+}
+
+#endif /* BSP_USING_UART1 */
+
+#if defined(BSP_USING_UART2)
+
+#if defined(RT_SERIAL_USING_DMA)
+#if defined(BSP_UART2_RX_USING_DMA)
+void UART2_DMA_RX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_rx_done_isr(&serial2);
+    rt_interrupt_leave();
+}
+#endif
+
+#if defined(BSP_UART2_TX_USING_DMA)
+void UART2_DMA_TX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_tx_done_isr(UART2_TX_DMA_PERIPH, UART2_TX_DMA_CHANNEL);
+    rt_interrupt_leave();
+}
+#endif
+#endif /* RT_SERIAL_USING_DMA */
+
+void USART2_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    GD32_UART_IRQHandler(&serial2);
+    rt_interrupt_leave();
+}
+
+#endif /* BSP_USING_UART2 */
+
+#if defined(BSP_USING_UART3)
+
+#if defined(RT_SERIAL_USING_DMA)
+#ifdef BSP_UART3_RX_USING_DMA
+void UART3_DMA_RX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_rx_done_isr(&serial3);
+    rt_interrupt_leave();
+}
+#endif
+
+#ifdef BSP_UART3_TX_USING_DMA
+void UART3_DMA_TX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_tx_done_isr(UART3_TX_DMA_PERIPH, UART3_TX_DMA_CHANNEL);
+    rt_interrupt_leave();
+}
+#endif
+#endif /* RT_SERIAL_USING_DMA */
+
+void UART3_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    GD32_UART_IRQHandler(&serial3);
+    rt_interrupt_leave();
+}
+
+#endif /* BSP_USING_UART3 */
+
+#if defined(BSP_USING_UART4)
+
+#if defined(RT_SERIAL_USING_DMA)
+#ifdef BSP_UART4_RX_USING_DMA
+void UART4_DMA_RX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_rx_done_isr(&serial4);
+    rt_interrupt_leave();
+}
+#endif
+#ifdef BSP_UART4_TX_USING_DMA
+void UART4_DMA_TX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_tx_done_isr(UART4_TX_DMA_PERIPH, UART4_TX_DMA_CHANNEL);
+    rt_interrupt_leave();
+}
+#endif
+#endif /* RT_SERIAL_USING_DMA */
+
+void UART4_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    GD32_UART_IRQHandler(&serial4);
+    rt_interrupt_leave();
+}
+
+#endif /* BSP_USING_UART4 */
+
+#if defined(BSP_USING_UART5)
+
+#if defined(RT_SERIAL_USING_DMA)
+#ifdef BSP_UART5_RX_USING_DMA
+void UART5_DMA_RX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_rx_done_isr(&serial5);
+    rt_interrupt_leave();
+}
+#endif
+#ifdef BSP_UART5_TX_USING_DMA
+void UART5_DMA_TX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_tx_done_isr(UART5_TX_DMA_PERIPH, UART5_TX_DMA_CHANNEL);
+    rt_interrupt_leave();
+}
+#endif
+#endif /* RT_SERIAL_USING_DMA */
+
+void USART5_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    GD32_UART_IRQHandler(&serial5);
+    rt_interrupt_leave();
+}
+
+#endif /* BSP_USING_UART5 */
+
+#if defined(BSP_USING_UART6)
+
+#if defined(RT_SERIAL_USING_DMA)
+#ifdef BSP_UART6_RX_USING_DMA
+void UART6_DMA_RX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_rx_done_isr(&serial6);
+    rt_interrupt_leave();
+}
+#endif
+#ifdef BSP_UART6_TX_USING_DMA
+void UART6_DMA_TX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_tx_done_isr(UART6_TX_DMA_PERIPH, UART6_TX_DMA_CHANNEL);
+    rt_interrupt_leave();
+}
+#endif
+#endif /* RT_SERIAL_USING_DMA */
+
+void UART6_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    GD32_UART_IRQHandler(&serial6);
+    rt_interrupt_leave();
+}
+
+#endif /* BSP_USING_UART6 */
+
+#if defined(BSP_USING_UART7)
+
+#if defined(RT_SERIAL_USING_DMA)
+#ifdef BSP_UART7_RX_USING_DMA
+void UART7_DMA_RX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_rx_done_isr(&serial7);
+    rt_interrupt_leave();
+}
+#endif
+#ifdef BSP_UART7_TX_USING_DMA
+void UART7_DMA_TX_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    dma_tx_done_isr(UART7_TX_DMA_PERIPH, UART7_TX_DMA_CHANNEL);
+    rt_interrupt_leave();
+}
+#endif
+#endif /* RT_SERIAL_USING_DMA */
+
+void UART7_IRQHandler(void)
+{
+    rt_interrupt_enter();
+    GD32_UART_IRQHandler(&serial7);
+    rt_interrupt_leave();
+}
+
+#endif /* BSP_USING_UART7 */
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
@@ -1000,24 +1025,33 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 #ifdef RT_SERIAL_USING_DMA
         /* disable DMA */
         if (ctrl_arg == RT_DEVICE_FLAG_DMA_RX) {
-            nvic_irq_disable(uart->uart_dma->rx_irq_ch);
+            nvic_irq_disable(uart->dma_rx->irq);
 
             /* disable interrupt */
             usart_interrupt_disable(uart->uart_periph, USART_INT_IDLE);
 
-            dma_channel_disable(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
+            dma_channel_disable(uart->dma_rx->periph, uart->dma_rx->channel);
             usart_dma_receive_config(uart->uart_periph, USART_RECEIVE_DMA_DISABLE);
-            dma_deinit(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
+            dma_deinit(uart->dma_rx->periph, uart->dma_rx->channel);
 
-            uart->uart_dma->last_recv_index = 0;
+#ifdef SOC_SERIES_GD32H7xx
+            /* Free cache-aligned DMA buffer */
+            if (uart->dma_rx_buffer != RT_NULL)
+            {
+                rt_free_align(uart->dma_rx_buffer);
+                uart->dma_rx_buffer = RT_NULL;
+            }
+#endif
+
+            uart->last_recv_index = 0;
         }
-#ifdef RT_SERIAL_USING_TX_DMA
+#ifdef BSP_SERIAL_USING_TX_DMA
         else if (ctrl_arg == RT_DEVICE_FLAG_DMA_TX) {
-            nvic_irq_disable(uart->uart_tx_dma->rx_irq_ch);
+            nvic_irq_disable(uart->dma_tx->irq);
 
-            dma_channel_disable(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch);
+            dma_channel_disable(uart->dma_tx->periph, uart->dma_tx->channel);
             usart_dma_transmit_config(uart->uart_periph, USART_TRANSMIT_DMA_DISABLE);
-            dma_deinit(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch);
+            dma_deinit(uart->dma_tx->periph, uart->dma_tx->channel);
         }
 #endif
 #endif
@@ -1046,7 +1080,7 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
         if (ctrl_arg == RT_DEVICE_FLAG_DMA_RX) {
             gd32_dma_config(serial, ctrl_arg);
         }
-#ifdef RT_SERIAL_USING_TX_DMA
+#ifdef BSP_SERIAL_USING_TX_DMA
         else if (ctrl_arg == RT_DEVICE_FLAG_DMA_TX) {
             gd32_dma_tx_config(serial, ctrl_arg);
         }
@@ -1065,11 +1099,13 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 /**
   * @brief  uart put char
   * @param  serial, ch
-  * @retval None
+  * @retval RT_EOK on success, -RT_ETIMEOUT on timeout
   */
 static int gd32_uart_putc(struct rt_serial_device *serial, char ch)
 {
     struct gd32_uart *uart;
+    rt_tick_t start_tick;
+    rt_tick_t timeout_ticks = rt_tick_from_millisecond(GD32_POLL_TX_TIMEOUT_MS);
 
     RT_ASSERT(serial != RT_NULL);
     uart = (struct gd32_uart *)serial->parent.user_data;
@@ -1077,12 +1113,26 @@ static int gd32_uart_putc(struct rt_serial_device *serial, char ch)
 #if defined SOC_SERIES_GD32E51x
     if (uart->uart_periph == USART5)
     {
-        while((usart5_flag_get(USART5, USART5_FLAG_TC) == RESET));
+        start_tick = rt_tick_get();
+        while((usart5_flag_get(USART5, USART5_FLAG_TC) == RESET))
+        {
+            if ((rt_tick_get() - start_tick) > timeout_ticks)
+            {
+                return -RT_ETIMEOUT;
+            }
+        }
     }
     else
 #endif
     {
-        while((usart_flag_get(uart->uart_periph, USART_FLAG_TBE) == RESET));
+        start_tick = rt_tick_get();
+        while((usart_flag_get(uart->uart_periph, USART_FLAG_TBE) == RESET))
+        {
+            if ((rt_tick_get() - start_tick) > timeout_ticks)
+            {
+                return -RT_ETIMEOUT;
+            }
+        }
     }
 
     return RT_EOK;
@@ -1125,54 +1175,80 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
     dma_single_data_parameter_struct dma_init_struct;
 
     /* rx dma config */
-    uart->uart_dma->setting_recv_len = setting_recv_len;
-    dma_deinit(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
+    uart->setting_recv_len = setting_recv_len;
+    /* Initialize last_recv_index to 0 - represents total bytes received so far */
+    uart->last_recv_index = 0;
+    dma_deinit(uart->dma_rx->periph, uart->dma_rx->channel);
 
     dma_single_data_para_struct_init(&dma_init_struct);
-    dma_init_struct.request      = uart->uart_dma->dma_mux_req_rx;
     dma_init_struct.direction    = DMA_PERIPH_TO_MEMORY;
     dma_init_struct.memory0_addr = (uint32_t)mem_base_addr;
     dma_init_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
-    dma_init_struct.number       = uart->uart_dma->setting_recv_len;
-    dma_init_struct.periph_addr  = (uint32_t) &(USART_RDATA(uart->uart_periph));
+    dma_init_struct.number       = uart->setting_recv_len;
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
+#ifdef SOC_SERIES_GD32H7xx
+    dma_init_struct.request      = uart->dma_rx->request;
+#endif
+    dma_init_struct.periph_addr  = (uint32_t)USART_DATA_RX(uart->uart_periph);
+    dma_single_data_mode_init(uart->dma_rx->periph, uart->dma_rx->channel, &dma_init_struct);
+#if defined(SOC_SERIES_GD32F5xx)
+    dma_channel_subperipheral_select(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->subperiph);
+#endif
+    /* configure DMA mode - non-circular mode */
+    dma_circulation_disable(uart->dma_rx->periph, uart->dma_rx->channel);
 
-    dma_single_data_mode_init(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch, &dma_init_struct);
-    /* configure DMA mode */
-    dma_circulation_disable(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
-
-    dma_flag_clear(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch, uart->uart_dma->rx_flag);
-    dma_interrupt_enable(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch, DMA_CHXCTL_FTFIE);
+    dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->dma_flag);
+    /* Enable Full-Transfer interrupt only */
+    dma_interrupt_enable(uart->dma_rx->periph, uart->dma_rx->channel, DMA_CHXCTL_FTFIE);
 }
 
 static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
 {
-    dma_single_data_parameter_struct dma_init_struct;
-
     struct gd32_uart *uart = (struct gd32_uart *) serial->parent.user_data;
     struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 
-    /* wait IDLEF set and clear it */
-    while(RESET == usart_flag_get(uart->uart_periph, USART_FLAG_IDLE)) {
-        rt_thread_mdelay(10);
+#ifdef SOC_SERIES_GD32H7xx
+    /*
+     * Allocate cache-line aligned DMA buffer to avoid D-Cache coherency issues.
+     * ARM Cortex-M7 cache line is 32 bytes. If the DMA buffer shares a cache line
+     * with other data (like serial_tx->data_queue), cache invalidate operations
+     * will corrupt that data.
+     */
+#define RT_DMA_CACHE_LINE_SIZE  32
+    if (uart->dma_rx_buffer == RT_NULL)
+    {
+        /* rx_fifo->buffer doesn't align with 32 bytes, so create a cache buffer with 32 bytes aligned */
+        uart->dma_rx_buffer = (rt_uint8_t *)rt_malloc_align(serial->config.bufsz, RT_DMA_CACHE_LINE_SIZE);
+        RT_ASSERT(uart->dma_rx_buffer != RT_NULL);
+        rt_memset(uart->dma_rx_buffer, 0, serial->config.bufsz);
+    }
+    /* Point rx_fifo->buffer to our aligned buffer */
+    rx_fifo->buffer = uart->dma_rx_buffer;
+#endif
+
+    /* Clear IDLE flag if set (read STAT then DATA to clear) */
+    if(SET == usart_flag_get(uart->uart_periph, USART_FLAG_IDLE)) {
+        usart_flag_clear(uart->uart_periph, USART_FLAG_IDLE);
+        usart_data_receive(uart->uart_periph);
     }
 
-    usart_flag_clear(uart->uart_periph, USART_FLAG_IDLE);
-    /* enable transmit idle interrupt */
+    /* enable idle interrupt */
     usart_interrupt_enable(uart->uart_periph, USART_INT_IDLE);
     /* DMA clock enable */
-    if(DMA0 == uart->uart_dma->dma_periph) {
+    if(DMA0 == uart->dma_rx->periph) {
         rcu_periph_clock_enable(RCU_DMA0);
-    } else if(DMA1 == uart->uart_dma->dma_periph) {
+    } else if(DMA1 == uart->dma_rx->periph) {
         rcu_periph_clock_enable(RCU_DMA1);
     } else {
         Error_Handler();
     }
 
+#ifdef SOC_SERIES_GD32H7xx
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
+#endif
 
 #ifdef RT_USING_CACHE
     /* clean d-cache */
@@ -1183,60 +1259,56 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
     dma_uart_config(serial, serial->config.bufsz, rx_fifo->buffer);
 
     usart_dma_receive_config(uart->uart_periph, USART_RECEIVE_DMA_ENABLE);
-    dma_channel_enable(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
+    dma_channel_enable(uart->dma_rx->periph, uart->dma_rx->channel);
     /* rx dma interrupt config */
-    nvic_irq_enable(uart->uart_dma->rx_irq_ch, 1, 0);
+    nvic_irq_enable(uart->dma_rx->irq, 1, 0);
 }
 
-#ifdef RT_SERIAL_USING_TX_DMA
+#ifdef BSP_SERIAL_USING_TX_DMA
 static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
 {
     dma_single_data_parameter_struct dma_init_struct;
 
     struct gd32_uart *uart = (struct gd32_uart *) serial->parent.user_data;
-    struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 
     /* DMA clock enable */
-    if(DMA0 == uart->uart_tx_dma->dma_periph) {
+    if(DMA0 == uart->dma_tx->periph) {
         rcu_periph_clock_enable(RCU_DMA0);
-    } else if(DMA1 == uart->uart_tx_dma->dma_periph) {
+    } else if(DMA1 == uart->dma_tx->periph) {
         rcu_periph_clock_enable(RCU_DMA1);
     } else {
         Error_Handler();
     }
 
+#ifdef SOC_SERIES_GD32H7xx
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
-
-#ifdef RT_USING_CACHE
-    /* clean d-cache */
-    rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, rx_fifo->buffer, serial->config.bufsz);
 #endif
 
     /* tx dma config */
-    uart->uart_tx_dma->setting_recv_len = 0;
-    dma_deinit(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch);
+    dma_deinit(uart->dma_tx->periph, uart->dma_tx->channel);
 
     dma_single_data_para_struct_init(&dma_init_struct);
-    dma_init_struct.request      = uart->uart_tx_dma->dma_mux_req_rx;
     dma_init_struct.direction    = DMA_MEMORY_TO_PERIPH;
     dma_init_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
-    dma_init_struct.periph_addr  = (uint32_t) &(USART_TDATA(uart->uart_periph));
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
-
-    dma_single_data_mode_init(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch, &dma_init_struct);
+#ifdef SOC_SERIES_GD32H7xx
+    dma_init_struct.request      = uart->dma_tx->request;
+#endif
+    dma_init_struct.number       = 0;   /* will be set in transmit function */
+    dma_init_struct.memory0_addr = 0;   /* will be set in transmit function */
+    dma_init_struct.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    dma_init_struct.periph_addr  = (uint32_t)USART_DATA_TX(uart->uart_periph);
+    dma_single_data_mode_init(uart->dma_tx->periph, uart->dma_tx->channel, &dma_init_struct);
+#if defined(SOC_SERIES_GD32F5xx)
+    dma_channel_subperipheral_select(uart->dma_tx->periph, uart->dma_tx->channel, uart->dma_tx->subperiph);
+#endif
     /* configure DMA mode */
-    dma_circulation_disable(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch);
+    dma_circulation_disable(uart->dma_tx->periph, uart->dma_tx->channel);
 }
 
-#ifdef RT_USING_CACHE
-#ifdef BSP_SCB_ENABLE_D_CACHE
-static uint8_t dma_buf_cache_pre_bk[32] = {0};
-static uint8_t dma_buf_cache_post_bk[32] = {0};
-#endif
-#endif
 static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t *buf, rt_size_t size, int direction)
 {
     struct gd32_uart *uart;
@@ -1252,27 +1324,50 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
 
     if (RT_SERIAL_DMA_TX == direction)
     {
+        /* Small transfers: use polling to avoid DMA setup overhead */
+        if (size < GD32_DMA_TX_THRESHOLD)
+        {
+            rt_size_t i;
+            int ret;
+            rt_tick_t start_tick;
+            rt_tick_t timeout_ticks = rt_tick_from_millisecond(GD32_POLL_TX_TIMEOUT_MS);
+
+            for (i = 0; i < size; i++)
+            {
+                ret = gd32_uart_putc(serial, buf[i]);
+                if (ret != RT_EOK)
+                {
+                    return ret;  /* timeout or error in putc */
+                }
+            }
+            /* wait for last byte fully shifted out with timeout */
+            start_tick = rt_tick_get();
+            while (usart_flag_get(uart->uart_periph, USART_FLAG_TC) == RESET)
+            {
+                if ((rt_tick_get() - start_tick) > timeout_ticks)
+                {
+                    /* timeout error */
+                    return -RT_ETIMEOUT;
+                }
+            }
+            /* notify framework that transmission is complete */
+            rt_hw_serial_isr(serial, RT_SERIAL_EVENT_TX_DMADONE);
+            return size;
+        }
+
 #ifdef RT_USING_CACHE
-#ifdef BSP_SCB_ENABLE_D_CACHE
-        uint32_t *dma_cache_pre_ptr = NULL, *dma_cache_post_ptr = NULL;
-        uint32_t pre_size = (rt_uint32_t)buf & (rt_uint32_t)0x1F;
-        dma_cache_pre_ptr = (uint32_t *)((uint32_t)buf - pre_size);
-        rt_memcpy(dma_buf_cache_pre_bk, dma_cache_pre_ptr, pre_size);
-        dma_cache_post_ptr = (uint32_t *)((uint32_t)buf + size);
-        rt_memcpy(dma_buf_cache_post_bk, dma_cache_post_ptr, sizeof(dma_buf_cache_post_bk));
-        /* invalidate d-cache */
-        rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, buf, size);
-
-        rt_memcpy(dma_cache_pre_ptr, dma_buf_cache_pre_bk, pre_size);
-        rt_memcpy(dma_cache_post_ptr, dma_buf_cache_post_bk, sizeof(dma_buf_cache_post_bk));
-#endif
+        /*
+         * Flush D-Cache to ensure DMA reads correct data from memory.
+         * rt_hw_cpu_dcache_ops handles non-aligned addresses internally.
+         */
+        rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, (void *)buf, size);
 #endif
 
-        dma_memory_address_config(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch, DMA_MEMORY_0, (uint32_t)buf);
-        dma_transfer_number_config(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch, size);
+        dma_memory_address_config(uart->dma_tx->periph, uart->dma_tx->channel, DMA_MEMORY_0, (uint32_t)buf);
+        dma_transfer_number_config(uart->dma_tx->periph, uart->dma_tx->channel, size);
 
-        dma_flag_clear(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch, uart->uart_tx_dma->rx_flag);
-        dma_interrupt_enable(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch, DMA_CHXCTL_FTFIE);
+        dma_flag_clear(uart->dma_tx->periph, uart->dma_tx->channel, uart->dma_tx->dma_flag);
+        dma_interrupt_enable(uart->dma_tx->periph, uart->dma_tx->channel, DMA_CHXCTL_FTFIE);
 
         usart_flag_clear(uart->uart_periph, USART_FLAG_TBE);
         usart_flag_clear(uart->uart_periph, USART_FLAG_TC);
@@ -1280,19 +1375,15 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
         usart_interrupt_enable(uart->uart_periph, USART_INT_TC);
 
         usart_dma_transmit_config(uart->uart_periph, USART_TRANSMIT_DMA_ENABLE);
-        /* rx dma interrupt config */
-        nvic_irq_enable(uart->uart_tx_dma->rx_irq_ch, 1, 0);
+        /* tx dma interrupt config */
+        nvic_irq_enable(uart->dma_tx->irq, 1, 0);
 
-        dma_channel_enable(uart->uart_tx_dma->dma_periph, uart->uart_tx_dma->dma_ch);
+        dma_channel_enable(uart->dma_tx->periph, uart->dma_tx->channel);
 
+        return size;
     }
     return 0;
 }
-#endif
-
-#ifdef RT_USING_CACHE
-static struct rt_serial_rx_fifo rx_fifo_cahce_bk = {0};
-static uint8_t rx_fifo_buf_cache_bk[32] = {0};
 #endif
 
 /**
@@ -1308,28 +1399,23 @@ static void dma_uart_rx_idle_isr(struct rt_serial_device *serial)
     struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 
 #ifdef RT_USING_CACHE
-    uint32_t *rx_fifo_end_ptr = NULL;
-    rx_fifo_end_ptr = (uint32_t *)((uint32_t)rx_fifo->buffer + serial->config.bufsz);
-    rt_memcpy(&rx_fifo_cahce_bk, rx_fifo, sizeof(rx_fifo_cahce_bk));
-    rt_memcpy(rx_fifo_buf_cache_bk, rx_fifo_end_ptr, sizeof(rx_fifo_buf_cache_bk));
-    /* invalidate d-cache */
+    /* Invalidate D-Cache before reading DMA buffer to get fresh data from RAM */
     rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, rx_fifo->buffer, serial->config.bufsz);
-
-    rt_memcpy(rx_fifo, &rx_fifo_cahce_bk, sizeof(rx_fifo_cahce_bk));
-    rt_memcpy(rx_fifo_end_ptr, rx_fifo_buf_cache_bk, sizeof(rx_fifo_buf_cache_bk));
 #endif
 
-    recv_total_index = uart->uart_dma->setting_recv_len -
-                       dma_transfer_number_get(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
+    recv_total_index = uart->setting_recv_len -
+                       dma_transfer_number_get(uart->dma_rx->periph, uart->dma_rx->channel);
 
-    if (recv_total_index >= uart->uart_dma->last_recv_index) {
-        recv_len = recv_total_index - uart->uart_dma->last_recv_index;
+    if (recv_total_index >= uart->last_recv_index) {
+        recv_len = recv_total_index - uart->last_recv_index;
     } else {
-        recv_len = uart->uart_dma->setting_recv_len - uart->uart_dma->last_recv_index + recv_total_index;
+        recv_len = uart->setting_recv_len - uart->last_recv_index + recv_total_index;
     }
-    uart->uart_dma->last_recv_index = recv_total_index;
+    uart->last_recv_index = recv_total_index;
 
-    rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
+    if (recv_len) {
+        rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
+    }
 
     /* read a data for clear receive idle interrupt flag */
     usart_data_receive(uart->uart_periph);
@@ -1338,48 +1424,44 @@ static void dma_uart_rx_idle_isr(struct rt_serial_device *serial)
 
 /**
  * DMA receive done process. This need add to DMA receive done ISR.
+ * Uses non-circular mode: disable DMA, process data, re-enable DMA.
  *
  * @param serial serial device
  */
 static void dma_rx_done_isr(struct rt_serial_device *serial)
 {
     struct gd32_uart *uart = (struct gd32_uart *) serial->parent.user_data;
-    rt_size_t recv_total_index, recv_len;
+    rt_size_t recv_len;
 
     struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 
 #ifdef RT_USING_CACHE
-    uint32_t *rx_fifo_end_ptr = NULL;
-    rx_fifo_end_ptr = (uint32_t *)((uint32_t)rx_fifo->buffer+serial->config.bufsz);
-    rt_memcpy(&rx_fifo_cahce_bk, rx_fifo, sizeof(rx_fifo_cahce_bk));
-    rt_memcpy(rx_fifo_buf_cache_bk, rx_fifo_end_ptr, sizeof(rx_fifo_buf_cache_bk));
-    /* invalidate d-cache */
+    /* Invalidate D-Cache before reading DMA buffer to get fresh data from RAM */
     rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, rx_fifo->buffer, serial->config.bufsz);
-
-    rt_memcpy(rx_fifo, &rx_fifo_cahce_bk, sizeof(rx_fifo_cahce_bk));
-    rt_memcpy(rx_fifo_end_ptr, rx_fifo_buf_cache_bk, sizeof(rx_fifo_buf_cache_bk));
 #endif
 
-    if (dma_flag_get(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch, uart->uart_dma->rx_flag) != RESET) {
+    if (dma_flag_get(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->dma_flag) != RESET) {
         /* disable dma, stop receive data */
-        dma_channel_disable(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
+        dma_channel_disable(uart->dma_rx->periph, uart->dma_rx->channel);
 
-        recv_total_index = uart->uart_dma->setting_recv_len -
-                           dma_transfer_number_get(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
-
-        if (recv_total_index >= uart->uart_dma->last_recv_index) {
-            recv_len = recv_total_index - uart->uart_dma->last_recv_index;
-        } else {
-            recv_len = uart->uart_dma->setting_recv_len - uart->uart_dma->last_recv_index + recv_total_index;
-            uart->uart_dma->last_recv_index = recv_total_index;
-        }
-        uart->uart_dma->last_recv_index = recv_total_index;
+        /*
+         * FTF (Full Transfer Finished) interrupt means DMA counter reached 0,
+         * so dma_transfer_number_get() always returns 0 here.
+         * recv_total_index = setting_recv_len - 0 = setting_recv_len (buffer is full)
+         * recv_len = setting_recv_len - last_recv_index (remaining bytes since last IDLE)
+         */
+        recv_len = uart->setting_recv_len - uart->last_recv_index;
 
         rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
 
-        /* start receive data */
-        dma_flag_clear(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch, uart->uart_dma->rx_flag);
-        dma_channel_enable(uart->uart_dma->dma_periph, uart->uart_dma->dma_ch);
+        /* Restart DMA for next reception - must reconfigure in non-circular mode */
+        dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->dma_flag);
+        /* Reset last_recv_index since DMA counter restarts from setting_recv_len */
+        uart->last_recv_index = 0;
+        /* Reconfigure DMA: reset transfer count and memory address */
+        dma_memory_address_config(uart->dma_rx->periph, uart->dma_rx->channel, DMA_MEMORY_0, (uint32_t)rx_fifo->buffer);
+        dma_transfer_number_config(uart->dma_rx->periph, uart->dma_rx->channel, uart->setting_recv_len);
+        dma_channel_enable(uart->dma_rx->periph, uart->dma_rx->channel);
     }
 }
 
@@ -1461,7 +1543,7 @@ static const struct rt_uart_ops gd32_uart_ops =
     .control = gd32_uart_control,
     .putc = gd32_uart_putc,
     .getc = gd32_uart_getc,
-#ifndef RT_SERIAL_USING_TX_DMA
+#ifndef BSP_SERIAL_USING_TX_DMA
     NULL,
 #else
     .dma_transmit = gd32_dma_transmit,
@@ -1489,7 +1571,7 @@ int rt_hw_usart_init(void)
         flag = RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX;
 #if defined(RT_SERIAL_USING_DMA)
         flag |= RT_DEVICE_FLAG_DMA_RX;
-#if defined(RT_SERIAL_USING_TX_DMA)
+#if defined(BSP_SERIAL_USING_TX_DMA)
         flag |= RT_DEVICE_FLAG_DMA_TX;
 #endif
 #endif

@@ -77,6 +77,7 @@ static int uart_sample(int argc, char *argv[]);
 #define UART_DMA_NAME      "uart2"
 #define RX_BUF_SIZE        256
 #define TX_BUF_SIZE        256
+#define DMA_TX_TIMEOUT     rt_tick_from_millisecond(1000)  /* 1 second timeout */
 
 static struct rt_semaphore uart_dma_rx_sem;
 static struct rt_semaphore uart_dma_tx_sem;
@@ -85,16 +86,20 @@ static rt_device_t uart_dma_serial;
 static rt_uint8_t rx_buf[RX_BUF_SIZE];
 static rt_uint8_t tx_buf[TX_BUF_SIZE];
 
+/* Initialization flag to prevent re-initialization */
+static rt_bool_t uart_dma_initialized = RT_FALSE;
+
 /* Statistics */
 static rt_uint32_t total_rx_bytes = 0;
 static rt_uint32_t total_tx_bytes = 0;
 static rt_uint32_t rx_count = 0;
 static rt_uint32_t tx_count = 0;
+static rt_uint32_t tx_timeout_count = 0;
 
 /* Forward declarations */
 static rt_err_t uart_dma_rx_indicate(rt_device_t dev, rt_size_t size);
 static rt_err_t uart_dma_tx_done(rt_device_t dev, void *buffer);
-static rt_size_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len);
+static rt_ssize_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len);
 static void uart_dma_thread_entry(void *parameter);
 static int uart_dma_sample(int argc, char *argv[]);
 #endif
@@ -478,9 +483,10 @@ static rt_err_t uart_dma_rx_indicate(rt_device_t dev, rt_size_t size)
 }
 
 /* DMA TX send with mutex and completion wait */
-static rt_size_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len)
+static rt_ssize_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len)
 {
-    rt_size_t sent;
+    rt_ssize_t sent;
+    rt_err_t ret;
 
     rt_mutex_take(&uart_dma_tx_mutex, RT_WAITING_FOREVER);
 
@@ -491,11 +497,28 @@ static rt_size_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len)
     rt_memcpy(tx_buf, buf, len);
 
     sent = rt_device_write(uart_dma_serial, 0, tx_buf, len);
-    if (sent > 0)
+    if (sent < 0)
     {
-        rt_sem_take(&uart_dma_tx_sem, RT_WAITING_FOREVER);
-        tx_count++;
-        total_tx_bytes += sent;
+        /* Device write error */
+        rt_kprintf("[UART DMA] TX write error! ret=%d\n", sent);
+        rt_mutex_release(&uart_dma_tx_mutex);
+        return sent;
+    }
+    else if (sent > 0)
+    {
+        /* Wait for TX completion with timeout to avoid infinite blocking */
+        ret = rt_sem_take(&uart_dma_tx_sem, DMA_TX_TIMEOUT);
+        if (ret == -RT_ETIMEOUT)
+        {
+            tx_timeout_count++;
+            rt_kprintf("[UART DMA] TX timeout! count=%d\n", tx_timeout_count);
+            sent = -RT_ETIMEOUT;  /* Indicate failure */
+        }
+        else
+        {
+            tx_count++;
+            total_tx_bytes += sent;
+        }
     }
 
     rt_mutex_release(&uart_dma_tx_mutex);
@@ -505,7 +528,7 @@ static rt_size_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len)
 
 static void uart_dma_thread_entry(void *parameter)
 {
-    rt_size_t len;
+    rt_ssize_t len;
 
     while (1)
     {
@@ -514,13 +537,19 @@ static void uart_dma_thread_entry(void *parameter)
 
         /* read data in batch */
         len = rt_device_read(uart_dma_serial, 0, rx_buf, RX_BUF_SIZE);
-        if (len > 0)
+        if (len < 0)
+        {
+            /* Read error, skip this iteration */
+            rt_kprintf("[UART DMA] RX read error! ret=%d\n", len);
+            continue;
+        }
+        else if (len > 0)
         {
             rx_count++;
             total_rx_bytes += len;
 
             /* Echo back using DMA TX */
-            uart_dma_send(rx_buf, len);
+            uart_dma_send(rx_buf, (rt_size_t)len);
         }
     }
 }
@@ -535,6 +564,15 @@ static int uart_dma_sample(int argc, char *argv[])
 {
     char uart_name[RT_NAME_MAX];
     char str[] = "hello RT-Thread UART DMA!\r\n";
+    rt_err_t ret;
+    rt_thread_t thread;
+
+    /* Prevent re-initialization */
+    if (uart_dma_initialized)
+    {
+        rt_kprintf("UART DMA sample already initialized!\n\r");
+        return RT_EOK;
+    }
 
     if (argc >= 2) {
         rt_strncpy(uart_name, argv[1], RT_NAME_MAX);
@@ -551,16 +589,33 @@ static int uart_dma_sample(int argc, char *argv[])
     }
 
     /* Initialize semaphores and mutex */
-    rt_sem_init(&uart_dma_rx_sem, "dmarxsem", 0, RT_IPC_FLAG_FIFO);
-    rt_sem_init(&uart_dma_tx_sem, "dmatxsem", 0, RT_IPC_FLAG_FIFO);
-    rt_mutex_init(&uart_dma_tx_mutex, "dmatxmtx", RT_IPC_FLAG_PRIO);
+    ret = rt_sem_init(&uart_dma_rx_sem, "dmarxsem", 0, RT_IPC_FLAG_FIFO);
+    if (ret != RT_EOK)
+    {
+        rt_kprintf("Failed to init rx semaphore!\n\r");
+        return RT_ERROR;
+    }
+
+    ret = rt_sem_init(&uart_dma_tx_sem, "dmatxsem", 0, RT_IPC_FLAG_FIFO);
+    if (ret != RT_EOK)
+    {
+        rt_kprintf("Failed to init tx semaphore!\n\r");
+        goto err_detach_rx_sem;
+    }
+
+    ret = rt_mutex_init(&uart_dma_tx_mutex, "dmatxmtx", RT_IPC_FLAG_PRIO);
+    if (ret != RT_EOK)
+    {
+        rt_kprintf("Failed to init tx mutex!\n\r");
+        goto err_detach_tx_sem;
+    }
 
     /* Open with DMA RX + DMA TX */
-    rt_err_t ret = rt_device_open(uart_dma_serial, RT_DEVICE_FLAG_DMA_RX | RT_DEVICE_FLAG_DMA_TX);
+    ret = rt_device_open(uart_dma_serial, RT_DEVICE_FLAG_DMA_RX | RT_DEVICE_FLAG_DMA_TX);
     if (ret != RT_EOK)
     {
         rt_kprintf("open %s failed! ret=%d\n\r", uart_name, ret);
-        return RT_ERROR;
+        goto err_detach_mutex;
     }
 
     rt_device_set_rx_indicate(uart_dma_serial, uart_dma_rx_indicate);
@@ -570,15 +625,32 @@ static int uart_dma_sample(int argc, char *argv[])
     uart_dma_send((const rt_uint8_t *)str, sizeof(str) - 1);
 
     /* Create echo thread */
-    rt_thread_t thread = rt_thread_create("dmauart", uart_dma_thread_entry, RT_NULL, 1024, 25, 10);
-    if (thread != RT_NULL)
+    thread = rt_thread_create("dmauart", uart_dma_thread_entry, RT_NULL, 1024, 25, 10);
+    if (thread == RT_NULL)
     {
-        rt_thread_startup(thread);
-        rt_kprintf("UART DMA RX + DMA TX on %s (115200,8N1)\n\r", uart_name);
-        rt_kprintf("Commands: dma_tx <data>, loopback [n], uart_stat, uart_clear\n\r");
+        rt_kprintf("Failed to create dmauart thread!\n\r");
+        goto err_close_device;
     }
 
+    rt_thread_startup(thread);
+    uart_dma_initialized = RT_TRUE;
+    rt_kprintf("UART DMA RX + DMA TX on %s (115200,8N1)\n\r", uart_name);
+    rt_kprintf("Commands: dma_tx <data>, loopback [n], uart_stat, uart_clear\n\r");
+
     return RT_EOK;
+
+err_close_device:
+    rt_device_set_rx_indicate(uart_dma_serial, RT_NULL);
+    rt_device_set_tx_complete(uart_dma_serial, RT_NULL);
+    rt_device_close(uart_dma_serial);
+err_detach_mutex:
+    rt_mutex_detach(&uart_dma_tx_mutex);
+err_detach_tx_sem:
+    rt_sem_detach(&uart_dma_tx_sem);
+err_detach_rx_sem:
+    rt_sem_detach(&uart_dma_rx_sem);
+    uart_dma_serial = RT_NULL;
+    return RT_ERROR;
 }
 
 MSH_CMD_EXPORT(uart_dma_sample, UART DMA echo test sample);
@@ -586,14 +658,23 @@ MSH_CMD_EXPORT(uart_dma_sample, UART DMA echo test sample);
 /* DMA TX test command: dma_tx <data> */
 static void uart_dma_tx_test(int argc, char *argv[])
 {
+    const char *data;
+    rt_size_t len;
+
+    if (!uart_dma_initialized)
+    {
+        rt_kprintf("Error: UART DMA not initialized! Run uart_dma_sample first.\n");
+        return;
+    }
+
     if (argc < 2)
     {
         rt_kprintf("Usage: dma_tx <data>\n");
         return;
     }
 
-    const char *data = argv[1];
-    rt_size_t len = strlen(data);
+    data = argv[1];
+    len = strlen(data);
 
     rt_kprintf("DMA TX: sending %d bytes\n", len);
     uart_dma_send((const rt_uint8_t *)data, len);
@@ -607,6 +688,12 @@ static void uart_loopback_test(int argc, char *argv[])
 {
     rt_uint8_t test_buf[64];
     int i, count = 10;
+
+    if (!uart_dma_initialized)
+    {
+        rt_kprintf("Error: UART DMA not initialized! Run uart_dma_sample first.\n");
+        return;
+    }
 
     if (argc > 1)
     {
@@ -632,19 +719,33 @@ MSH_CMD_EXPORT_ALIAS(uart_loopback_test, loopback, Loopback test [count]);
 /* Show statistics */
 static void uart_stat(int argc, char *argv[])
 {
+    if (!uart_dma_initialized)
+    {
+        rt_kprintf("Error: UART DMA not initialized! Run uart_dma_sample first.\n");
+        return;
+    }
+
     rt_kprintf("UART Statistics (DMA RX + DMA TX):\n");
     rt_kprintf("  RX count: %d, bytes: %d\n", rx_count, total_rx_bytes);
     rt_kprintf("  TX count: %d, bytes: %d\n", tx_count, total_tx_bytes);
+    rt_kprintf("  TX timeout: %d\n", tx_timeout_count);
 }
 MSH_CMD_EXPORT_ALIAS(uart_stat, uart_stat, Show UART statistics);
 
 /* Clear statistics */
 static void uart_stat_clear(int argc, char *argv[])
 {
+    if (!uart_dma_initialized)
+    {
+        rt_kprintf("Error: UART DMA not initialized! Run uart_dma_sample first.\n");
+        return;
+    }
+
     total_rx_bytes = 0;
     total_tx_bytes = 0;
     rx_count = 0;
     tx_count = 0;
+    tx_timeout_count = 0;
     rt_kprintf("Statistics cleared.\n");
 }
 MSH_CMD_EXPORT_ALIAS(uart_stat_clear, uart_clear, Clear UART statistics);

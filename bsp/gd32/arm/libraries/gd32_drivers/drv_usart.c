@@ -109,6 +109,13 @@ static void dma_rx_done_isr(struct rt_serial_device *serial);
 #endif
 #endif /* RT_SERIAL_USING_DMA - forward declarations */
 
+/* Polling TX timeout in milliseconds */
+#ifdef BSP_UART_POLL_TX_TIMEOUT_MS
+#define GD32_POLL_TX_TIMEOUT_MS BSP_UART_POLL_TX_TIMEOUT_MS
+#else
+#define GD32_POLL_TX_TIMEOUT_MS 1000
+#endif
+
 static void GD32_UART_IRQHandler(struct rt_serial_device *serial);
 
 /*******************************************************************************
@@ -635,6 +642,7 @@ void UART1_DMA_RX_IRQHandler(void)
     dma_rx_done_isr(&serial1);
     rt_interrupt_leave();
 }
+#endif
 
 #ifdef BSP_UART1_TX_USING_DMA
 void UART1_DMA_TX_IRQHandler(void)
@@ -643,7 +651,6 @@ void UART1_DMA_TX_IRQHandler(void)
     dma_tx_done_isr(UART1_TX_DMA_PERIPH, UART1_TX_DMA_CHANNEL);
     rt_interrupt_leave();
 }
-#endif
 #endif /* RT_SERIAL_USING_DMA */
 
 void USART1_IRQHandler(void)
@@ -1027,6 +1034,15 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
             usart_dma_receive_config(uart->uart_periph, USART_RECEIVE_DMA_DISABLE);
             dma_deinit(uart->dma_rx->periph, uart->dma_rx->channel);
 
+#ifdef SOC_SERIES_GD32H7xx
+            /* Free cache-aligned DMA buffer */
+            if (uart->dma_rx_buffer != RT_NULL)
+            {
+                rt_free_align(uart->dma_rx_buffer);
+                uart->dma_rx_buffer = RT_NULL;
+            }
+#endif
+
             uart->last_recv_index = 0;
         }
 #ifdef BSP_SERIAL_USING_TX_DMA
@@ -1083,11 +1099,13 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 /**
   * @brief  uart put char
   * @param  serial, ch
-  * @retval None
+  * @retval RT_EOK on success, -RT_ETIMEOUT on timeout
   */
 static int gd32_uart_putc(struct rt_serial_device *serial, char ch)
 {
     struct gd32_uart *uart;
+    rt_tick_t start_tick;
+    rt_tick_t timeout_ticks = rt_tick_from_millisecond(GD32_POLL_TX_TIMEOUT_MS);
 
     RT_ASSERT(serial != RT_NULL);
     uart = (struct gd32_uart *)serial->parent.user_data;
@@ -1095,12 +1113,26 @@ static int gd32_uart_putc(struct rt_serial_device *serial, char ch)
 #if defined SOC_SERIES_GD32E51x
     if (uart->uart_periph == USART5)
     {
-        while((usart5_flag_get(USART5, USART5_FLAG_TC) == RESET));
+        start_tick = rt_tick_get();
+        while((usart5_flag_get(USART5, USART5_FLAG_TC) == RESET))
+        {
+            if ((rt_tick_get() - start_tick) > timeout_ticks)
+            {
+                return -RT_ETIMEOUT;
+            }
+        }
     }
     else
 #endif
     {
-        while((usart_flag_get(uart->uart_periph, USART_FLAG_TBE) == RESET));
+        start_tick = rt_tick_get();
+        while((usart_flag_get(uart->uart_periph, USART_FLAG_TBE) == RESET))
+        {
+            if ((rt_tick_get() - start_tick) > timeout_ticks)
+            {
+                return -RT_ETIMEOUT;
+            }
+        }
     }
 
     return RT_EOK;
@@ -1187,9 +1219,8 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
 #define RT_DMA_CACHE_LINE_SIZE  32
     if (uart->dma_rx_buffer == RT_NULL)
     {
-        /* Allocate buffer with extra space for alignment and cache line padding */
-        rt_size_t alloc_size = RT_ALIGN(serial->config.bufsz, RT_DMA_CACHE_LINE_SIZE) + RT_DMA_CACHE_LINE_SIZE;
-        uart->dma_rx_buffer = (rt_uint8_t *)rt_malloc_align(alloc_size, RT_DMA_CACHE_LINE_SIZE);
+        /* rx_fifo->buffer doesn't align with 32 bytes, so create a cache buffer with 32 bytes aligned */
+        uart->dma_rx_buffer = (rt_uint8_t *)rt_malloc_align(serial->config.bufsz, RT_DMA_CACHE_LINE_SIZE);
         RT_ASSERT(uart->dma_rx_buffer != RT_NULL);
         rt_memset(uart->dma_rx_buffer, 0, serial->config.bufsz);
     }
@@ -1265,11 +1296,10 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
 #ifdef SOC_SERIES_GD32H7xx
     dma_init_struct.request      = uart->dma_tx->request;
-#elif defined(SOC_SERIES_GD32F5xx)
-    dma_init_struct.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+#endif
     dma_init_struct.number       = 0;   /* will be set in transmit function */
     dma_init_struct.memory0_addr = 0;   /* will be set in transmit function */
-#endif
+    dma_init_struct.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
     dma_init_struct.periph_addr  = (uint32_t)USART_DATA_TX(uart->uart_periph);
     dma_single_data_mode_init(uart->dma_tx->periph, uart->dma_tx->channel, &dma_init_struct);
 #if defined(SOC_SERIES_GD32F5xx)
@@ -1298,12 +1328,28 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
         if (size < GD32_DMA_TX_THRESHOLD)
         {
             rt_size_t i;
+            int ret;
+            rt_tick_t start_tick;
+            rt_tick_t timeout_ticks = rt_tick_from_millisecond(GD32_POLL_TX_TIMEOUT_MS);
+
             for (i = 0; i < size; i++)
             {
-                gd32_uart_putc(serial, buf[i]);
+                ret = gd32_uart_putc(serial, buf[i]);
+                if (ret != RT_EOK)
+                {
+                    return ret;  /* timeout or error in putc */
+                }
             }
-            /* wait for last byte fully shifted out */
-            while (usart_flag_get(uart->uart_periph, USART_FLAG_TC) == RESET);
+            /* wait for last byte fully shifted out with timeout */
+            start_tick = rt_tick_get();
+            while (usart_flag_get(uart->uart_periph, USART_FLAG_TC) == RESET)
+            {
+                if ((rt_tick_get() - start_tick) > timeout_ticks)
+                {
+                    /* timeout error */
+                    return -RT_ETIMEOUT;
+                }
+            }
             /* notify framework that transmission is complete */
             rt_hw_serial_isr(serial, RT_SERIAL_EVENT_TX_DMADONE);
             return size;

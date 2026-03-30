@@ -168,6 +168,13 @@ menu "On-chip Peripheral Drivers"
                 select BSP_USING_UART_TX_DMA
                 default n
 
+            config BSP_UART_POLL_TX_TIMEOUT_MS
+                int "Polling TX timeout in milliseconds"
+                range 100 10000
+                default 1000
+                help
+                    Timeout value for polling TX operations in milliseconds.
+
             if BSP_USING_UART_TX_DMA
                 config BSP_UART_DMA_TX_THRESHOLD
                     int "UART DMA TX minimum transfer length"

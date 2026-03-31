@@ -24,7 +24,6 @@ extern "C" {
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
  && !defined(SOC_SERIES_GD32F5xx)
-
 #ifndef SOC_SERIES_GD32H7xx
 #undef RT_SERIAL_USING_DMA
 #endif
@@ -125,7 +124,7 @@ struct gd32_uart
 #endif
 #ifdef BSP_USING_UART_RX_DMA
     struct dma_config *dma_rx;
-#ifdef SOC_SERIES_GD32H7xx
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /* Cache-aligned DMA buffer to avoid D-Cache coherency issues (Cortex-M7 only) */
     rt_uint8_t *dma_rx_buffer;
 #endif

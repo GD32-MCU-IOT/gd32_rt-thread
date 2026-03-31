@@ -25,8 +25,14 @@
 #define USART_RECEIVE_DMA_DISABLE USART_DENR_DISABLE
 #endif
 
+#if defined(SOC_SERIES_GD32H77x)
+#define gd32_dma_deinit(periph, ch)                 dma_channel_deinit(periph, ch)
+#else
+#define gd32_dma_deinit(periph, ch)                 dma_deinit(periph, ch)
+#endif
+
 /* USART data register address macros for DMA configuration */
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E)
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
 #define USART_DATA_TX(usartx) (&USART_TDATA(usartx))
 #define USART_DATA_RX(usartx) (&USART_RDATA(usartx))
 #else
@@ -1032,9 +1038,9 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 
             dma_channel_disable(uart->dma_rx->periph, uart->dma_rx->channel);
             usart_dma_receive_config(uart->uart_periph, USART_RECEIVE_DMA_DISABLE);
-            dma_deinit(uart->dma_rx->periph, uart->dma_rx->channel);
+            gd32_dma_deinit(uart->dma_rx->periph, uart->dma_rx->channel);
 
-#ifdef SOC_SERIES_GD32H7xx
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
             /* Free cache-aligned DMA buffer */
             if (uart->dma_rx_buffer != RT_NULL)
             {
@@ -1051,7 +1057,7 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 
             dma_channel_disable(uart->dma_tx->periph, uart->dma_tx->channel);
             usart_dma_transmit_config(uart->uart_periph, USART_TRANSMIT_DMA_DISABLE);
-            dma_deinit(uart->dma_tx->periph, uart->dma_tx->channel);
+            gd32_dma_deinit(uart->dma_tx->periph, uart->dma_tx->channel);
         }
 #endif
 #endif
@@ -1178,7 +1184,7 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
     uart->setting_recv_len = setting_recv_len;
     /* Initialize last_recv_index to 0 - represents total bytes received so far */
     uart->last_recv_index = 0;
-    dma_deinit(uart->dma_rx->periph, uart->dma_rx->channel);
+    gd32_dma_deinit(uart->dma_rx->periph, uart->dma_rx->channel);
 
     dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.direction    = DMA_PERIPH_TO_MEMORY;
@@ -1188,7 +1194,7 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
     dma_init_struct.number       = uart->setting_recv_len;
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
-#ifdef SOC_SERIES_GD32H7xx
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     dma_init_struct.request      = uart->dma_rx->request;
 #endif
     dma_init_struct.periph_addr  = (uint32_t)USART_DATA_RX(uart->uart_periph);
@@ -1209,7 +1215,7 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
     struct gd32_uart *uart = (struct gd32_uart *) serial->parent.user_data;
     struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 
-#ifdef SOC_SERIES_GD32H7xx
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /*
      * Allocate cache-line aligned DMA buffer to avoid D-Cache coherency issues.
      * ARM Cortex-M7 cache line is 32 bytes. If the DMA buffer shares a cache line
@@ -1245,7 +1251,7 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
         Error_Handler();
     }
 
-#ifdef SOC_SERIES_GD32H7xx
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif
@@ -1280,13 +1286,13 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
         Error_Handler();
     }
 
-#ifdef SOC_SERIES_GD32H7xx
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif
 
     /* tx dma config */
-    dma_deinit(uart->dma_tx->periph, uart->dma_tx->channel);
+    gd32_dma_deinit(uart->dma_tx->periph, uart->dma_tx->channel);
 
     dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.direction    = DMA_MEMORY_TO_PERIPH;
@@ -1294,7 +1300,7 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
-#ifdef SOC_SERIES_GD32H7xx
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     dma_init_struct.request      = uart->dma_tx->request;
 #endif
     dma_init_struct.number       = 0;   /* will be set in transmit function */

@@ -80,10 +80,6 @@
 /* kservice options */
 
 /* end of kservice options */
-#define RT_USING_DEBUG
-#define RT_DEBUGING_ASSERT
-#define RT_DEBUGING_COLOR
-#define RT_DEBUGING_CONTEXT
 
 /* Inter-Thread communication */
 
@@ -154,6 +150,7 @@
 #define RT_UNAMED_PIPE_NUMBER 64
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
+#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
@@ -431,8 +428,15 @@
 
 #define BSP_USING_GPIO
 #define BSP_USING_UART
+#define BSP_SERIAL_USING_TX_DMA
+#define BSP_USING_UART_TX_DMA
+#define BSP_USING_UART_RX_DMA
 #define BSP_USING_UART0
 #define BSP_USING_UART1
+#define BSP_USING_UART3
+#define BSP_UART3_RX_USING_DMA
+#define BSP_UART3_TX_USING_DMA
+#define BSP_UART_DMA_TX_THRESHOLD 8
 #define BSP_USING_SPI
 #define BSP_USING_SPI3
 #define BSP_USING_I2C

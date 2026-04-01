@@ -1225,16 +1225,12 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
 #define RT_DMA_CACHE_LINE_SIZE  32
     if (uart->dma_rx_buffer == RT_NULL)
     {
-        /* rx_fifo->buffer doesn't align with 32 bytes, so create a cache buffer with 32 bytes aligned */
+        /* Allocate cache-aligned DMA buffer, keep rx_fifo->buffer unchanged */
         uart->dma_rx_buffer = (rt_uint8_t *)rt_malloc_align(serial->config.bufsz, RT_DMA_CACHE_LINE_SIZE);
         RT_ASSERT(uart->dma_rx_buffer != RT_NULL);
         rt_memset(uart->dma_rx_buffer, 0, serial->config.bufsz);
     }
-    /* Point rx_fifo->buffer to our aligned buffer */
-    rx_fifo->buffer = uart->dma_rx_buffer;
 #endif
-
-    /* Clear IDLE flag if set (read STAT then DATA to clear) */
     if(SET == usart_flag_get(uart->uart_periph, USART_FLAG_IDLE)) {
         usart_flag_clear(uart->uart_periph, USART_FLAG_IDLE);
         usart_data_receive(uart->uart_periph);
@@ -1254,15 +1250,14 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
-#endif
-
-#ifdef RT_USING_CACHE
     /* clean d-cache */
-    rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, rx_fifo->buffer, serial->config.bufsz);
-#endif
-
+    rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, uart->dma_rx_buffer, serial->config.bufsz);
+    /* rx dma config */
+    dma_uart_config(serial, serial->config.bufsz, uart->dma_rx_buffer);
+#else
     /* rx dma config */
     dma_uart_config(serial, serial->config.bufsz, rx_fifo->buffer);
+#endif
 
     usart_dma_receive_config(uart->uart_periph, USART_RECEIVE_DMA_ENABLE);
     dma_channel_enable(uart->dma_rx->periph, uart->dma_rx->channel);
@@ -1404,11 +1399,6 @@ static void dma_uart_rx_idle_isr(struct rt_serial_device *serial)
 
     struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 
-#ifdef RT_USING_CACHE
-    /* Invalidate D-Cache before reading DMA buffer to get fresh data from RAM */
-    rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, rx_fifo->buffer, serial->config.bufsz);
-#endif
-
     recv_total_index = uart->setting_recv_len -
                        dma_transfer_number_get(uart->dma_rx->periph, uart->dma_rx->channel);
 
@@ -1417,6 +1407,15 @@ static void dma_uart_rx_idle_isr(struct rt_serial_device *serial)
     } else {
         recv_len = uart->setting_recv_len - uart->last_recv_index + recv_total_index;
     }
+
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+    /* Invalidate DMA buffer cache, then copy to rx_fifo->buffer */
+    if (recv_len > 0) {
+        rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, uart->dma_rx_buffer, serial->config.bufsz);
+        rt_memcpy(rx_fifo->buffer + uart->last_recv_index,
+                  uart->dma_rx_buffer + uart->last_recv_index, recv_len);
+    }
+#endif
     uart->last_recv_index = recv_total_index;
 
     if (recv_len) {
@@ -1441,31 +1440,31 @@ static void dma_rx_done_isr(struct rt_serial_device *serial)
 
     struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 
-#ifdef RT_USING_CACHE
-    /* Invalidate D-Cache before reading DMA buffer to get fresh data from RAM */
-    rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, rx_fifo->buffer, serial->config.bufsz);
-#endif
-
     if (dma_flag_get(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->dma_flag) != RESET) {
         /* disable dma, stop receive data */
         dma_channel_disable(uart->dma_rx->periph, uart->dma_rx->channel);
 
-        /*
-         * FTF (Full Transfer Finished) interrupt means DMA counter reached 0,
-         * so dma_transfer_number_get() always returns 0 here.
-         * recv_total_index = setting_recv_len - 0 = setting_recv_len (buffer is full)
-         * recv_len = setting_recv_len - last_recv_index (remaining bytes since last IDLE)
-         */
         recv_len = uart->setting_recv_len - uart->last_recv_index;
+
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+        /* Invalidate DMA buffer cache, then copy to rx_fifo->buffer */
+        if (recv_len > 0) {
+            rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, uart->dma_rx_buffer, serial->config.bufsz);
+            rt_memcpy(rx_fifo->buffer + uart->last_recv_index,
+                      uart->dma_rx_buffer + uart->last_recv_index, recv_len);
+        }
+#endif
 
         rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
 
-        /* Restart DMA for next reception - must reconfigure in non-circular mode */
+        /* Restart DMA for next reception */
         dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->dma_flag);
-        /* Reset last_recv_index since DMA counter restarts from setting_recv_len */
         uart->last_recv_index = 0;
-        /* Reconfigure DMA: reset transfer count and memory address */
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+        dma_memory_address_config(uart->dma_rx->periph, uart->dma_rx->channel, DMA_MEMORY_0, (uint32_t)uart->dma_rx_buffer);
+#else
         dma_memory_address_config(uart->dma_rx->periph, uart->dma_rx->channel, DMA_MEMORY_0, (uint32_t)rx_fifo->buffer);
+#endif
         dma_transfer_number_config(uart->dma_rx->periph, uart->dma_rx->channel, uart->setting_recv_len);
         dma_channel_enable(uart->dma_rx->periph, uart->dma_rx->channel);
     }

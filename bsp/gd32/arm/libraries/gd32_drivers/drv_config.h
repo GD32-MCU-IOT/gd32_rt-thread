@@ -28,7 +28,6 @@ extern "C" {
 #elif defined(SOC_SERIES_GD32H7xx)
 #include "config/h7xx/dma_config.h"
 #include "config/h7xx/uart_config.h"
-#include "config/f527/spi_config.h"
 #elif defined(SOC_SERIES_GD32H77x)
 #include "config/h77x/dma_config.h"
 #include "config/h77x/uart_config.h"

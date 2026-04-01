@@ -27,6 +27,7 @@
 #include <netdev.h>
 #include <board.h>
 
+#ifdef BSP_USING_ETH
 #define LOG_TAG    "drv.enet"
 #define LOG_LVL    LOG_LVL_DBG
 #include <drv_log.h>
@@ -1480,3 +1481,5 @@ void phy_reset(void)
 FINSH_FUNCTION_EXPORT(phy_reset, reset PHY and restart auto-negotiation);
 
 #endif /* RT_USING_FINSH */
+
+#endif /* BSP_USING_ETH */

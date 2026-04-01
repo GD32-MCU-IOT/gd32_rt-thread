@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2024, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -12,61 +12,63 @@
 #include <board.h>
 #include <string.h>
 
+/* Test Feature Switches - comment out to disable */
 #define GD32_I2C_EEPROM_TEST
-
-/* Note: The h75ey eval board not support SPI flash, if you want to test this function,
- *       please connect the SPI to SPI flash.
- */
-//#define GD32_SPI_TEST
-
+#define GD32_SPI_POLL_TEST
+#define GD32_SPI_DMA_TEST
 #define GD32_UART_TEST
-
 #define GD32_GPIO_EXTI_TEST
 
-
-/* defined the LED pins: LED1 and LED2 */
+/* GD32H75EY-EVAL has 3 LEDs */
 #define LED1_PIN    GET_PIN(C, 3)   /* LED1 on PC3 */
 #define LED2_PIN    GET_PIN(C, 4)   /* LED2 on PC4 */
-#define LED3_PIN    GET_PIN(C, 5)   /* LED2 on PC4 */
+#define LED3_PIN    GET_PIN(C, 5)   /* LED3 on PC5 */
 
 #ifdef GD32_I2C_EEPROM_TEST
 #include "at24cxx.h"
 #define BUFFER_SIZE    256
 #define I2C_SERIAL     "hwi2c3"
-rt_uint8_t buf[16];
 rt_uint8_t i2c_buffer_write[BUFFER_SIZE];
 rt_uint8_t i2c_buffer_read[BUFFER_SIZE];
-uint8_t i2c_24c02_test(void);
+static uint8_t i2c_24c02_test(void);
 #endif
 
-#ifdef GD32_SPI_TEST
-#define BUS_NAME     "spi2"
-#define SPI_NAME     "spi00"
+#if defined(GD32_SPI_POLL_TEST) || defined(GD32_SPI_DMA_TEST)
+#define SPI_BUS_NAME     "spi4"
+#define SPI_DEV_NAME     "spi04"
+#define SPI_CS_PIN       GET_PIN(H, 5)
 
-uint8_t send_id = 0x9F;
-uint8_t WREN = 0x06;
-uint8_t WRITE = 0x02;
-uint8_t READ = 0x03;
-uint8_t SE = 0x20;
-uint8_t recei_id[4] = {0};
-uint8_t  tx_buffer[200];
-uint8_t  rx_buffer[200];
+static uint8_t cmd_read_id = 0x9F;
+static uint8_t cmd_wren = 0x06;
+static uint8_t id_buf[4] = {0};
 
-static void spi_sample(void);
+static void spi_init_device(void);
+#endif
+
+#ifdef GD32_SPI_POLL_TEST
+/* SPI polling mode test - transfer below BSP_SPI_DMA_TRANS_MIN_LEN */
+#define SPI_POLL_TEST_SIZE    8
+static void spi_poll_sample(void);
+#endif
+
+#ifdef GD32_SPI_DMA_TEST
+/* SPI DMA mode test - transfer >= BSP_SPI_DMA_TRANS_MIN_LEN */
+#define SPI_DMA_TEST_SIZE     200
+static uint8_t tx_buffer[SPI_DMA_TEST_SIZE];
+static uint8_t rx_buffer[SPI_DMA_TEST_SIZE];
+static void spi_dma_sample(void);
 #endif
 
 #ifdef GD32_UART_TEST
 #define SAMPLE_UART_NAME    "uart0"
-static struct rt_semaphore  rx_sem;
+static struct rt_semaphore rx_sem;
 static rt_device_t serial;
-
 static int uart_sample(int argc, char *argv[]);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
 #define WAKEUP_PIN_NUM   GET_PIN(A, 0)
 #define TAMPER_PIN       GET_PIN(C, 13)
-
 static void pin_irq_sample(void);
 #endif
 
@@ -84,22 +86,34 @@ int main(void)
     rt_kprintf("System Clock: %d Hz\n", SystemCoreClock);
 
 #ifdef GD32_I2C_EEPROM_TEST
-    struct rt_i2c_bus_device *i2c0_dev;
-    i2c0_dev = rt_i2c_bus_device_find(I2C_SERIAL);
-    if(i2c_24c02_test() != 0){
-        rt_kprintf("I2C-AT24C02 test passed!\n\r");
+    rt_kprintf("\n--- I2C EEPROM Test ---\n");
+    if (i2c_24c02_test() != 0) {
+        rt_kprintf("I2C-AT24C02 test passed!\n");
+    } else {
+        rt_kprintf("I2C-AT24C02 test failed!\n");
     }
 #endif
 
-#ifdef GD32_SPI_TEST
-    spi_sample();
+#if defined(GD32_SPI_POLL_TEST) || defined(GD32_SPI_DMA_TEST)
+    rt_kprintf("\n--- SPI Flash Test ---\n");
+    spi_init_device();
+#endif
+
+#ifdef GD32_SPI_POLL_TEST
+    spi_poll_sample();
+#endif
+
+#ifdef GD32_SPI_DMA_TEST
+    spi_dma_sample();
 #endif
 
 #ifdef GD32_UART_TEST
+    rt_kprintf("\n--- UART Test ---\n");
     uart_sample(0, 0);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
+    rt_kprintf("\n--- GPIO EXTI Test ---\n");
     pin_irq_sample();
 #endif
 
@@ -130,115 +144,247 @@ int main(void)
     return RT_EOK;
 }
 
-
-#ifdef GD32_SPI_TEST
-
-static void spi_sample(void)
-{
-
-    uint8_t address[4] = {0x20,00,00,04};
-    uint8_t waddress[4] = {0x02,00,00,04};
-    uint8_t raddress[4] = {0x03,00,00,04};
-    
-    static struct rt_spi_device *spi_dev = RT_NULL;
-    struct rt_spi_configuration cfg;
-    
-    for(int i = 0; i < 200; i ++){
-            tx_buffer[i] = i;
-        }
-    
-    spi_dev = (struct rt_spi_device *)rt_malloc(sizeof(struct rt_spi_device));
-    rt_hw_spi_device_attach(BUS_NAME, SPI_NAME, GET_PIN(D, 3));
-//    rt_spi_bus_attach_device_cspin(spi_dev, SPI_NAME, BUS_NAME, GET_PIN(A, 4), RT_NULL);
-
-    cfg.data_width = 8;
-    cfg.mode   = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
-    cfg.max_hz =  2 *1000 *1000;
-
-    spi_dev = (struct rt_spi_device *)rt_device_find(SPI_NAME);
-    spi_dev->bus->owner = spi_dev;
-    if (RT_NULL == spi_dev)
-    {
-        rt_kprintf("spi sample run failed! can't find %s device!\n", SPI_NAME);
-    }
-    rt_spi_configure(spi_dev, &cfg);
-
-    /* READ FLASH ID */
-    rt_spi_send_then_recv((struct rt_spi_device *)spi_dev, (uint8_t *)&send_id, 1,(uint8_t *)recei_id, 3);
-    rt_kprintf("use rt_spi_transfer_message() read gd25q ID is:%x,%x,%x\n", recei_id[0], recei_id[1],recei_id[2]);
-
-    /* WRITE ENABLE */
-    rt_spi_transfer((struct rt_spi_device *)spi_dev, (uint8_t *)&WREN,(uint8_t *)recei_id, 1);
-
-    /* ERASE SECTOR */
-    rt_spi_transfer((struct rt_spi_device *)spi_dev, (uint8_t *)address,(uint8_t *)recei_id, 4);
-    rt_thread_mdelay(100);
-
-    /* WRITE ENABLE */
-    rt_spi_transfer((struct rt_spi_device *)spi_dev, (uint8_t *)&WREN,(uint8_t *)recei_id, 1);
-
-    /* WRITE TO PAGE */
-    rt_spi_send_then_send((struct rt_spi_device *)spi_dev, (uint8_t *)waddress, 4,(uint8_t *)tx_buffer, 200);
-    rt_thread_mdelay(50);
-
-    /* READ TO BUFFER */
-    rt_spi_send_then_recv((struct rt_spi_device *)spi_dev, (uint8_t *)raddress, 4,(uint8_t *)rx_buffer, 200);
-    rt_thread_mdelay(20);
-
-    if(0 == memcmp(rx_buffer, tx_buffer, 200)) {
-        rt_kprintf("spi flash write and read test success.\r\n");
-    } else {
-        rt_kprintf("spi flash write and read test failed.\r\n");
-    }
-
-}
-
-MSH_CMD_EXPORT(spi_sample, dspi_sample);
-#endif
-
 #ifdef GD32_I2C_EEPROM_TEST
-
-uint8_t i2c_24c02_test(void)
+/**
+ * @brief I2C EEPROM (AT24C02) read/write test
+ * @return 1 on success, 0 on failure
+ */
+static uint8_t i2c_24c02_test(void)
 {
     at24cxx_device_t ati2c;
-    ati2c = at24cxx_init(I2C_SERIAL, 0x00);
-    
-    if (ati2c != NULL)
-    {
-       rt_kprintf("\r\n Found eeprom \r\n");
-    
-    }
     uint16_t i;
-    uint8_t i2c_buffer_write[BUFFER_SIZE];
-    uint8_t i2c_buffer_read[BUFFER_SIZE];
 
-    rt_kprintf("\r\n I2C-AT24C02 writing...\r\n");
+    ati2c = at24cxx_init(I2C_SERIAL, 0x00);
+    if (ati2c == RT_NULL) {
+        rt_kprintf("Failed to find EEPROM device!\n");
+        return 0;
+    }
+    rt_kprintf("Found EEPROM device on %s\n", I2C_SERIAL);
 
-    /* initialize i2c_buffer_write */
-    for(i = 0; i < BUFFER_SIZE; i++) {
-        i2c_buffer_write[i] = i+8;
+    /* initialize write buffer */
+    for (i = 0; i < BUFFER_SIZE; i++) {
+        i2c_buffer_write[i] = i + 8;
     }
-    /* EEPROM data write */
-    if(at24cxx_page_write(ati2c,0x00,i2c_buffer_write, BUFFER_SIZE) == RT_EOK) {
-           rt_kprintf("I2C-AT24C02 Finish writing...\r\n");
+
+    rt_kprintf("I2C-AT24C02 writing %d bytes...\n", BUFFER_SIZE);
+    if (at24cxx_page_write(ati2c, 0x00, i2c_buffer_write, BUFFER_SIZE) != RT_EOK) {
+        rt_kprintf("I2C-AT24C02 write failed!\n");
+        return 0;
     }
-    
-    rt_kprintf("I2C-AT24C02 reading...\r\n");
-    /* EEPROM data read */
-    if(at24cxx_page_read(ati2c,0x00,i2c_buffer_read, BUFFER_SIZE) == RT_EOK) {
-           rt_kprintf("I2C-AT24C02 Finish reading...\r\n");
+    rt_kprintf("I2C-AT24C02 write complete.\n");
+
+    rt_kprintf("I2C-AT24C02 reading %d bytes...\n", BUFFER_SIZE);
+    if (at24cxx_page_read(ati2c, 0x00, i2c_buffer_read, BUFFER_SIZE) != RT_EOK) {
+        rt_kprintf("I2C-AT24C02 read failed!\n");
+        return 0;
     }
-    
-    /* compare the read buffer and write buffer */
-    for(i = 0; i < BUFFER_SIZE; i++) {
-        if(i2c_buffer_read[i] != i2c_buffer_write[i]) {
-            rt_kprintf("0x%02X ", i2c_buffer_read[i]);
-            rt_kprintf("\r\n rr:data read and write aren't matching.\n\r");
+    rt_kprintf("I2C-AT24C02 read complete.\n");
+
+    /* compare read buffer with write buffer */
+    for (i = 0; i < BUFFER_SIZE; i++) {
+        if (i2c_buffer_read[i] != i2c_buffer_write[i]) {
+            rt_kprintf("Data mismatch at offset %d: wrote 0x%02X, read 0x%02X\n",
+                       i, i2c_buffer_write[i], i2c_buffer_read[i]);
             return 0;
         }
     }
     return 1;
 }
+#endif
+
+#if defined(GD32_SPI_POLL_TEST) || defined(GD32_SPI_DMA_TEST)
+/**
+ * @brief Initialize SPI device - shared by polling and DMA tests
+ */
+static void spi_init_device(void)
+{
+    struct rt_spi_device *spi_dev = RT_NULL;
+    struct rt_spi_configuration cfg;
+
+    /* attach SPI device to bus */
+    if (rt_hw_spi_device_attach(SPI_BUS_NAME, SPI_DEV_NAME, SPI_CS_PIN) != RT_EOK) {
+        rt_kprintf("SPI device attach failed!\n");
+        return;
+    }
+
+    /* find SPI device */
+    spi_dev = (struct rt_spi_device *)rt_device_find(SPI_DEV_NAME);
+    if (spi_dev == RT_NULL) {
+        rt_kprintf("SPI device %s not found!\n", SPI_DEV_NAME);
+        return;
+    }
+
+    /* configure SPI */
+    cfg.data_width = 8;
+    cfg.mode = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
+    cfg.max_hz = 2 * 1000 * 1000;  /* 2 MHz */
+    rt_spi_configure(spi_dev, &cfg);
+    spi_dev->bus->owner = spi_dev;
+
+    /* Read Flash ID */
+    rt_spi_send_then_recv(spi_dev, &cmd_read_id, 1, id_buf, 3);
+    rt_kprintf("SPI Flash ID: 0x%02X 0x%02X 0x%02X\n", id_buf[0], id_buf[1], id_buf[2]);
+}
+#endif
+
+#ifdef GD32_SPI_POLL_TEST
+/**
+ * @brief SPI Flash polling mode test - transfer < BSP_SPI_DMA_TRANS_MIN_LEN bytes
+ */
+static void spi_poll_sample(void)
+{
+    uint8_t erase_cmd[4] = {0x20, 0x00, 0x10, 0x00};   /* Sector Erase at 0x001000 */
+    uint8_t write_cmd[4] = {0x02, 0x00, 0x10, 0x00};   /* Page Program at 0x001000 */
+    uint8_t read_cmd[4]  = {0x03, 0x00, 0x10, 0x00};   /* Read Data at 0x001000 */
+    uint8_t poll_tx[SPI_POLL_TEST_SIZE];
+    uint8_t poll_rx[SPI_POLL_TEST_SIZE];
+
+    struct rt_spi_device *spi_dev = RT_NULL;
+    rt_tick_t start, end;
+    int i;
+
+    /* initialize poll test buffer */
+    for (i = 0; i < SPI_POLL_TEST_SIZE; i++) {
+        poll_tx[i] = i + 0x10;
+    }
+    rt_memset(poll_rx, 0, SPI_POLL_TEST_SIZE);
+
+    /* find SPI device */
+    spi_dev = (struct rt_spi_device *)rt_device_find(SPI_DEV_NAME);
+    if (spi_dev == RT_NULL) {
+        rt_kprintf("[Poll] SPI device %s not found!\n", SPI_DEV_NAME);
+        return;
+    }
+
+    /* Write Enable */
+    rt_spi_transfer(spi_dev, &cmd_wren, id_buf, 1);
+
+    /* Erase Sector */
+    rt_spi_transfer(spi_dev, erase_cmd, id_buf, 4);
+    rt_thread_mdelay(100);  /* wait for erase to complete */
+
+    /* Write Enable */
+    rt_spi_transfer(spi_dev, &cmd_wren, id_buf, 1);
+
+    /* Write data using polling mode (< BSP_SPI_DMA_TRANS_MIN_LEN bytes) */
+    start = rt_tick_get();
+    rt_spi_send_then_send(spi_dev, write_cmd, 4, poll_tx, SPI_POLL_TEST_SIZE);
+    end = rt_tick_get();
+    rt_kprintf("[Poll] SPI Write %d bytes: %d ticks\n", SPI_POLL_TEST_SIZE, end - start);
+    rt_thread_mdelay(50);   /* wait for write to complete */
+
+    /* Read data using polling mode */
+    start = rt_tick_get();
+    rt_spi_send_then_recv(spi_dev, read_cmd, 4, poll_rx, SPI_POLL_TEST_SIZE);
+    end = rt_tick_get();
+    rt_kprintf("[Poll] SPI Read %d bytes: %d ticks\n", SPI_POLL_TEST_SIZE, end - start);
+
+    /* Verify data */
+    if (memcmp(poll_rx, poll_tx, SPI_POLL_TEST_SIZE) == 0) {
+        rt_kprintf("[Poll] SPI Flash test passed!\n");
+    } else {
+        rt_kprintf("[Poll] SPI Flash test failed!\n");
+        rt_kprintf("[Poll] TX: ");
+        for (i = 0; i < SPI_POLL_TEST_SIZE; i++) {
+            rt_kprintf("%02X ", poll_tx[i]);
+        }
+        rt_kprintf("\n[Poll] RX: ");
+        for (i = 0; i < SPI_POLL_TEST_SIZE; i++) {
+            rt_kprintf("%02X ", poll_rx[i]);
+        }
+        rt_kprintf("\n");
+    }
+}
+
+MSH_CMD_EXPORT(spi_poll_sample, SPI Flash polling mode test);
+#endif
+
+#ifdef GD32_SPI_DMA_TEST
+/**
+ * @brief SPI Flash DMA mode test - transfer >= BSP_SPI_DMA_TRANS_MIN_LEN bytes
+ */
+static void spi_dma_sample(void)
+{
+#ifndef BSP_SPI4_USING_DMA
+    rt_kprintf("[DMA] Warning: BSP_SPI4_USING_DMA not enabled!\n");
+    rt_kprintf("[DMA] Test will use polling mode instead.\n");
+    rt_kprintf("[DMA] Enable 'Enable SPI4 DMA' in menuconfig to use DMA.\n\n");
+#endif
+
+    uint8_t erase_cmd[4] = {0x20, 0x00, 0x00, 0x00};   /* Sector Erase at 0x000000 */
+    uint8_t write_cmd[4] = {0x02, 0x00, 0x00, 0x00};   /* Page Program at 0x000000 */
+    uint8_t read_cmd[4]  = {0x03, 0x00, 0x00, 0x00};   /* Read Data at 0x000000 */
+
+    struct rt_spi_device *spi_dev = RT_NULL;
+    rt_tick_t start, end;
+    int i;
+
+    /* initialize tx buffer with test pattern */
+    for (i = 0; i < SPI_DMA_TEST_SIZE; i++) {
+        tx_buffer[i] = i;
+    }
+    rt_memset(rx_buffer, 0, SPI_DMA_TEST_SIZE);
+
+    /* find SPI device */
+    spi_dev = (struct rt_spi_device *)rt_device_find(SPI_DEV_NAME);
+    if (spi_dev == RT_NULL) {
+        rt_kprintf("[DMA] SPI device %s not found!\n", SPI_DEV_NAME);
+        return;
+    }
+
+    /* Write Enable */
+    rt_spi_transfer(spi_dev, &cmd_wren, id_buf, 1);
+
+    /* Erase Sector */
+    rt_spi_transfer(spi_dev, erase_cmd, id_buf, 4);
+    rt_thread_mdelay(100);  /* wait for erase to complete */
+
+    /* Write Enable */
+    rt_spi_transfer(spi_dev, &cmd_wren, id_buf, 1);
+
+    /* Write data using DMA mode (>= BSP_SPI_DMA_TRANS_MIN_LEN bytes) */
+    start = rt_tick_get();
+    rt_spi_send_then_send(spi_dev, write_cmd, 4, tx_buffer, SPI_DMA_TEST_SIZE);
+    end = rt_tick_get();
+#ifdef BSP_SPI4_USING_DMA
+    rt_kprintf("[DMA] SPI Write %d bytes: %d ticks\n", SPI_DMA_TEST_SIZE, end - start);
+#else
+    rt_kprintf("[Poll] SPI Write %d bytes: %d ticks\n", SPI_DMA_TEST_SIZE, end - start);
+#endif
+    rt_thread_mdelay(50);   /* wait for write to complete */
+
+    /* Read data using DMA mode */
+    start = rt_tick_get();
+    rt_spi_send_then_recv(spi_dev, read_cmd, 4, rx_buffer, SPI_DMA_TEST_SIZE);
+    end = rt_tick_get();
+#ifdef BSP_SPI4_USING_DMA
+    rt_kprintf("[DMA] SPI Read %d bytes: %d ticks\n", SPI_DMA_TEST_SIZE, end - start);
+#else
+    rt_kprintf("[Poll] SPI Read %d bytes: %d ticks\n", SPI_DMA_TEST_SIZE, end - start);
+#endif
+
+    /* Verify data */
+    if (memcmp(rx_buffer, tx_buffer, SPI_DMA_TEST_SIZE) == 0) {
+#ifdef BSP_SPI4_USING_DMA
+        rt_kprintf("[DMA] SPI Flash test passed! (DMA mode)\n");
+#else
+        rt_kprintf("[Poll] SPI Flash test passed! (DMA not enabled)\n");
+#endif
+    } else {
+        rt_kprintf("[DMA] SPI Flash test failed!\n");
+        rt_kprintf("[DMA] First 16 bytes - TX: ");
+        for (i = 0; i < 16; i++) {
+            rt_kprintf("%02X ", tx_buffer[i]);
+        }
+        rt_kprintf("\n[DMA] First 16 bytes - RX: ");
+        for (i = 0; i < 16; i++) {
+            rt_kprintf("%02X ", rx_buffer[i]);
+        }
+        rt_kprintf("\n");
+    }
+}
+
+MSH_CMD_EXPORT(spi_dma_sample, SPI Flash DMA mode test);
 #endif
 
 #ifdef GD32_UART_TEST
@@ -258,8 +404,7 @@ static void serial_thread_entry(void *parameter)
         while (rt_device_read(serial, -1, &ch, 1) != 1) {
             rt_sem_take(&rx_sem, RT_WAITING_FOREVER);
         }
-
-        /* echothe recived ch */
+        /* echo the received character */
         rt_device_write(serial, 0, &ch, 1);
     }
 }
@@ -268,7 +413,7 @@ static int uart_sample(int argc, char *argv[])
 {
     rt_err_t ret = RT_EOK;
     char uart_name[RT_NAME_MAX];
-    char str[] = "hello RT-Thread!\r\n";
+    char str[] = "Hello RT-Thread UART Test!\r\n";
 
     if (argc == 2) {
         rt_strncpy(uart_name, argv[1], RT_NAME_MAX);
@@ -278,7 +423,7 @@ static int uart_sample(int argc, char *argv[])
 
     serial = rt_device_find(uart_name);
     if (!serial) {
-        rt_kprintf("find %s failed!\n", uart_name);
+        rt_kprintf("UART device %s not found!\n", uart_name);
         return RT_ERROR;
     }
 
@@ -288,15 +433,17 @@ static int uart_sample(int argc, char *argv[])
     rt_device_write(serial, 0, str, (sizeof(str) - 1));
 
     rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 1024, 25, 10);
-
     if (thread != RT_NULL) {
         rt_thread_startup(thread);
+        rt_kprintf("UART %s echo test started. Type to see echo.\n", uart_name);
     } else {
         ret = RT_ERROR;
     }
 
     return ret;
 }
+
+MSH_CMD_EXPORT(uart_sample, UART echo test sample);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
@@ -313,16 +460,14 @@ void tamper_key_pin_cb(void *args)
 
 static void pin_irq_sample(void)
 {
-    /* Wakeup key interrupt */
+    /* Wakeup key interrupt - PA0 */
     rt_pin_mode(WAKEUP_PIN_NUM, PIN_MODE_INPUT_PULLUP);
     rt_pin_attach_irq(WAKEUP_PIN_NUM, PIN_IRQ_MODE_FALLING, wakeup_key_pin_cb, RT_NULL);
-
     rt_pin_irq_enable(WAKEUP_PIN_NUM, PIN_IRQ_ENABLE);
 
-    /* Tamper key interrupt */
+    /* Tamper key interrupt - PC13 */
     rt_pin_mode(TAMPER_PIN, PIN_MODE_INPUT_PULLUP);
     rt_pin_attach_irq(TAMPER_PIN, PIN_IRQ_MODE_FALLING, tamper_key_pin_cb, RT_NULL);
-
     rt_pin_irq_enable(TAMPER_PIN, PIN_IRQ_ENABLE);
 }
 #endif

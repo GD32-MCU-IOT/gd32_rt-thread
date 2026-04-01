@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>GD32H75EYMJ6</Device>
           <Vendor>GigaDevice</Vendor>
-          <PackID>GigaDevice.GD32H75E_DFP.0.0.1</PackID>
+          <PackID>GigaDevice.GD32H75E_DFP.1.3.0</PackID>
           <PackURL>https://gd32mcu.com</PackURL>
           <Cpu>IRAM(0x24000000,0x000D0000) IRAM2(0x00000000,0x00010000) IROM(0x08000000,0x03C0000) XRAM(0x20000000,0x00020000) XRAM2(0x30000000,0x00004000) XRAM3(0x30004000,0x00004000) CPUTYPE("Cortex-M7") FPU3(DFPU) CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -337,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>__CLK_TCK=RT_TICK_PER_SECOND, __STDC_LIMIT_MACROS, USE_STDPERIPH_DRIVER, GD32H75E, RT_USING_LIBC, RT_USING_ARMLIBC, __RTTHREAD__</Define>
+              <Define>__RTTHREAD__, __CLK_TCK=RT_TICK_PER_SECOND, __STDC_LIMIT_MACROS, GD32H75E, RT_USING_LIBC, RT_USING_ARMLIBC, USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\..\components\drivers\smp_call;packages\at24cxx-latest;..\..\..\..\components\drivers\include;..\libraries\gd32_drivers;..\..\..\..\components\drivers\include;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\spi;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\libcpu\arm\cortex-m7;.;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;..\..\..\..\components\drivers\include;..\..\..\..\include;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\finsh;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\libcpu\arm\common;..\..\..\..\components\drivers\include;packages\gd32-arm-cmsis-latest\GD32H75E\GD\GD32H75E\Include;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\phy;..\..\..\..\components\drivers\include;applications;..\..\..\..\components\libc\posix\io\epoll;board;..\..\..\..\components\net\utest;packages\gd32-arm-series-latest\GD32H75E\GD32H75E_standard_peripheral\Include</IncludePath>
+              <IncludePath>packages\gd32-arm-cmsis-latest\GD32H75E\GD\GD32H75E\Include;..\..\..\..\libcpu\arm\common;..\libraries\gd32_drivers;..\..\..\..\components\libc\compilers\common\extension;.;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\drivers\include;..\..\..\..\components\net\utest;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\drivers\include;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;applications;..\..\..\..\components\drivers\include;board;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\drivers\smp_call;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\spi;..\..\..\..\components\drivers\include;..\..\..\..\include;..\..\..\..\components\finsh;..\..\..\..\components\drivers\phy;..\..\..\..\libcpu\arm\cortex-m7;packages\gd32-arm-series-latest\GD32H75E\GD32H75E_standard_peripheral\Include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;packages\at24cxx-latest;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\drivers\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1716,14 +1716,9 @@
           <GroupName>Finsh</GroupName>
           <Files>
             <File>
-              <FileName>shell.c</FileName>
+              <FileName>msh.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\shell.c</FilePath>
-            </File>
-            <File>
-              <FileName>cmd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
             </File>
             <File>
               <FileName>msh_parse.c</FileName>
@@ -1736,9 +1731,14 @@
               <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
             </File>
             <File>
-              <FileName>msh.c</FileName>
+              <FileName>cmd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\shell.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2669,6 +2669,11 @@
               <FileName>system_gd32h75e.c</FileName>
               <FileType>1</FileType>
               <FilePath>packages\gd32-arm-cmsis-latest\GD32H75E\GD\GD32H75E\Source\system_gd32h75e.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32h75e_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32H75E\GD32H75E_standard_peripheral\Source\gd32h75e_dma.c</FilePath>
             </File>
             <File>
               <FileName>gd32h75e_exti.c</FileName>

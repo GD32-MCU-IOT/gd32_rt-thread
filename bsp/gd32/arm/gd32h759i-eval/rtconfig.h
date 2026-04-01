@@ -306,26 +306,6 @@
 
 /* end of Kendryte SDK */
 
-/* WCH HAL & SDK Drivers */
-
-/* end of WCH HAL & SDK Drivers */
-
-/* AT32 HAL & SDK Drivers */
-
-/* end of AT32 HAL & SDK Drivers */
-
-/* HC32 DDL Drivers */
-
-/* end of HC32 DDL Drivers */
-
-/* NXP HAL & SDK Drivers */
-
-/* end of NXP HAL & SDK Drivers */
-
-/* NUVOTON Drivers */
-
-/* end of NUVOTON Drivers */
-
 /* GD32 Drivers */
 
 #define PKG_USING_GD32_ARM_CMSIS_DRIVER
@@ -333,10 +313,6 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
-
-/* HPMicro SDK */
-
-/* end of HPMicro SDK */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -434,7 +410,11 @@
 #define BSP_USING_UART0
 #define BSP_USING_UART1
 #define BSP_USING_SPI
+#define BSP_USING_SPI_DMA
 #define BSP_USING_SPI3
+#define BSP_SPI3_USING_DMA
+#define BSP_SPI_DMA_TRANS_MIN_LEN 16
+#define BSP_SPI_DMA_TIMEOUT 1000
 #define BSP_USING_I2C
 #define BSP_USING_HARD_I2C1
 #define BSP_USING_GD_DBG

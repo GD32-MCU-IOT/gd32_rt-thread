@@ -83,7 +83,7 @@ struct gd32_uart
 
 #ifdef RT_SERIAL_USING_DMA
     gd32_uart_dma *uart_dma;
-#ifdef RT_SERIAL_USING_TX_DMA
+#ifdef BSP_SERIAL_USING_TX_DMA
     gd32_uart_dma *uart_tx_dma;
 #endif
 #endif
@@ -96,12 +96,13 @@ struct gd32_uart
 
 #ifdef RT_SERIAL_USING_DMA
 #include "drv_dma.h"
+#include "drv_config.h"
 #endif
 
 #ifdef RT_SERIAL_USING_DMA
 typedef struct
 {
-    dma_config *config;
+    struct dma_config *config;
     /* setting receive len */
     rt_size_t setting_recv_len;
     /* last receive index */
@@ -120,10 +121,14 @@ struct gd32_uart
 
 #ifdef RT_SERIAL_USING_DMA
 #ifdef BSP_USING_UART_TX_DMA
-    dma_config *dma_tx;
+    struct dma_config *dma_tx;
 #endif
 #ifdef BSP_USING_UART_RX_DMA
-    dma_config *dma_rx;
+    struct dma_config *dma_rx;
+#ifdef SOC_SERIES_GD32H7xx
+    /* Cache-aligned DMA buffer to avoid D-Cache coherency issues (Cortex-M7 only) */
+    rt_uint8_t *dma_rx_buffer;
+#endif
     /* setting receive len */
     rt_size_t setting_recv_len;
     /* last receive index */

@@ -23,6 +23,7 @@ extern "C" {
 #include "config/e50x/spi_config.h"
 #elif defined(SOC_SERIES_GD32F5xx)
 #include "config/f527/dma_config.h"
+#include "config/f527/uart_config.h"
 #include "config/f527/spi_config.h"
 #elif defined(SOC_SERIES_GD32H7xx)
 #include "config/h7xx/dma_config.h"

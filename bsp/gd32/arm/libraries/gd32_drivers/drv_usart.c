@@ -35,6 +35,8 @@
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
 #define USART_DATA_TX(usartx) (&USART_TDATA(usartx))
 #define USART_DATA_RX(usartx) (&USART_RDATA(usartx))
+/* ARM Cortex-M7 cache line size for DMA buffer alignment */
+#define RT_DMA_CACHE_LINE_SIZE  32
 #else
 #define USART_DATA_TX(usartx) (&USART_DATA(usartx))
 #define USART_DATA_RX(usartx) (&USART_DATA(usartx))
@@ -1221,14 +1223,18 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
      * ARM Cortex-M7 cache line is 32 bytes. If the DMA buffer shares a cache line
      * with other data (like serial_tx->data_queue), cache invalidate operations
      * will corrupt that data.
+     *
+     * Buffer size must also be aligned to cache line size to ensure safe
+     * cache invalidate operations on the entire buffer.
      */
-#define RT_DMA_CACHE_LINE_SIZE  32
     if (uart->dma_rx_buffer == RT_NULL)
     {
+        /* Align buffer size to cache line size for safe cache operations */
+        rt_size_t aligned_bufsz = RT_ALIGN(serial->config.bufsz, RT_DMA_CACHE_LINE_SIZE);
         /* Allocate cache-aligned DMA buffer, keep rx_fifo->buffer unchanged */
-        uart->dma_rx_buffer = (rt_uint8_t *)rt_malloc_align(serial->config.bufsz, RT_DMA_CACHE_LINE_SIZE);
+        uart->dma_rx_buffer = (rt_uint8_t *)rt_malloc_align(aligned_bufsz, RT_DMA_CACHE_LINE_SIZE);
         RT_ASSERT(uart->dma_rx_buffer != RT_NULL);
-        rt_memset(uart->dma_rx_buffer, 0, serial->config.bufsz);
+        rt_memset(uart->dma_rx_buffer, 0, aligned_bufsz);
     }
 #endif
     if(SET == usart_flag_get(uart->uart_periph, USART_FLAG_IDLE)) {
@@ -1402,11 +1408,9 @@ static void dma_uart_rx_idle_isr(struct rt_serial_device *serial)
     recv_total_index = uart->setting_recv_len -
                        dma_transfer_number_get(uart->dma_rx->periph, uart->dma_rx->channel);
 
-    if (recv_total_index >= uart->last_recv_index) {
-        recv_len = recv_total_index - uart->last_recv_index;
-    } else {
-        recv_len = uart->setting_recv_len - uart->last_recv_index + recv_total_index;
-    }
+    /* Non-circular mode: recv_total_index always >= last_recv_index */
+    RT_ASSERT(recv_total_index >= uart->last_recv_index);
+    recv_len = recv_total_index - uart->last_recv_index;
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /* Invalidate DMA buffer cache, then copy to rx_fifo->buffer */

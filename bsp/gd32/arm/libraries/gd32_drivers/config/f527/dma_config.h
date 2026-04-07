@@ -60,14 +60,18 @@ extern "C" {
 #define UART0_RX_DMA_CHANNEL            DMA_CH1
 #define UART0_RX_DMA_IRQ                DMA0_Channel1_IRQn
 #define UART0_RX_DMA_SUBPERI            DMA_SUBPERI4
-#elif defined(BSP_I2C3_RX_USING_DMA) && !defined(I2C3_RX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C3_RX_USING_DMA) && !defined(I2C3_RX_DMA_PERIPH)
 #define I2C3_DMA_RX_IRQHandler          DMA0_Channel1_IRQHandler
 #define I2C3_RX_DMA_PERIPH              DMA0
 #define I2C3_RX_DMA_RCU                 RCU_DMA0
 #define I2C3_RX_DMA_CHANNEL             DMA_CH1
 #define I2C3_RX_DMA_IRQ                 DMA0_Channel1_IRQn
 #define I2C3_RX_DMA_SUBPERI             DMA_SUBPERI0
-#elif defined(BSP_I2C4_RX_USING_DMA) && !defined(I2C4_RX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C4_RX_USING_DMA) && !defined(I2C4_RX_DMA_PERIPH)
 #define I2C4_DMA_RX_IRQHandler          DMA0_Channel1_IRQHandler
 #define I2C4_RX_DMA_PERIPH              DMA0
 #define I2C4_RX_DMA_RCU                 RCU_DMA0
@@ -84,14 +88,18 @@ extern "C" {
 #define UART0_TX_DMA_CHANNEL            DMA_CH2
 #define UART0_TX_DMA_IRQ                DMA0_Channel2_IRQn
 #define UART0_TX_DMA_SUBPERI            DMA_SUBPERI4
-#elif defined(BSP_I2C2_RX_USING_DMA) && !defined(I2C2_RX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C2_RX_USING_DMA) && !defined(I2C2_RX_DMA_PERIPH)
 #define I2C2_DMA_RX_IRQHandler          DMA0_Channel2_IRQHandler
 #define I2C2_RX_DMA_PERIPH              DMA0
 #define I2C2_RX_DMA_RCU                 RCU_DMA0
 #define I2C2_RX_DMA_CHANNEL             DMA_CH2
 #define I2C2_RX_DMA_IRQ                 DMA0_Channel2_IRQn
 #define I2C2_RX_DMA_SUBPERI             DMA_SUBPERI3
-#elif defined(BSP_I2C1_RX_USING_DMA) && !defined(I2C1_RX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C1_RX_USING_DMA) && !defined(I2C1_RX_DMA_PERIPH)
 #define I2C1_DMA_RX_IRQHandler          DMA0_Channel2_IRQHandler
 #define I2C1_RX_DMA_PERIPH              DMA0
 #define I2C1_RX_DMA_RCU                 RCU_DMA0
@@ -108,7 +116,9 @@ extern "C" {
 #define SPI0_RX_DMA_CHANNEL             DMA_CH3
 #define SPI0_RX_DMA_IRQ                 DMA0_Channel3_IRQn
 #define SPI0_RX_DMA_SUBPERI             DMA_SUBPERI3
-#elif defined(BSP_I2C4_TX_USING_DMA) && !defined(I2C4_TX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C4_TX_USING_DMA) && !defined(I2C4_TX_DMA_PERIPH)
 #define I2C4_DMA_TX_IRQHandler          DMA0_Channel3_IRQHandler
 #define I2C4_TX_DMA_PERIPH              DMA0
 #define I2C4_TX_DMA_RCU                 RCU_DMA0
@@ -125,7 +135,9 @@ extern "C" {
 #define SPI1_TX_DMA_CHANNEL             DMA_CH4
 #define SPI1_TX_DMA_IRQ                 DMA0_Channel4_IRQn
 #define SPI1_TX_DMA_SUBPERI             DMA_SUBPERI0
-#elif defined(BSP_I2C2_TX_USING_DMA) && !defined(I2C2_TX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C2_TX_USING_DMA) && !defined(I2C2_TX_DMA_PERIPH)
 #define I2C2_DMA_TX_IRQHandler          DMA0_Channel4_IRQHandler
 #define I2C2_TX_DMA_PERIPH              DMA0
 #define I2C2_TX_DMA_RCU                 RCU_DMA0
@@ -142,7 +154,9 @@ extern "C" {
 #define SPI0_TX_DMA_CHANNEL             DMA_CH5
 #define SPI0_TX_DMA_IRQ                 DMA0_Channel5_IRQn
 #define SPI0_TX_DMA_SUBPERI             DMA_SUBPERI3
-#elif defined(BSP_I2C5_RX_USING_DMA) && !defined(I2C5_RX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C5_RX_USING_DMA) && !defined(I2C5_RX_DMA_PERIPH)
 #define I2C5_DMA_RX_IRQHandler          DMA0_Channel5_IRQHandler
 #define I2C5_RX_DMA_PERIPH              DMA0
 #define I2C5_RX_DMA_RCU                 RCU_DMA0
@@ -159,7 +173,9 @@ extern "C" {
 #define I2C0_TX_DMA_CHANNEL             DMA_CH6
 #define I2C0_TX_DMA_IRQ                 DMA0_Channel6_IRQn
 #define I2C0_TX_DMA_SUBPERI             DMA_SUBPERI1
-#elif defined(BSP_I2C3_TX_USING_DMA) && !defined(I2C3_TX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C3_TX_USING_DMA) && !defined(I2C3_TX_DMA_PERIPH)
 #define I2C3_DMA_TX_IRQHandler          DMA0_Channel6_IRQHandler
 #define I2C3_TX_DMA_PERIPH              DMA0
 #define I2C3_TX_DMA_RCU                 RCU_DMA0
@@ -176,7 +192,9 @@ extern "C" {
 #define I2C1_TX_DMA_CHANNEL             DMA_CH7
 #define I2C1_TX_DMA_IRQ                 DMA0_Channel7_IRQn
 #define I2C1_TX_DMA_SUBPERI             DMA_SUBPERI7
-#elif defined(BSP_I2C5_TX_USING_DMA) && !defined(I2C5_TX_DMA_PERIPH)
+#endif
+
+#if defined(BSP_I2C5_TX_USING_DMA) && !defined(I2C5_TX_DMA_PERIPH)
 #define I2C5_DMA_TX_IRQHandler          DMA0_Channel7_IRQHandler
 #define I2C5_TX_DMA_PERIPH              DMA0
 #define I2C5_TX_DMA_RCU                 RCU_DMA0

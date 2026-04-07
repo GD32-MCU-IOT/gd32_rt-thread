@@ -333,9 +333,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls />
-              <Define>RT_USING_ARMLIBC, __CLK_TCK=RT_TICK_PER_SECOND, GD32F527, RT_USING_LIBC, __STDC_LIMIT_MACROS, USE_STDPERIPH_DRIVER, __RTTHREAD__</Define>
+              <Define>RT_USING_LIBC, RT_USING_ARMLIBC, GD32F527, USE_STDPERIPH_DRIVER, __CLK_TCK=RT_TICK_PER_SECOND, __STDC_LIMIT_MACROS, __RTTHREAD__</Define>
               <Undefine />
-              <IncludePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\smp_call;..\..\..\..\include;..\..\..\..\components\drivers\include;packages\gd32-arm-cmsis-latest\GD32F5xx\GD\GD32F5xx\Include;..\..\..\..\libcpu\arm\cortex-m33;packages\at24cxx-latest;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\spi;..\libraries\gd32_drivers;..\..\..\..\components\drivers\include;packages\gd32-arm-cmsis-latest\GD32F5xx;..\..\..\..\components\drivers\phy;..\..\..\..\components\net\utest;..\..\..\..\components\finsh;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\drivers\include;applications;.;..\..\..\..\libcpu\arm\common;board;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\libc\compilers\common\include</IncludePath>
+              <IncludePath>..\..\..\..\libcpu\arm\cortex-m33;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\drivers\include;..\..\..\..\libcpu\arm\common;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\drivers\phy;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\net\utest;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;board;..\..\..\..\include;..\..\..\..\components\drivers\smp_call;packages\gd32-arm-cmsis-latest\GD32F5xx\GD\GD32F5xx\Include;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Include;.;..\..\..\..\components\libc\compilers\common\include;applications;..\libraries\gd32_drivers;packages\at24cxx-latest;..\..\..\..\components\libc\posix\io\epoll;packages\gd32-arm-cmsis-latest\GD32F5xx;..\..\..\..\components\drivers\spi;..\..\..\..\components\finsh;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -830,44 +830,6 @@
           <GroupName>Filesystem</GroupName>
           <Files>
             <File>
-              <FileName>dfs.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs.c</FilePath>
-              <FileOption>
-                <FileArmAds>
-                  <Cads>
-                    <VariousControls>
-                      <MiscControls>  -std=c99</MiscControls>
-                      <Define> </Define>
-                      <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-          </Files>
-          <Files>
-            <File>
-              <FileName>dfs_file.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_file.c</FilePath>
-              <FileOption>
-                <FileArmAds>
-                  <Cads>
-                    <VariousControls>
-                      <MiscControls>  -std=c99</MiscControls>
-                      <Define> </Define>
-                      <Undefine> </Undefine>
-                      <IncludePath> </IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-          </Files>
-          <Files>
-            <File>
               <FileName>dfs_posix.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_posix.c</FilePath>
@@ -904,21 +866,52 @@
               </FileOption>
             </File>
           </Files>
+          <Files>
+            <File>
+              <FileName>dfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls>  -std=c99</MiscControls>
+                      <Define> </Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>dfs_file.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_file.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls>  -std=c99</MiscControls>
+                      <Define> </Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>Finsh</GroupName>
           <Files>
             <File>
-              <FileName>msh_file.c</FileName>
+              <FileName>msh_parse.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
-            </File>
-          </Files>
-          <Files>
-            <File>
-              <FileName>msh.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
             </File>
           </Files>
           <Files>
@@ -930,9 +923,16 @@
           </Files>
           <Files>
             <File>
-              <FileName>msh_parse.c</FileName>
+              <FileName>msh.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>msh_file.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
             </File>
           </Files>
           <Files>

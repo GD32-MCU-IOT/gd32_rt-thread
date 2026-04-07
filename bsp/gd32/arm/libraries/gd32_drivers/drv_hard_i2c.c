@@ -91,12 +91,9 @@ struct rt_i2c_bus_device i2c5;
 #define I2C_CTL0_GD(periph)                  I2C_ADD_CTL0(periph)
 #define I2C_TDATA_GD(periph)                 I2C_ADD_TDATA(periph)
 #define I2C_RDATA_GD(periph)                 I2C_ADD_RDATA(periph)
-#if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
-#define I2C_DMA_TRANSMIT_GD                  I2C_ADD_DMA_TRANSMIT
-#define I2C_DMA_RECEIVE_GD                   I2C_ADD_DMA_RECEIVE
 #define I2C_FLAG_TCR_GD                      I2C_ADD_FLAG_TCR
 #define MAX_RELOAD_SIZE                      255
-/* Frame mode for multi-msg DMA transfer */
+/* Frame mode for multi-msg transfer */
 #define GD32_I2C_FIRST_FRAME                 BIT(0)    /* First msg: START, no AUTOEND */
 #define GD32_I2C_FIRST_AND_LAST_FRAME        BIT(1)    /* Only one msg: START + AUTOEND */
 #define GD32_I2C_NEXT_FRAME                  BIT(2)    /* Middle msg: no START, no AUTOEND */
@@ -105,6 +102,9 @@ struct rt_i2c_bus_device i2c5;
 #define GD32_I2C_FIRST_FRAME_RELOAD          BIT(5)    /* First msg: START, use RELOAD for next NO_START msg */
 #define GD32_I2C_NEXT_FRAME_NO_START         BIT(6)    /* Continue from RELOAD, no START needed */
 #define GD32_I2C_NEXT_FRAME_RELOAD           BIT(7)    /* Middle msg: RESTART, use RELOAD for next NO_START msg */
+#if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
+#define I2C_DMA_TRANSMIT_GD                  I2C_ADD_DMA_TRANSMIT
+#define I2C_DMA_RECEIVE_GD                   I2C_ADD_DMA_RECEIVE
 #endif /* BSP_USING_I2C_*_DMA */
 
 #elif defined(SOC_SERIES_GD32E51x)
@@ -193,17 +193,15 @@ struct rt_i2c_bus_device i2c5;
 #endif
 
 #if defined (SOC_SERIES_GD32F5xx)
-#if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
 /* Atomic CTL1 config: NBYTES + RELOAD + AUTOEND */
 #define i2c_nbytes_reload_autoend_config_gd(periph, nbytes, reload, autoend) do { \
     uint32_t _ctl1 = I2C_ADD_CTL1(periph); \
     _ctl1 &= ~(I2C_ADD_CTL1_BYTENUM | I2C_ADD_CTL1_RELOAD | I2C_ADD_CTL1_AUTOEND); \
     _ctl1 |= ((uint32_t)(nbytes) << 16); \
-    if (reload) _ctl1 |= I2C_ADD_CTL1_RELOAD; \
-    if (autoend) _ctl1 |= I2C_ADD_CTL1_AUTOEND; \
+    if(reload) _ctl1 |= I2C_ADD_CTL1_RELOAD; \
+    if(autoend) _ctl1 |= I2C_ADD_CTL1_AUTOEND; \
     I2C_ADD_CTL1(periph) = _ctl1; \
 } while(0)
-#endif /* BSP_USING_I2C_*_DMA */
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1 || (periph) == I2C2)
 #elif defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32F3x0) || defined (SOC_SERIES_GD32F30x) \
    || defined (SOC_SERIES_GD32C11x) || defined (SOC_SERIES_GD32E23x) || defined (SOC_SERIES_GD32E11x)
@@ -549,6 +547,68 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
 };
 #endif
 
+/**
+ * @brief  Unified timeout wait for I2C/DMA flag or legacy control bit.
+  * @param  periph      I2C peripheral (used for I2C flag check)
+  * @param  flag        Flag or legacy control bit to wait for
+  * @param  set         RT_TRUE = wait for flag SET, RT_FALSE = wait for flag RESET
+  * @param  dma         DMA config pointer (RT_NULL for I2C, non-NULL for DMA)
+  * @retval RT_EOK on success, -RT_ETIMEOUT on timeout
+  */
+static int gd32_timeout_wait_flag(uint32_t periph, uint32_t flag, rt_bool_t set, struct dma_config *dma)
+{
+    rt_tick_t timeout = rt_tick_from_millisecond(I2C_DMA_TIMEOUT_MS);
+    rt_tick_t start = rt_tick_get();
+
+    while(1)
+    {
+        FlagStatus status;
+
+#if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
+        if(dma != RT_NULL)
+        {
+            /* DMA flag check */
+            status = dma_flag_get(dma->periph, dma->channel, flag);
+        }
+        else
+#endif
+        {
+#ifdef GD32_I2C_HAS_LEGACY_IP
+            if(IS_I2C_LEGACY(periph))
+            {
+                if(flag == I2C_CTL0_STOP)
+                {
+                    /* Legacy STOP is a control bit in CTL0, not a status flag. */
+                    status = (I2C_CTL0(periph) & I2C_CTL0_STOP) ? SET : RESET;
+                }
+                else
+                {
+                    /* Legacy I2C flag check */
+                    status = i2c_flag_get(periph, flag);
+                }
+            }
+            else
+#endif
+            {
+                /* New I2C flag check */
+                status = i2c_flag_get_gd(periph, flag);
+            }
+        }
+
+        if((set && status == SET) || (!set && status != SET))
+        {
+            return RT_EOK;
+        }
+
+        if(rt_tick_get() - start > timeout)
+        {
+            return -RT_ETIMEOUT;
+        }
+
+        rt_thread_mdelay(1);
+    }
+}
+
 #if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
 /**
   * @brief  configure DMA channel for I2C transfer.
@@ -559,8 +619,7 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
   * @param  direction
   * @retval None
   */
-static void gd32_i2c_dma_config_channel(struct dma_config *dma, uint32_t periph_addr,
-                                         uint8_t *buf, uint16_t len, uint32_t direction)
+static void gd32_i2c_dma_config_channel(struct dma_config *dma, uint32_t periph_addr, uint8_t *buf, uint16_t len, uint32_t direction)
 {
     dma_single_data_parameter_struct dma_init_struct;
 
@@ -581,31 +640,6 @@ static void gd32_i2c_dma_config_channel(struct dma_config *dma, uint32_t periph_
     /* NOTE: Do NOT enable DMA channel here! Caller controls enable order. */
 }
 
-/**
-  * @brief  wait for legacy I2C DMA completion.
-  * @param  dma
-  * @param  timeout
-  * @retval 0 on success, -RT_ETIMEOUT on timeout
-  */
-static int gd32_i2c_legacy_dma_wait_complete(struct dma_config *dma, rt_tick_t timeout)
-{
-    rt_tick_t start = rt_tick_get();
-
-    while (dma_flag_get(dma->periph, dma->channel, DMA_FLAG_FTF) != SET)
-    {
-        if (rt_tick_get() - start > timeout)
-        {
-            dma_channel_disable(dma->periph, dma->channel);
-            dma_flag_clear(dma->periph, dma->channel, DMA_FLAG_FTF);
-            return -RT_ETIMEOUT;
-        }
-        rt_thread_mdelay(1);
-    }
-    dma_channel_disable(dma->periph, dma->channel);
-    dma_flag_clear(dma->periph, dma->channel, DMA_FLAG_FTF);
-    return 0;
-}
-
 #ifdef GD32_I2C_HAS_NEW_IP
 /**
   * @brief  calculate frame mode for new I2C DMA transfer.
@@ -615,25 +649,24 @@ static int gd32_i2c_legacy_dma_wait_complete(struct dma_config *dma, rt_tick_t t
   * @param  num
   * @retval frame mode constant
   */
-static uint32_t gd32_i2c_new_frame_mode(struct rt_i2c_msg *msg, struct rt_i2c_msg *next_msg,
-                                          rt_uint32_t index, rt_uint32_t num)
+static uint32_t gd32_i2c_new_frame_mode(struct rt_i2c_msg *msg, struct rt_i2c_msg *next_msg, rt_uint32_t index, rt_uint32_t num)
 {
     uint8_t next_has_no_start = (next_msg != RT_NULL) && (next_msg->flags & RT_I2C_NO_START);
 
-    if (num == 1)
+    if(num == 1)
     {
         /* Single message */
         return (msg->flags & RT_I2C_NO_STOP) ? GD32_I2C_LAST_FRAME_NO_STOP : GD32_I2C_FIRST_AND_LAST_FRAME;
     }
-    else if (index == 0)
+    else if(index == 0)
     {
         /* First message of multiple */
-        if (next_has_no_start)
+        if(next_has_no_start)
             return GD32_I2C_FIRST_FRAME_RELOAD;  /* Use RELOAD for seamless continuation */
         else
             return GD32_I2C_FIRST_FRAME;
     }
-    else if (index == num - 1)
+    else if(index == num - 1)
     {
         /* Last message */
         return (msg->flags & RT_I2C_NO_STOP) ? GD32_I2C_LAST_FRAME_NO_STOP : GD32_I2C_LAST_FRAME;
@@ -641,7 +674,7 @@ static uint32_t gd32_i2c_new_frame_mode(struct rt_i2c_msg *msg, struct rt_i2c_ms
     else
     {
         /* Middle message */
-        if (next_has_no_start)
+        if(next_has_no_start)
             return GD32_I2C_NEXT_FRAME_RELOAD;  /* RESTART, then RELOAD for seamless continuation */
         else
             return GD32_I2C_NEXT_FRAME;
@@ -650,51 +683,20 @@ static uint32_t gd32_i2c_new_frame_mode(struct rt_i2c_msg *msg, struct rt_i2c_ms
 #endif /* GD32_I2C_HAS_NEW_IP */
 #endif
 
-/**
-  * @brief  wait for I2C flag with timeout.
-  * @param  i2c_periph
-  * @param  flag
-  * @param  wait_set  1: wait until flag is set, 0: wait until flag is cleared
-  * @param  timeout   timeout in ticks
-  * @retval 0 on success, -RT_ETIMEOUT on timeout
-  */
-#define DEFINE_I2C_WAIT_FLAG(name, flag_get_func) \
-static int name(uint32_t i2c_periph, uint32_t flag, \
-                uint8_t wait_set, rt_tick_t timeout) \
-{ \
-    rt_tick_t start = rt_tick_get(); \
-    while ((!flag_get_func(i2c_periph, flag)) == wait_set) \
-    { \
-        if (rt_tick_get() - start > timeout) return -RT_ETIMEOUT; \
-    } \
-    return 0; \
-}
-
-#ifdef GD32_I2C_HAS_LEGACY_IP
-DEFINE_I2C_WAIT_FLAG(gd32_i2c_legacy_wait_flag, i2c_flag_get)
-#endif
-
 #ifdef GD32_I2C_HAS_NEW_IP
-DEFINE_I2C_WAIT_FLAG(gd32_i2c_new_wait_flag, i2c_flag_get_gd)
-#endif
-
-#if (defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)) && defined(GD32_I2C_HAS_NEW_IP)
+#if defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)
 /**
-  * @brief  new I2C DMA transfer (unified TX/RX).
-  * @param  i2c_bus
-  * @param  msg
-  * @param  mode
-  * @param  is_read
-  * @retval 0 on success, non-zero on error
-  */
-static int gd32_i2c_new_dma_xfer(const struct gd32_i2c_bus *i2c_bus,
-                                  struct rt_i2c_msg *msg, uint32_t mode,
-                                  uint8_t is_read)
+    * @brief  new I2C single-message transfer (DMA or polling).
+    * @param  i2c_bus
+    * @param  msg
+    * @param  mode
+    * @param  is_read
+    * @param  use_dma
+    * @retval 0 on success, non-zero on error
+    */
+static int gd32_i2c_new_msg_xfer(const struct gd32_i2c_bus *i2c_bus, struct rt_i2c_msg *msg, uint32_t mode, uint8_t is_read, uint8_t use_dma)
 {
     uint32_t i2c_periph = i2c_bus->i2c_periph;
-    struct dma_config *dma = is_read ? i2c_bus->dma_rx : i2c_bus->dma_tx;
-    rt_tick_t timeout = rt_tick_from_millisecond(I2C_DMA_TIMEOUT_MS);
-    rt_tick_t start;
     uint16_t shifted_addr = msg->addr << 1;
     uint16_t remaining = msg->len;
     uint8_t *p_current = msg->buf;
@@ -702,11 +704,21 @@ static int gd32_i2c_new_dma_xfer(const struct gd32_i2c_bus *i2c_bus,
 
     /* Direction-specific parameters */
     uint32_t i2c_direction = is_read ? I2C_MASTER_RECEIVE_GD : I2C_MASTER_TRANSMIT_GD;
-    uint32_t data_reg = is_read ? (uint32_t)&I2C_RDATA_GD(i2c_periph)
-                                : (uint32_t)&I2C_TDATA_GD(i2c_periph);
-    uint32_t dma_direction = is_read ? DMA_PERIPH_TO_MEMORY : DMA_MEMORY_TO_PERIPH;
-    uint32_t dma_mode = is_read ? I2C_DMA_RECEIVE_GD : I2C_DMA_TRANSMIT_GD;
     const char *dir_str = is_read ? "rx" : "tx";
+
+    struct dma_config *dma = RT_NULL;
+    uint32_t data_reg = 0;
+    uint32_t dma_direction = 0;
+    uint32_t dma_mode = 0;
+
+    if(use_dma)
+    {
+        dma = is_read ? i2c_bus->dma_rx : i2c_bus->dma_tx;
+        data_reg = is_read ? (uint32_t)&I2C_RDATA_GD(i2c_periph)
+                           : (uint32_t)&I2C_TDATA_GD(i2c_periph);
+        dma_direction = is_read ? DMA_PERIPH_TO_MEMORY : DMA_MEMORY_TO_PERIPH;
+        dma_mode = is_read ? I2C_DMA_RECEIVE_GD : I2C_DMA_TRANSMIT_GD;
+    }
 
     /* Only first frame needs to wait for bus idle */
     uint8_t need_bus_idle_wait = (mode == GD32_I2C_FIRST_FRAME ||
@@ -724,110 +736,147 @@ static int gd32_i2c_new_dma_xfer(const struct gd32_i2c_bus *i2c_bus,
     uint8_t continuing_from_reload = (msg->flags & RT_I2C_NO_START) != 0;
 
     /* Only configure address for new transfers, not when continuing from RELOAD */
-    if (!continuing_from_reload)
+    if(!continuing_from_reload)
     {
         i2c_master_addressing_gd(i2c_periph, shifted_addr, i2c_direction);
     }
 
     /* Wait for bus idle if starting new transfer */
-    if (need_bus_idle_wait)
+    if(need_bus_idle_wait)
     {
-        if (gd32_i2c_new_wait_flag(i2c_periph, I2C_FLAG_I2CBSY_GD, 0, timeout) != 0)
+        if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_I2CBSY_GD, RT_FALSE, RT_NULL) != 0)
         {
-            LOG_E("i2c seq %s bus busy timeout", dir_str);
-            return -RT_EBUSY;
+            LOG_E("i2c %s bus busy timeout", dir_str);
+            return -RT_ETIMEOUT;
         }
     }
 
-    while (remaining > 0)
+    while(remaining > 0)
     {
         uint8_t is_last_chunk = (remaining <= MAX_RELOAD_SIZE);
         nbytes = is_last_chunk ? remaining : MAX_RELOAD_SIZE;
 
-        /* Configure DMA channel */
-        gd32_i2c_dma_config_channel(dma, data_reg, p_current, nbytes, dma_direction);
-        i2c_dma_enable_gd(i2c_periph, dma_mode);
-        dma_channel_enable(dma->periph, dma->channel);
-
-        /* Configure NBYTES + RELOAD + AUTOEND atomically */
+        if(use_dma)
         {
-            uint8_t set_reload = !is_last_chunk || use_reload_for_next;
-            uint8_t set_autoend = is_last_chunk && need_autoend;
-            i2c_nbytes_reload_autoend_config_gd(i2c_periph, nbytes, set_reload, set_autoend);
+            /* Configure DMA channel */
+            gd32_i2c_dma_config_channel(dma, data_reg, p_current, nbytes, dma_direction);
+            i2c_dma_enable_gd(i2c_periph, dma_mode);
+            dma_channel_enable(dma->periph, dma->channel);
         }
 
+        /* Configure NBYTES + RELOAD + AUTOEND atomically */
+        uint8_t set_reload = !is_last_chunk || use_reload_for_next;
+        uint8_t set_autoend = is_last_chunk && need_autoend;
+        i2c_nbytes_reload_autoend_config_gd(i2c_periph, nbytes, set_reload, set_autoend);
+
         /* Send START only for first chunk when needed */
-        if (need_start && p_current == msg->buf)
+        if(need_start && p_current == msg->buf)
         {
             i2c_start_on_bus_gd(i2c_periph);
         }
 
-        /* Wait for DMA FTF */
-        start = rt_tick_get();
-        while (!dma_flag_get(dma->periph, dma->channel, DMA_FLAG_FTF))
+        if(use_dma)
         {
-            if (rt_tick_get() - start > timeout)
+            /* Wait for DMA FTF */
+            if(gd32_timeout_wait_flag(i2c_periph, DMA_FLAG_FTF, RT_TRUE, dma) != 0)
             {
-                LOG_E("i2c seq %s dma timeout", dir_str);
-                goto error_exit;
+                LOG_E("i2c %s dma timeout", dir_str);
+                goto error_exit_dma;
+            }
+            dma_flag_clear(dma->periph, dma->channel, DMA_FLAG_FTF);
+            dma_channel_disable(dma->periph, dma->channel);
+
+            p_current += nbytes;
+            remaining -= nbytes;
+        }
+        else
+        {
+            /* Polling data transfer */
+            if(is_read)
+            {
+                while(nbytes > 0)
+                {
+                    if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_RBNE_GD, RT_TRUE, RT_NULL) != 0)
+                    {
+                        LOG_E("i2c rx RBNE timeout");
+                        goto error_exit;
+                    }
+                    *p_current++ = i2c_data_receive_gd(i2c_periph);
+                    nbytes--;
+                    remaining--;
+                }
+            }
+            else
+            {
+                while(nbytes > 0)
+                {
+                    if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_TI_GD, RT_TRUE, RT_NULL) != 0)
+                    {
+                        LOG_E("i2c tx TI timeout");
+                        goto error_exit;
+                    }
+                    i2c_data_transmit_gd(i2c_periph, *p_current++);
+                    nbytes--;
+                    remaining--;
+                }
             }
         }
-        dma_flag_clear(dma->periph, dma->channel, DMA_FLAG_FTF);
-        dma_channel_disable(dma->periph, dma->channel);
-
-        p_current += nbytes;
-        remaining -= nbytes;
 
         /* If more data in this msg, wait for TCR before next chunk */
-        if (remaining > 0)
+        if(remaining > 0)
         {
-            if (gd32_i2c_new_wait_flag(i2c_periph, I2C_FLAG_TCR_GD, 1, timeout) != 0)
+            if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_TCR_GD, RT_TRUE, RT_NULL) != 0)
             {
-                LOG_E("i2c seq %s TCR timeout", dir_str);
+                LOG_E("i2c %s TCR timeout", dir_str);
                 goto error_exit;
             }
         }
     }
 
     /* Wait for completion based on mode */
-    if (need_autoend)
+    if(need_autoend)
     {
-        if (gd32_i2c_new_wait_flag(i2c_periph, I2C_FLAG_STPDET_GD, 1, timeout) != 0)
+        if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_STPDET_GD, RT_TRUE, RT_NULL) != 0)
         {
-            LOG_E("i2c seq %s STOP timeout", dir_str);
+            LOG_E("i2c %s STOP timeout", dir_str);
             goto error_exit;
         }
         i2c_flag_clear_gd(i2c_periph, I2C_FLAG_STPDET_GD);
     }
-    else if (use_reload_for_next)
+    else if(use_reload_for_next)
     {
-        if (gd32_i2c_new_wait_flag(i2c_periph, I2C_FLAG_TCR_GD, 1, timeout) != 0)
+        if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_TCR_GD, RT_TRUE, RT_NULL) != 0)
         {
-            LOG_E("i2c seq %s TCR timeout (reload)", dir_str);
+            LOG_E("i2c %s TCR timeout (reload)", dir_str);
             goto error_exit;
         }
     }
     else
     {
-        if (gd32_i2c_new_wait_flag(i2c_periph, I2C_FLAG_TC_GD, 1, timeout) != 0)
+        if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_TC_GD, RT_TRUE, RT_NULL) != 0)
         {
-            LOG_E("i2c seq %s TC timeout", dir_str);
+            LOG_E("i2c %s TC timeout", dir_str);
             goto error_exit;
         }
     }
 
-    /* Cleanup */
-    i2c_dma_disable_gd(i2c_periph, dma_mode);
+    if(use_dma)
+    {
+        i2c_dma_disable_gd(i2c_periph, dma_mode);
+    }
     return 0;
 
-error_exit:
+error_exit_dma:
     dma_channel_disable(dma->periph, dma->channel);
     i2c_dma_disable_gd(i2c_periph, dma_mode);
+error_exit:
     i2c_stop_on_bus_gd(i2c_periph);
     return -RT_ETIMEOUT;
 }
-#endif /* (BSP_USING_I2C_TX_DMA || BSP_USING_I2C_RX_DMA) && GD32_I2C_HAS_NEW_IP */
+#endif /* BSP_USING_I2C_*_DMA */
+#endif /* GD32_I2C_HAS_NEW_IP */
 
+#ifdef GD32_I2C_HAS_LEGACY_IP
 #ifdef BSP_USING_I2C_TX_DMA
 /**
   * @brief  legacy I2C TX DMA transfer.
@@ -837,10 +886,8 @@ error_exit:
   */
 static int gd32_i2c_legacy_dma_write(const struct gd32_i2c_bus *i2c_bus, const struct rt_i2c_msg *msg)
 {
-#ifdef GD32_I2C_HAS_LEGACY_IP
     uint32_t i2c_periph = i2c_bus->i2c_periph;
     struct dma_config *dma_tx = i2c_bus->dma_tx;
-    rt_tick_t timeout = rt_tick_from_millisecond(I2C_DMA_TIMEOUT_MS);
     int result;
 
     /* Configure DMA channel and enable I2C DMA
@@ -851,15 +898,17 @@ static int gd32_i2c_legacy_dma_write(const struct gd32_i2c_bus *i2c_bus, const s
     dma_channel_enable(dma_tx->periph, dma_tx->channel);
 
     /* Wait for DMA completion */
-    result = gd32_i2c_legacy_dma_wait_complete(dma_tx, timeout);
-    if (result != 0)
+    result = gd32_timeout_wait_flag(i2c_periph, DMA_FLAG_FTF, RT_TRUE, dma_tx);
+    dma_channel_disable(dma_tx->periph, dma_tx->channel);
+    dma_flag_clear(dma_tx->periph, dma_tx->channel, DMA_FLAG_FTF);
+    if(result != 0)
     {
         i2c_dma_config(i2c_periph, I2C_DMA_OFF);
         return result;
     }
 
     /* Wait for I2C BTC (Byte Transfer Complete) */
-    if (gd32_i2c_legacy_wait_flag(i2c_periph, I2C_FLAG_BTC, 1, timeout) != 0)
+    if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_BTC, RT_TRUE, RT_NULL) != 0)
     {
         i2c_dma_config(i2c_periph, I2C_DMA_OFF);
         return -RT_ETIMEOUT;
@@ -869,15 +918,12 @@ static int gd32_i2c_legacy_dma_write(const struct gd32_i2c_bus *i2c_bus, const s
     i2c_dma_config(i2c_periph, I2C_DMA_OFF);
 
     return 0;
-#else
-    (void)i2c_bus;
-    (void)msg;
-    return -RT_ENOSYS;
-#endif
 }
 #endif /* BSP_USING_I2C_TX_DMA */
+#endif /* GD32_I2C_HAS_LEGACY_IP */
 
-#if defined(BSP_USING_I2C_RX_DMA) && defined(GD32_I2C_HAS_LEGACY_IP)
+#ifdef GD32_I2C_HAS_LEGACY_IP
+#ifdef BSP_USING_I2C_RX_DMA
 /**
   * @brief  legacy I2C RX DMA transfer.
   * @param  i2c_bus
@@ -888,21 +934,22 @@ static int gd32_i2c_legacy_dma_read(const struct gd32_i2c_bus *i2c_bus, const st
 {
     uint32_t i2c_periph = i2c_bus->i2c_periph;
     struct dma_config *dma_rx = i2c_bus->dma_rx;
-    rt_tick_t timeout = rt_tick_from_millisecond(I2C_DMA_TIMEOUT_MS);
     int result;
 
-    /* CRITICAL: Configure and enable DMA BEFORE clearing ADDSEND (DMALST timing) */
+    /* Official style: clear ADDSEND first, then configure DMA */
+    i2c_flag_clear(i2c_periph, I2C_FLAG_ADDSEND);
+
+    /* Configure DMA channel */
     gd32_i2c_dma_config_channel(dma_rx, (uint32_t)&I2C_DATA(i2c_periph),
                                  msg->buf, msg->len, DMA_PERIPH_TO_MEMORY);
     i2c_dma_last_transfer_config(i2c_periph, I2C_DMALST_ON);
     i2c_dma_config(i2c_periph, I2C_DMA_ON);
     dma_channel_enable(dma_rx->periph, dma_rx->channel);
 
-    /* Now clear ADDSEND to start I2C clock */
-    i2c_flag_clear(i2c_periph, I2C_FLAG_ADDSEND);
-
     /* Wait for DMA completion */
-    result = gd32_i2c_legacy_dma_wait_complete(dma_rx, timeout);
+    result = gd32_timeout_wait_flag(i2c_periph, DMA_FLAG_FTF, RT_TRUE, dma_rx);
+    dma_channel_disable(dma_rx->periph, dma_rx->channel);
+    dma_flag_clear(dma_rx->periph, dma_rx->channel, DMA_FLAG_FTF);
 
     /* Send STOP */
     i2c_stop_on_bus(i2c_periph);
@@ -913,7 +960,8 @@ static int gd32_i2c_legacy_dma_read(const struct gd32_i2c_bus *i2c_bus, const st
 
     return result;
 }
-#endif /* BSP_USING_I2C_RX_DMA && GD32_I2C_HAS_LEGACY_IP */
+#endif /* BSP_USING_I2C_RX_DMA */
+#endif /* GD32_I2C_HAS_LEGACY_IP */
 
 
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
@@ -935,7 +983,6 @@ static void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
 #if defined (SOC_SERIES_GD32F30x)
     gpio_init(i2c->sda_port, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, i2c->sda_pin);
     gpio_init(i2c->scl_port, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, i2c->scl_pin);
-
 #else
 
     /* configure I2C_SCL as alternate function push-pull */
@@ -963,12 +1010,11 @@ static void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
   * @param  i2c_periph
   * @param  *p_buffer
   * @param  data_byte
-  * @retval None
+  * @retval 0 on success, -RT_ETIMEOUT on timeout
   */
-static uint8_t gd32_i2c_read(rt_uint32_t i2c_periph, rt_uint8_t *p_buffer, rt_uint16_t data_byte)
+static int8_t gd32_i2c_read(rt_uint32_t i2c_periph, rt_uint8_t *p_buffer, rt_uint16_t data_byte)
 {
     if (data_byte == 0) return 1;
-    rt_tick_t timeout = rt_tick_from_millisecond(I2C_DMA_TIMEOUT_MS);
     /* while there is data to be read */
 
     while(data_byte)
@@ -978,20 +1024,20 @@ static uint8_t gd32_i2c_read(rt_uint32_t i2c_periph, rt_uint8_t *p_buffer, rt_ui
         {
             if(3 == data_byte)
             {
-                    /* wait until BTC bit is set */
-                    if (gd32_i2c_legacy_wait_flag(i2c_periph, I2C_FLAG_BTC, 1, timeout) != 0)
-                        return 1;
-                    /* disable acknowledge */
-                    i2c_ack_config(i2c_periph, I2C_ACK_DISABLE);
+                /* wait until BTC bit is set */
+                if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_BTC, RT_TRUE, RT_NULL) != 0)
+                    return -RT_ETIMEOUT;
+                /* disable acknowledge */
+                i2c_ack_config(i2c_periph, I2C_ACK_DISABLE);
             }
 
             if(2 == data_byte)
             {
-                    /* wait until BTC bit is set */
-                    if (gd32_i2c_legacy_wait_flag(i2c_periph, I2C_FLAG_BTC, 1, timeout) != 0)
-                        return 1;
-                    /* send a stop condition to I2C bus */
-                    i2c_stop_on_bus(i2c_periph);
+                /* wait until BTC bit is set */
+                if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_BTC, RT_TRUE, RT_NULL) != 0)
+                    return -RT_ETIMEOUT;
+                /* send a stop condition to I2C bus */
+                i2c_stop_on_bus(i2c_periph);
             }
             /* wait until RBNE bit is set */
             if(i2c_flag_get(i2c_periph, I2C_FLAG_RBNE))
@@ -1007,8 +1053,8 @@ static uint8_t gd32_i2c_read(rt_uint32_t i2c_periph, rt_uint8_t *p_buffer, rt_ui
 #endif
         {
             /* wait until the RBNE bit is set */
-            if (gd32_i2c_new_wait_flag(i2c_periph, I2C_FLAG_RBNE_GD, 1, timeout) != 0)
-                return 1;
+            if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_RBNE_GD, RT_TRUE, RT_NULL) != 0)
+                return -RT_ETIMEOUT;
 
             /* read a byte */
             *p_buffer = i2c_data_receive_gd(i2c_periph);
@@ -1026,12 +1072,11 @@ static uint8_t gd32_i2c_read(rt_uint32_t i2c_periph, rt_uint8_t *p_buffer, rt_ui
   * @param  i2c_periph
   * @param  *p_buffer
   * @param  data_byte
-  * @retval None
+  * @retval 0 on success, -RT_ETIMEOUT on timeout
   */
-static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_t data_byte)
+static int8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_t data_byte)
 {
     if (data_byte == 0) return 1;
-    rt_tick_t timeout = rt_tick_from_millisecond(I2C_DMA_TIMEOUT_MS);
 
     while(data_byte)
     {
@@ -1044,23 +1089,23 @@ static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_
             p_buffer++;
             /* decrement the write bytes counter */
             data_byte--;
-            /* wait until the TI bit is set */
-            if (gd32_i2c_legacy_wait_flag(i2c_periph, I2C_FLAG_BTC, 1, timeout) != 0)
-                return 1;
+            /* wait until BTC bit is set */
+            if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_BTC, RT_TRUE, RT_NULL) != 0)
+                return -RT_ETIMEOUT;
         }
         else
 #endif
         {
 #ifdef GD32_I2C_HAS_NEW_IP
             /* wait until the transmit data buffer is empty */
-            if (gd32_i2c_new_wait_flag(i2c_periph, I2C_FLAG_TBE, 1, timeout) != 0)
-                return 1;
+            if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_TBE, RT_TRUE, RT_NULL) != 0)
+                return -RT_ETIMEOUT;
 
             while(data_byte)
             {
                 /* wait until the TI bit is set */
-                if (gd32_i2c_new_wait_flag(i2c_periph, I2C_FLAG_TI_GD, 1, timeout) != 0)
-                    return 1;
+                if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_TI_GD, RT_TRUE, RT_NULL) != 0)
+                    return -RT_ETIMEOUT;
                 /* data transmission */
                 i2c_data_transmit_gd(i2c_periph, *p_buffer);
                 /* point to the next byte to be written */
@@ -1071,13 +1116,202 @@ static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_
 #endif
         }
     }
-
-    if(data_byte != 0)
-    {
-        return 1;
-    }
     return 0;
 }
+
+#ifdef GD32_I2C_HAS_LEGACY_IP
+#if defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)
+static rt_ssize_t gd32_i2c_legacy_dma_xfer(struct gd32_i2c_bus *gd32_i2c,
+                                           struct rt_i2c_msg msgs[],
+                                           rt_uint32_t num)
+{
+    struct rt_i2c_msg *msg = RT_NULL;
+    rt_uint16_t addr;
+    rt_uint32_t i;
+    rt_err_t ret = RT_ERROR;
+
+    for(i = 0; i < num; i++)
+    {
+        msg = &msgs[i];
+        addr = msg->addr << 1;
+
+        if(!(msg->flags & RT_I2C_NO_START))
+        {
+            if(msg->flags & RT_I2C_RD)
+            {
+                i2c_ack_config(gd32_i2c->i2c_periph, I2C_ACK_ENABLE);
+                if(msg->len == 2U)
+                {
+                    i2c_ackpos_config(gd32_i2c->i2c_periph, I2C_ACKPOS_NEXT);
+                }
+
+                i2c_start_on_bus(gd32_i2c->i2c_periph);
+                if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_SBSEND, RT_TRUE, RT_NULL) != 0)
+                {
+                    ret = -RT_ERROR;
+                    break;
+                }
+
+                i2c_master_addressing(gd32_i2c->i2c_periph, addr, I2C_RECEIVER);
+                if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND, RT_TRUE, RT_NULL) != 0)
+                {
+                    ret = -RT_ERROR;
+                    break;
+                }
+
+#ifdef BSP_USING_I2C_RX_DMA
+                if(!(msg->len >= I2C_DMA_TRANS_MIN_LEN && msg->len >= 2 && gd32_i2c->dma_rx != RT_NULL))
+#endif
+                {
+                    if(msg->len <= 2)
+                    {
+                        i2c_ack_config(gd32_i2c->i2c_periph, I2C_ACK_DISABLE);
+                    }
+                    i2c_flag_clear(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND);
+                    if(msg->len == 1)
+                    {
+                        i2c_stop_on_bus(gd32_i2c->i2c_periph);
+                    }
+                }
+            }
+            else
+            {
+                if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_I2CBSY, RT_FALSE, RT_NULL) != 0)
+                {
+                    ret = -RT_ERROR;
+                    break;
+                }
+
+                i2c_start_on_bus(gd32_i2c->i2c_periph);
+                if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_SBSEND, RT_TRUE, RT_NULL) != 0)
+                {
+                    ret = -RT_ERROR;
+                    break;
+                }
+
+                i2c_master_addressing(gd32_i2c->i2c_periph, addr, I2C_TRANSMITTER);
+                if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND, RT_TRUE, RT_NULL) != 0)
+                {
+                    ret = -RT_ERROR;
+                    break;
+                }
+
+                i2c_flag_clear(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND);
+            }
+        }
+
+        if(msg->flags & RT_I2C_RD)
+        {
+#ifdef BSP_USING_I2C_RX_DMA
+            if(msg->len >= I2C_DMA_TRANS_MIN_LEN && msg->len >= 2 && gd32_i2c->dma_rx != RT_NULL)
+            {
+                if(gd32_i2c_legacy_dma_read(gd32_i2c, msg) != 0)
+                {
+                    LOG_E("i2c bus dma read failed!");
+                    ret = -RT_ERROR;
+                    break;
+                }
+            }
+            else
+#endif
+            {
+                if(gd32_i2c_read(gd32_i2c->i2c_periph, msg->buf, msg->len) != 0)
+                {
+                    LOG_E("i2c bus read failed,i2c bus stop!");
+                    ret = -RT_ERROR;
+                    break;
+                }
+            }
+        }
+        else
+        {
+#ifdef BSP_USING_I2C_TX_DMA
+            if(msg->len >= I2C_DMA_TRANS_MIN_LEN && gd32_i2c->dma_tx != RT_NULL)
+            {
+                if(gd32_i2c_legacy_dma_write(gd32_i2c, msg) != 0)
+                {
+                    LOG_E("i2c bus dma write failed,i2c bus stop!");
+                    ret = -RT_ERROR;
+                    break;
+                }
+            }
+            else
+#endif
+            {
+                if(gd32_i2c_write(gd32_i2c->i2c_periph, msg->buf, msg->len) != 0)
+                {
+                    LOG_E("i2c bus write failed,i2c bus stop!");
+                    ret = -RT_ERROR;
+                    break;
+                }
+            }
+        }
+    }
+
+    if((ret == RT_ERROR) && (i == num))
+    {
+        ret = i;
+    }
+
+    if((msg != RT_NULL) && !(msg->flags & RT_I2C_NO_STOP))
+    {
+        int wait_result;
+
+        if(msg->flags & RT_I2C_RD)
+        {
+            wait_result = gd32_timeout_wait_flag(gd32_i2c->i2c_periph,
+                                                 I2C_CTL0_STOP,
+                                                 RT_FALSE,
+                                                 RT_NULL);
+        }
+        else
+        {
+            i2c_stop_on_bus(gd32_i2c->i2c_periph);
+            wait_result = gd32_timeout_wait_flag(gd32_i2c->i2c_periph,
+                                                 I2C_CTL0_STOP,
+                                                 RT_FALSE,
+                                                 RT_NULL);
+        }
+
+        if(wait_result != RT_EOK)
+        {
+            ret = wait_result;
+        }
+    }
+
+    return ret;
+}
+#endif
+#endif
+
+#ifdef GD32_I2C_HAS_NEW_IP
+#if defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)
+static rt_ssize_t gd32_i2c_new_dma_xfer(struct gd32_i2c_bus *gd32_i2c,
+                                        struct rt_i2c_msg msgs[],
+                                        rt_uint32_t num)
+{
+    rt_uint32_t i;
+
+    for(i = 0; i < num; i++)
+    {
+        struct rt_i2c_msg *msg = &msgs[i];
+        struct rt_i2c_msg *next_msg = (i < num - 1) ? &msgs[i + 1] : RT_NULL;
+        uint32_t frame_mode = gd32_i2c_new_frame_mode(msg, next_msg, i, num);
+        uint8_t is_read = (msg->flags & RT_I2C_RD) != 0;
+        struct dma_config *dma = is_read ? gd32_i2c->dma_rx : gd32_i2c->dma_tx;
+        uint8_t use_dma = (msg->len >= I2C_DMA_TRANS_MIN_LEN && dma != RT_NULL);
+
+        if(gd32_i2c_new_msg_xfer(gd32_i2c, msg, frame_mode, is_read, use_dma) != 0)
+        {
+            i2c_flag_clear_gd(gd32_i2c->i2c_periph, I2C_FLAG_STPDET_GD);
+            return -RT_ERROR;
+        }
+    }
+
+    return i;
+}
+#endif
+#endif
 
 /**
   * @brief
@@ -1089,82 +1323,46 @@ static uint8_t gd32_i2c_write(rt_uint32_t i2c_periph, uint8_t *p_buffer, uint16_
 
 static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_i2c_msg msgs[], rt_uint32_t num)
 {
-    static struct rt_i2c_msg *msg;
+    struct rt_i2c_msg *msg = RT_NULL;
+    struct gd32_i2c_bus *gd32_i2c = (struct gd32_i2c_bus *)bus->priv;
     rt_uint16_t addr;
-
-    rt_uint32_t i,w_total_byte=0,r_total_byte=0;
+    rt_uint32_t i, w_total_byte=0, r_total_byte=0;
     rt_err_t ret = RT_ERROR;
-    rt_tick_t timeout = rt_tick_from_millisecond(I2C_DMA_TIMEOUT_MS);
-    rt_tick_t start;
 
     RT_ASSERT(bus != RT_NULL);
 
-    struct gd32_i2c_bus *gd32_i2c = (struct gd32_i2c_bus *)bus->priv;
+#if defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)
+#ifdef GD32_I2C_HAS_LEGACY_IP
+    if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
+    {
+        return gd32_i2c_legacy_dma_xfer(gd32_i2c, msgs, num);
+    }
+#endif
+
+#ifdef GD32_I2C_HAS_NEW_IP
+    return gd32_i2c_new_dma_xfer(gd32_i2c, msgs, num);
+#endif
+#endif
 
     for(i = 0; i < num; i++)
     {
         msg = &msgs[i];
 
-        if(msg->flags & RT_I2C_RD)
+        /* Calculate total bytes for New IP non-DMA path: only on first iteration */
+        if(i == 0)
         {
-            r_total_byte += msg->len;
-        }else{
-            w_total_byte += msg->len;
-        }
-    }
-
-#if defined(GD32_I2C_HAS_NEW_IP) && (defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA))
-    /*
-     * New IP DMA: Use seq DMA API when total transfer length >= threshold
-     * and required DMA channels are available for all message directions.
-     * Handles arbitrary msg patterns (EEPROM read/write, multi-msg, etc.)
-     */
-    if (!IS_I2C_LEGACY(gd32_i2c->i2c_periph))
-    {
-        if ((w_total_byte + r_total_byte) >= I2C_DMA_TRANS_MIN_LEN &&
-            (r_total_byte == 0 || gd32_i2c->dma_rx != RT_NULL) &&
-            (w_total_byte == 0 || gd32_i2c->dma_tx != RT_NULL))
-        {
-            for (i = 0; i < num; i++)
+            for(rt_uint32_t j = 0; j < num; j++)
             {
-                msg = &msgs[i];
-                struct rt_i2c_msg *next_msg = (i < num - 1) ? &msgs[i + 1] : RT_NULL;
-                uint32_t frame_mode = gd32_i2c_new_frame_mode(msg, next_msg, i, num);
-                int result;
-
-                uint8_t is_read = (msg->flags & RT_I2C_RD) != 0;
-                struct dma_config *dma = is_read ? gd32_i2c->dma_rx : gd32_i2c->dma_tx;
-
-                if (dma != RT_NULL)
-                {
-                    result = gd32_i2c_new_dma_xfer(gd32_i2c, msg, frame_mode, is_read);
-                }
+                if(msgs[j].flags & RT_I2C_RD)
+                    r_total_byte += msgs[j].len;
                 else
-                {
-                    result = -RT_ENOSYS;
-                }
-
-                if (result != 0)
-                {
-                    /* gd32_i2c_new_dma_xfer sent STOP on error, wait for completion and clear flag */
-                    if (result != -RT_ENOSYS)
-                    {
-                        gd32_i2c_new_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_STPDET_GD, 1, timeout);
-                        i2c_flag_clear_gd(gd32_i2c->i2c_periph, I2C_FLAG_STPDET_GD);
-                    }
-                    return -RT_ERROR;
-                }
+                    w_total_byte += msgs[j].len;
             }
-            return num;
         }
-    }
-#endif /* GD32_I2C_HAS_NEW_IP && (BSP_USING_I2C_RX_DMA || BSP_USING_I2C_TX_DMA) */
 
-    for(i = 0; i < num; i++)
-    {
-        msg = &msgs[i];
+        /* Legacy IP + New IP non-DMA path */
         addr = msg->addr << 1;
-        if (!(msg->flags & RT_I2C_NO_START))
+        if(!(msg->flags & RT_I2C_NO_START))
         {
     #ifdef GD32_I2C_HAS_LEGACY_IP
             if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
@@ -1173,95 +1371,103 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
                 {
                         /* enable acknowledge */
                     i2c_ack_config(gd32_i2c->i2c_periph, I2C_ACK_ENABLE);
-                    if (msg->len == 2U)
+                    if(msg->len == 2U)
                     {
                         /* Configure ACK position for 2-byte read */
                         i2c_ackpos_config(gd32_i2c->i2c_periph, I2C_ACKPOS_NEXT);
                     }
-                        /* send the start signal */
+                    /* send the start signal */
                     i2c_start_on_bus(gd32_i2c->i2c_periph);
-                     /* i2c master sends START signal successfully */
-                    if (gd32_i2c_legacy_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_SBSEND, 1, timeout) != 0)
-                        goto out;
+                    /* i2c master sends START signal successfully */
+                    if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_SBSEND, RT_TRUE, RT_NULL) != 0)
+                    {
+                        ret = -RT_ERROR;
+                        break;
+                    }
 
                     i2c_master_addressing(gd32_i2c->i2c_periph, addr, I2C_RECEIVER);
 
-                    if (gd32_i2c_legacy_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND, 1, timeout) != 0)
-                        goto out;
-
-#if defined(BSP_USING_I2C_RX_DMA)
-                    /* Legacy I2C RX DMA: must configure DMA BEFORE clearing ADDSEND */
-                    if (msg->len >= I2C_DMA_TRANS_MIN_LEN && msg->len >= 2 && gd32_i2c->dma_rx != RT_NULL)
+                    if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND, RT_TRUE, RT_NULL) != 0)
                     {
-                        /* DMA read handles ADDSEND clear, data transfer, and STOP internally */
-                        if (gd32_i2c_legacy_dma_read(gd32_i2c, msg) != 0)
-                        {
-                            LOG_E("i2c bus dma read failed!");
-                            goto out;
-                        }
-                        /* Mark that DMA read is done, skip polling read later */
-                    }
-                    else
-#endif
-                    {
-                        /* Polling read: original flow */
-                        /* address flag set means i2c slave sends ACK */
-                        if (msg->len <= 2)
-                        {
-                            i2c_ack_config(gd32_i2c->i2c_periph, I2C_ACK_DISABLE);
-                        }
-                        i2c_flag_clear(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND);
-                        if (msg->len == 1)
-                        {
-                            i2c_stop_on_bus(gd32_i2c->i2c_periph);
-                        }
+                        ret = -RT_ERROR;
+                        break;
                     }
 
-               }else {
-                     /* configure slave address */
-                    if (gd32_i2c_legacy_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_I2CBSY, 0, timeout) != 0)
-                        goto out;
-                     //i2c_transfer_byte_number_config(gd32_i2c->i2c_periph, w_total_byte);
-                     /* send a start condition to I2C bus */
+                    /* Polling read: original flow */
+                    /* address flag set means i2c slave sends ACK */
+                    if(msg->len <= 2)
+                    {
+                        i2c_ack_config(gd32_i2c->i2c_periph, I2C_ACK_DISABLE);
+                    }
+                    i2c_flag_clear(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND);
+                    if(msg->len == 1)
+                    {
+                        i2c_stop_on_bus(gd32_i2c->i2c_periph);
+                    }
+
+                }
+                else
+                {
+                    /* configure slave address */
+                    if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_I2CBSY, RT_FALSE, RT_NULL) != 0)
+                    {
+                        ret = -RT_ERROR;
+                        break;
+                    }
+                    //i2c_transfer_byte_number_config(gd32_i2c->i2c_periph, w_total_byte);
+                    /* send a start condition to I2C bus */
                     i2c_start_on_bus(gd32_i2c->i2c_periph);
-                    if (gd32_i2c_legacy_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_SBSEND, 1, timeout) != 0)
-                        goto out;
+                    if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_SBSEND, RT_TRUE, RT_NULL) != 0)
+                    {
+                        ret = -RT_ERROR;
+                        break;
+                    }
 
                     i2c_master_addressing(gd32_i2c->i2c_periph, addr, I2C_TRANSMITTER);
-                    if (gd32_i2c_legacy_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND, 1, timeout) != 0)
-                        goto out;
+                    if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND, RT_TRUE, RT_NULL) != 0)
+                    {
+                        ret = -RT_ERROR;
+                        break;
+                    }
 
                     i2c_flag_clear(gd32_i2c->i2c_periph, I2C_FLAG_ADDSEND);
-               }
-            }else
+                }
+            }
+            else
 #endif
             {
 #ifdef GD32_I2C_HAS_NEW_IP
                 if(msg->flags & RT_I2C_ADDR_10BIT)
                 {
-                        /* enable 10-bit addressing mode in master mode */
+                    /* enable 10-bit addressing mode in master mode */
                     i2c_address10_enable_gd(gd32_i2c->i2c_periph);
-                }else {
-                        /* disable 10-bit addressing mode in master mode */
+                }
+                else
+                {
+                    /* disable 10-bit addressing mode in master mode */
                     i2c_address10_disable_gd(gd32_i2c->i2c_periph);
                 }
 
                 if(msg->flags & RT_I2C_RD)
                 {
-                     /* configure slave address */
+                    /* configure slave address */
                     i2c_master_addressing_gd(gd32_i2c->i2c_periph, addr, I2C_MASTER_RECEIVE_GD);
 
                     i2c_transfer_byte_number_config_gd(gd32_i2c->i2c_periph, r_total_byte);
-                     /* send a start condition to I2C bus */
+                    /* send a start condition to I2C bus */
                     i2c_start_on_bus_gd(gd32_i2c->i2c_periph);
-
-                }else {
-                     /* configure slave address */
+                }
+                else
+                {
+                    /* configure slave address */
                     i2c_master_addressing_gd(gd32_i2c->i2c_periph, addr, I2C_MASTER_TRANSMIT_GD);
-                    if (gd32_i2c_new_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_I2CBSY_GD, 0, timeout) != 0)
-                        goto out;
+                    if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_I2CBSY_GD, RT_FALSE, RT_NULL) != 0)
+                    {
+                        ret = -RT_ERROR;
+                        break;
+                    }
                     i2c_transfer_byte_number_config_gd(gd32_i2c->i2c_periph, w_total_byte);
-                     /* send a start condition to I2C bus */
+                    /* send a start condition to I2C bus */
                     i2c_start_on_bus_gd(gd32_i2c->i2c_periph);
                 }
 #endif
@@ -1270,97 +1476,111 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
 
         if(msg->flags & RT_I2C_RD)
         {
-#if defined(BSP_USING_I2C_RX_DMA) && defined(GD32_I2C_HAS_LEGACY_IP)
-            /* Skip polling read if DMA read was already done above */
-            if (IS_I2C_LEGACY(gd32_i2c->i2c_periph) &&
-                msg->len >= I2C_DMA_TRANS_MIN_LEN && msg->len >= 2 && gd32_i2c->dma_rx != RT_NULL)
+            if(gd32_i2c_read(gd32_i2c->i2c_periph, msg->buf, msg->len) != 0)
             {
-                /* DMA read already completed in the address phase, nothing to do here */
+                LOG_E("i2c bus read failed,i2c bus stop!");
+                ret = -RT_ERROR;
+                break;
             }
-            else
-#endif
+        }
+        else
+        {
+            if(gd32_i2c_write(gd32_i2c->i2c_periph, msg->buf, msg->len) != 0)
             {
-                if(gd32_i2c_read(gd32_i2c->i2c_periph, msg->buf, msg->len) != 0)
-                {
-                    LOG_E("i2c bus read failed,i2c bus stop!");
-                    goto out;
-                }
+                LOG_E("i2c bus write failed,i2c bus stop!");
+                ret = -RT_ERROR;
+                break;
             }
-        }else {
-#if defined(BSP_USING_I2C_TX_DMA) && defined(GD32_I2C_HAS_LEGACY_IP)
-            /* Legacy I2C TX DMA */
-            if (IS_I2C_LEGACY(gd32_i2c->i2c_periph) &&
-                msg->len >= I2C_DMA_TRANS_MIN_LEN && gd32_i2c->dma_tx != RT_NULL)
-            {
-                if(gd32_i2c_legacy_dma_write(gd32_i2c, msg) != 0)
-                {
-                    LOG_E("i2c bus dma write failed,i2c bus stop!");
-                    goto out;
-                }
-            }
-            else
-#endif
-            {
-                if(gd32_i2c_write(gd32_i2c->i2c_periph, msg->buf, msg->len) != 0)
-                {
-                    LOG_E("i2c bus write failed,i2c bus stop!");
-                    goto out;
-                }
-            }
-       }
+        }
+
 #ifdef GD32_I2C_HAS_NEW_IP
         if(!IS_I2C_LEGACY(gd32_i2c->i2c_periph))
         {
             if(r_total_byte != 0)
             {
-                if (gd32_i2c_new_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_TC_GD, 1, timeout) != 0)
-                    goto out;
+                if(gd32_timeout_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_TC_GD, RT_TRUE, RT_NULL) != 0)
+                {
+                    ret = -RT_ERROR;
+                    break;
+                }
             }
         }
 #endif
-
     }
-    ret = i;
 
-out:
+    if((ret == RT_ERROR) && (i == num))
+    {
+        ret = i;
+    }
+
 #ifdef GD32_I2C_HAS_LEGACY_IP
     if(IS_I2C_LEGACY(gd32_i2c->i2c_periph))
     {
-
-        if(!(msg->flags & RT_I2C_NO_STOP))
+        if((msg != RT_NULL) && !(msg->flags & RT_I2C_NO_STOP))
         {
             if(msg->flags & RT_I2C_RD)
             {
-                start = rt_tick_get();
-                while((I2C_CTL0(gd32_i2c->i2c_periph) & I2C_CTL0_STOP))
+                int wait_result = gd32_timeout_wait_flag(gd32_i2c->i2c_periph,
+                                                         I2C_CTL0_STOP,
+                                                         RT_FALSE,
+                                                         RT_NULL);
+
+                if(wait_result != RT_EOK)
                 {
-                    if (rt_tick_get() - start > timeout) break;
+                    ret = wait_result;
                 }
-            }else{
+            }
+            else
+            {
                 /* send a stop condition to I2C bus */
                 i2c_stop_on_bus(gd32_i2c->i2c_periph);
                 /* wait until stop condition generate */
-                start = rt_tick_get();
-                while((I2C_CTL0(gd32_i2c->i2c_periph) & I2C_CTL0_STOP))
+                int wait_result = gd32_timeout_wait_flag(gd32_i2c->i2c_periph,
+                                                         I2C_CTL0_STOP,
+                                                         RT_FALSE,
+                                                         RT_NULL);
+
+                if(wait_result != RT_EOK)
                 {
-                    if (rt_tick_get() - start > timeout) break;
+                    ret = wait_result;
                 }
-                /* clear the STPDET bit */
             }
         }
-    }else
+    }
+    else
 #endif
     {
 #ifdef GD32_I2C_HAS_NEW_IP
-        if(!(msg->flags & RT_I2C_NO_STOP))
+        if((msg != RT_NULL) && !(msg->flags & RT_I2C_NO_STOP))
         {
-            gd32_i2c_new_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_TC_GD, 1, timeout);
-            /* send a stop condition to I2C bus */
-            i2c_stop_on_bus_gd(gd32_i2c->i2c_periph);
-            /* wait until stop condition generate */
-            gd32_i2c_new_wait_flag(gd32_i2c->i2c_periph, I2C_FLAG_STPDET_GD, 1, timeout);
-            /* clear the STPDET bit */
-            i2c_flag_clear_gd(gd32_i2c->i2c_periph, I2C_FLAG_STPDET_GD);
+            int wait_result = gd32_timeout_wait_flag(gd32_i2c->i2c_periph,
+                                                     I2C_FLAG_TC_GD,
+                                                     RT_TRUE,
+                                                     RT_NULL);
+
+            if(wait_result != RT_EOK)
+            {
+                ret = wait_result;
+            }
+            else
+            {
+                /* send a stop condition to I2C bus */
+                i2c_stop_on_bus_gd(gd32_i2c->i2c_periph);
+                /* wait until stop condition generate */
+                wait_result = gd32_timeout_wait_flag(gd32_i2c->i2c_periph,
+                                                     I2C_FLAG_STPDET_GD,
+                                                     RT_TRUE,
+                                                     RT_NULL);
+                if(wait_result != RT_EOK)
+                {
+                    ret = wait_result;
+                }
+                else
+                {
+                    /* clear the STPDET bit */
+                    i2c_flag_clear_gd(gd32_i2c->i2c_periph, I2C_FLAG_STPDET_GD);
+                }
+            }
         }
 #endif
     }

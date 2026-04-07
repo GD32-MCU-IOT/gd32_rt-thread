@@ -28,7 +28,6 @@ extern "C" {
 #define I2C0_TX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C0_TX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C0_TX_DMA_RCU,                     \
 		.channel = I2C0_TX_DMA_CHANNEL,             \
 		.subperiph = I2C0_TX_DMA_SUBPERI,           \
@@ -43,7 +42,6 @@ extern "C" {
 #define I2C0_RX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C0_RX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C0_RX_DMA_RCU,                     \
 		.channel = I2C0_RX_DMA_CHANNEL,             \
 		.subperiph = I2C0_RX_DMA_SUBPERI,           \
@@ -59,7 +57,6 @@ extern "C" {
 #define I2C1_TX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C1_TX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C1_TX_DMA_RCU,                     \
 		.channel = I2C1_TX_DMA_CHANNEL,             \
 		.subperiph = I2C1_TX_DMA_SUBPERI,           \
@@ -74,7 +71,6 @@ extern "C" {
 #define I2C1_RX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C1_RX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C1_RX_DMA_RCU,                     \
 		.channel = I2C1_RX_DMA_CHANNEL,             \
 		.subperiph = I2C1_RX_DMA_SUBPERI,           \
@@ -90,7 +86,6 @@ extern "C" {
 #define I2C2_TX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C2_TX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C2_TX_DMA_RCU,                     \
 		.channel = I2C2_TX_DMA_CHANNEL,             \
 		.subperiph = I2C2_TX_DMA_SUBPERI,           \
@@ -105,7 +100,6 @@ extern "C" {
 #define I2C2_RX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C2_RX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C2_RX_DMA_RCU,                     \
 		.channel = I2C2_RX_DMA_CHANNEL,             \
 		.subperiph = I2C2_RX_DMA_SUBPERI,           \
@@ -121,7 +115,6 @@ extern "C" {
 #define I2C3_TX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C3_TX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C3_TX_DMA_RCU,                     \
 		.channel = I2C3_TX_DMA_CHANNEL,             \
 		.subperiph = I2C3_TX_DMA_SUBPERI,           \
@@ -136,7 +129,6 @@ extern "C" {
 #define I2C3_RX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C3_RX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C3_RX_DMA_RCU,                     \
 		.channel = I2C3_RX_DMA_CHANNEL,             \
 		.subperiph = I2C3_RX_DMA_SUBPERI,           \
@@ -152,7 +144,6 @@ extern "C" {
 #define I2C4_TX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C4_TX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C4_TX_DMA_RCU,                     \
 		.channel = I2C4_TX_DMA_CHANNEL,             \
 		.subperiph = I2C4_TX_DMA_SUBPERI,           \
@@ -167,7 +158,6 @@ extern "C" {
 #define I2C4_RX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C4_RX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C4_RX_DMA_RCU,                     \
 		.channel = I2C4_RX_DMA_CHANNEL,             \
 		.subperiph = I2C4_RX_DMA_SUBPERI,           \
@@ -183,7 +173,6 @@ extern "C" {
 #define I2C5_TX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C5_TX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C5_TX_DMA_RCU,                     \
 		.channel = I2C5_TX_DMA_CHANNEL,             \
 		.subperiph = I2C5_TX_DMA_SUBPERI,           \
@@ -198,7 +187,6 @@ extern "C" {
 #define I2C5_RX_DMA_CONFIG                          \
 	{                                               \
 		.periph = I2C5_RX_DMA_PERIPH,             \
-		.dma_flag = 0,                              \
 		.rcu = I2C5_RX_DMA_RCU,                     \
 		.channel = I2C5_RX_DMA_CHANNEL,             \
 		.subperiph = I2C5_RX_DMA_SUBPERI,           \

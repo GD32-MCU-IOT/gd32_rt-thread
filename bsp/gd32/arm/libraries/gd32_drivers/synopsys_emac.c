@@ -47,6 +47,23 @@ ErrStatus enet_transmit_checksum_config(enet_descriptors_struct *desc, uint32_t 
     return ret;
 }
 
+static rt_int32_t emac_mac_addr_index_get(rt_uint32_t mac_addr)
+{
+    if ((mac_addr & 0x7U) != 0U)
+    {
+        return -1;
+    }
+
+    mac_addr >>= 3;
+
+    if (mac_addr > 3U)
+    {
+        return -1;
+    }
+
+    return (rt_int32_t)mac_addr;
+}
+
 
 static enet_mediamode_enum emac_get_phy_mediemode(uint32_t enet_periph, rt_uint16_t phy_address)
 {
@@ -197,18 +214,60 @@ void EMAC_INT_config(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint32_t EMAC_DMA
 void EMAC_MAC_Addr_config(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint32_t MacAddr, rt_uint8_t *Addr)
 {
     rt_uint32_t value;
+    rt_int32_t index;
+
+    if ((ETHERNET_MAC == RT_NULL) || (Addr == RT_NULL))
+    {
+        return;
+    }
+
+    index = emac_mac_addr_index_get(MacAddr);
+    if (index < 0)
+    {
+        return;
+    }
 
     /* Calculate the selectecd MAC address high register */
     value = ((rt_uint32_t)Addr[5] << 8) | (rt_uint32_t)Addr[4];
     /* Load the selectecd MAC address high register */
-    //(*(volatile rt_uint32_t *) (EMAC_MAC_ADDR_HBASE + MacAddr)) = value;
-    ETHERNET_MAC->MARs[MacAddr].MARH = value;
+    ETHERNET_MAC->MARs[index].MARH = (ETHERNET_MAC->MARs[index].MARH & ~0x0000FFFFU) | value;
     /* Calculate the selectecd MAC address low register */
     value = ((rt_uint32_t)Addr[3] << 24) | ((rt_uint32_t)Addr[2] << 16) | ((rt_uint32_t)Addr[1] << 8) | Addr[0];
 
     /* Load the selectecd MAC address low register */
-    //(*(volatile rt_uint32_t *) (EMAC_MAC_ADDR_LBASE + MacAddr)) = value;
-    ETHERNET_MAC->MARs[MacAddr].MARL = value;
+    ETHERNET_MAC->MARs[index].MARL = value;
+}
+
+/**
+  * Configures the selected MAC address filter.
+  */
+void EMAC_MAC_AddrFilter_config(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint32_t MacAddr, rt_uint32_t FilterMode, rt_uint32_t AddrMask)
+{
+    rt_uint32_t value;
+    rt_int32_t index;
+
+    if (ETHERNET_MAC == RT_NULL)
+    {
+        return;
+    }
+
+    index = emac_mac_addr_index_get(MacAddr);
+    if (index < 0)
+    {
+        return;
+    }
+
+    value = ETHERNET_MAC->MARs[index].MARH;
+    value &= ~(EMAC_MAC_AddressFilter_Source | EMAC_MAC_AddressFilter_Mask);
+    value |= EMAC_MAC_AddressFilter_Enable;
+
+    if (FilterMode == EMAC_MAC_AddressFilter_SA)
+    {
+        value |= EMAC_MAC_AddressFilter_Source;
+    }
+
+    value |= (AddrMask & EMAC_MAC_AddressFilter_Mask);
+    ETHERNET_MAC->MARs[index].MARH = value;
 }
 
 /**

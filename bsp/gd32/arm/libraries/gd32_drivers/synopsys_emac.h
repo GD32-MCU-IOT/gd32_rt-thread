@@ -907,6 +907,10 @@ typedef enet_descriptors_struct EMAC_DMADESCTypeDef;
 #define EMAC_MAC_AddressFilter_SA       ((rt_uint32_t)0x00000000)
 #define EMAC_MAC_AddressFilter_DA       ((rt_uint32_t)0x00000008)
 
+#define EMAC_MAC_AddressFilter_Enable   EMAC_MACA1HR_AE
+#define EMAC_MAC_AddressFilter_Source   EMAC_MACA1HR_SA
+#define EMAC_MAC_AddressFilter_Mask     EMAC_MACA1HR_MBC
+
 #define EMAC_MAC_AddressMask_Byte6      ((rt_uint32_t)0x20000000)  /* Mask MAC Address high reg bits [15:8] */
 #define EMAC_MAC_AddressMask_Byte5      ((rt_uint32_t)0x10000000)  /* Mask MAC Address high reg bits [7:0] */
 #define EMAC_MAC_AddressMask_Byte4      ((rt_uint32_t)0x08000000)  /* Mask MAC Address low reg bits [31:24] */
@@ -1326,6 +1330,7 @@ rt_uint16_t EMAC_PHY_read(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint16_t PHY
 rt_uint32_t EMAC_PHY_write(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint16_t PHYAddress, rt_uint16_t PHYReg, rt_uint16_t PHYValue);
 
 void EMAC_MAC_Addr_config(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint32_t MacAddr, rt_uint8_t *Addr);
+void EMAC_MAC_AddrFilter_config(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint32_t MacAddr, rt_uint32_t FilterMode, rt_uint32_t AddrMask);
 void EMAC_clear_pending(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint32_t EMAC_DMA_IT);
 
 void EMAC_INT_config(struct rt_synopsys_eth * ETHERNET_MAC, rt_uint32_t EMAC_DMA_IT, rt_bool_t NewState);

@@ -1,13 +1,11 @@
 /*
- * Copyright (c) 2006-2023, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2018-10-30     SummerGift   first version
- * 2019-01-05     zylx         modify dma support
- * 2020-05-02     whj4674672   support stm32h7 uart dma
+ * 2026-03-31     RT-Thread    first version for GD32H77x
  */
 
 #ifndef __UART_CONFIG_H__

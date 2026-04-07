@@ -13,6 +13,7 @@ GD32H75E_standard_peripheral/Source/gd32h75e_exti.c
 GD32H75E_standard_peripheral/Source/gd32h75e_misc.c
 GD32H75E_standard_peripheral/Source/gd32h75e_syscfg.c
 GD32H75E_standard_peripheral/Source/gd32h75e_pmu.c
+GD32H75E_standard_peripheral/Source/gd32h75e_dma.c
 ''')
 
 if GetDepend(['RT_USING_SERIAL']):
@@ -40,9 +41,6 @@ if GetDepend(['RT_USING_RTC']):
 if GetDepend(['RT_USING_WDT']):
     src += ['GD32H75E_standard_peripheral/Source/gd32h75e_wwdgt.c']
     src += ['GD32H75E_standard_peripheral/Source/gd32h75e_fwdgt.c']
-
-if GetDepend(['RT_USING_DMA']):
-    src += ['GD32H75E_standard_peripheral/Source/gd32h75e_dma.c']
 
 if GetDepend(['BSP_USING_OSPI']):
     src += ['GD32H75E_standard_peripheral/Source/gd32h75e_ospi.c']

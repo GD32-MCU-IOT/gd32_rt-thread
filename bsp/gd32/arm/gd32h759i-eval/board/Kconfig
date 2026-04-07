@@ -22,9 +22,13 @@ menu "On-chip Peripheral Drivers"
         default y
         select RT_USING_SERIAL
         if BSP_USING_UART
+            config BSP_SERIAL_USING_TX_DMA
+                bool
+
             config BSP_USING_UART_TX_DMA
                 bool
                 select RT_SERIAL_USING_DMA
+                select BSP_SERIAL_USING_TX_DMA
 
             config BSP_USING_UART_RX_DMA
                 bool
@@ -93,6 +97,87 @@ menu "On-chip Peripheral Drivers"
                 depends on BSP_USING_UART3
                 select BSP_USING_UART_TX_DMA
                 default n
+
+            config BSP_USING_UART4
+                bool "Enable UART4"
+                default n
+
+            config BSP_UART4_RX_USING_DMA
+                bool "Enable UART4 RX DMA"
+                depends on BSP_USING_UART4
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART4_TX_USING_DMA
+                bool "Enable UART4 TX DMA"
+                depends on BSP_USING_UART4
+                select BSP_USING_UART_TX_DMA
+                default n
+
+            config BSP_USING_UART5
+                bool "Enable UART5"
+                default n
+
+            config BSP_UART5_RX_USING_DMA
+                bool "Enable UART5 RX DMA"
+                depends on BSP_USING_UART5
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART5_TX_USING_DMA
+                bool "Enable UART5 TX DMA"
+                depends on BSP_USING_UART5
+                select BSP_USING_UART_TX_DMA
+                default n
+
+            config BSP_USING_UART6
+                bool "Enable UART6"
+                default n
+
+            config BSP_UART6_RX_USING_DMA
+                bool "Enable UART6 RX DMA"
+                depends on BSP_USING_UART6
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART6_TX_USING_DMA
+                bool "Enable UART6 TX DMA"
+                depends on BSP_USING_UART6
+                select BSP_USING_UART_TX_DMA
+                default n
+
+            config BSP_USING_UART7
+                bool "Enable UART7"
+                default n
+
+            config BSP_UART7_RX_USING_DMA
+                bool "Enable UART7 RX DMA"
+                depends on BSP_USING_UART7
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART7_TX_USING_DMA
+                bool "Enable UART7 TX DMA"
+                depends on BSP_USING_UART7
+                select BSP_USING_UART_TX_DMA
+                default n
+
+            config BSP_UART_POLL_TX_TIMEOUT_MS
+                int "Polling TX timeout in milliseconds"
+                range 100 10000
+                default 1000
+                help
+                    Timeout value for polling TX operations in milliseconds.
+
+            if BSP_USING_UART_TX_DMA
+                config BSP_UART_DMA_TX_THRESHOLD
+                    int "UART DMA TX minimum transfer length"
+                    range 1 256
+                    default 8
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+            endif
         endif
 
     menuconfig BSP_USING_SPI

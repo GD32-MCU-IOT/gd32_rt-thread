@@ -35,6 +35,16 @@
 #define OSPI_TCK_DELAY_CHAIN_VAL   6U
 #define OSPI_RCK_DELAY_CHAIN_VAL   0x0AU
 
+/* MDMA transfer parameters */
+#define MDMA_BLOCK_SIZE            65536U
+#define MDMA_BUFF_TRANS_LEN        127U
+
+/* DTCM/ITCM address range for bus selection */
+#define DTCM_ADDR_START            (0x20000000U)
+#define DTCM_ADDR_END              (0x21000000U)
+#define ITCM_ADDR_START            (0x00000000U)
+#define ITCM_ADDR_END              (0x01000000U)
+
 static struct gd32_ospi_dev gd32_ospi0_dev;
 
 static struct gd32_ospi ospi0_drv = {
@@ -330,6 +340,129 @@ static void _ospi_psram_memorymapped_enable(struct gd32_ospi *drv, ospi_paramete
 }
 
 /*!
+    \brief      check if address is in TCM range (DTCM or ITCM)
+    \param[in]  addr: address to check
+    \param[out] none
+    \retval     RT_TRUE if in TCM range, RT_FALSE otherwise
+*/
+static rt_bool_t _ospi_addr_is_tcm(uint32_t addr)
+{
+    if ((addr >= DTCM_ADDR_START && addr < DTCM_ADDR_END) ||
+        (addr >= ITCM_ADDR_START && addr < ITCM_ADDR_END))
+    {
+        return RT_TRUE;
+    }
+    return RT_FALSE;
+}
+
+/*!
+    \brief      configure and execute MDMA transfer between RAM and OSPI memory-mapped PSRAM
+    \param[in]  src_addr: source address
+    \param[in]  dst_addr: destination address
+    \param[in]  total_size: total transfer size in bytes
+    \param[out] none
+    \retval     RT_EOK on success, -RT_ERROR on failure
+*/
+static rt_err_t _ospi_mdma_transfer(uint32_t src_addr, uint32_t dst_addr, uint32_t total_size)
+{
+    mdma_parameter_struct mdma_init_struct;
+    mdma_multi_block_parameter_struct block_init_struct;
+    uint32_t block_cnt;
+    uint32_t size_in_block;
+
+    /* calculate block count and size per block */
+    if (total_size <= MDMA_BLOCK_SIZE)
+    {
+        block_cnt = 1;
+        size_in_block = total_size;
+    }
+    else
+    {
+        size_in_block = MDMA_BLOCK_SIZE;
+        block_cnt = total_size / MDMA_BLOCK_SIZE;
+        if (total_size % MDMA_BLOCK_SIZE != 0)
+        {
+            block_cnt++;
+        }
+    }
+
+    /* enable MDMA clock */
+    rcu_periph_clock_enable(RCU_MDMA);
+
+    /* deinitialize MDMA */
+    mdma_deinit();
+
+    /* initialize MDMA parameter structure */
+    mdma_para_struct_init(&mdma_init_struct);
+
+    mdma_init_struct.request          = MDMA_REQUEST_SW;
+    mdma_init_struct.trans_trig_mode  = MDMA_MULTI_BLOCK_TRANSFER;
+    mdma_init_struct.priority         = MDMA_PRIORITY_HIGH;
+    mdma_init_struct.endianness       = MDMA_LITTLE_ENDIANNESS;
+    mdma_init_struct.source_addr      = src_addr;
+    mdma_init_struct.destination_addr = dst_addr;
+
+    /* configure source bus parameters based on address range */
+    if (_ospi_addr_is_tcm(src_addr))
+    {
+        mdma_init_struct.source_bus       = MDMA_SOURCE_AHB_TCM;
+        mdma_init_struct.source_inc       = MDMA_SOURCE_INCREASE_32BIT;
+        mdma_init_struct.source_data_size = MDMA_SOURCE_DATASIZE_32BIT;
+        mdma_init_struct.source_burst     = MDMA_SOURCE_BURST_32BEATS;
+    }
+    else
+    {
+        mdma_init_struct.source_bus       = MDMA_SOURCE_AXI;
+        mdma_init_struct.source_inc       = MDMA_SOURCE_INCREASE_64BIT;
+        mdma_init_struct.source_data_size = MDMA_SOURCE_DATASIZE_64BIT;
+        mdma_init_struct.source_burst     = MDMA_SOURCE_BURST_16BEATS;
+    }
+
+    /* configure destination bus parameters based on address range */
+    if (_ospi_addr_is_tcm(dst_addr))
+    {
+        mdma_init_struct.destination_bus  = MDMA_DESTINATION_AHB_TCM;
+        mdma_init_struct.dest_inc         = MDMA_DESTINATION_INCREASE_32BIT;
+        mdma_init_struct.dest_data_size   = MDMA_DESTINATION_DATASIZE_32BIT;
+        mdma_init_struct.dest_burst       = MDMA_DESTINATION_BURST_32BEATS;
+    }
+    else
+    {
+        mdma_init_struct.destination_bus  = MDMA_DESTINATION_AXI;
+        mdma_init_struct.dest_inc         = MDMA_DESTINATION_INCREASE_64BIT;
+        mdma_init_struct.dest_data_size   = MDMA_DESTINATION_DATASIZE_64BIT;
+        mdma_init_struct.dest_burst       = MDMA_DESTINATION_BURST_16BEATS;
+    }
+
+    mdma_init_struct.data_alignment      = MDMA_DATAALIGN_PKEN;
+    mdma_init_struct.buff_trans_len      = MDMA_BUFF_TRANS_LEN;
+    mdma_init_struct.tbytes_num_in_block = size_in_block;
+    mdma_init_struct.mask_addr           = 0;
+    mdma_init_struct.mask_data           = 0;
+
+    /* configure MDMA channel 0 */
+    mdma_init(MDMA_CH0, &mdma_init_struct);
+
+    /* configure multi-block mode */
+    mdma_multi_block_para_struct_init(&block_init_struct);
+    block_init_struct.block_num = block_cnt - 1;
+    mdma_multi_block_mode_config(MDMA_CH0, size_in_block, &block_init_struct);
+
+    /* start MDMA transfer */
+    mdma_channel_enable(MDMA_CH0);
+    mdma_channel_software_request_enable(MDMA_CH0);
+
+    /* wait for multi-block transfer complete */
+    while (!mdma_flag_get(MDMA_CH0, MDMA_FLAG_MBTCF))
+    {
+    }
+
+    mdma_channel_disable(MDMA_CH0);
+
+    return RT_EOK;
+}
+
+/*!
     \brief      configure OSPI PSRAM with user-specified parameters
     \param[in]  ospi_dev: pointer to OSPI device structure
     \param[in]  config: pointer to configuration structure
@@ -408,6 +541,7 @@ static rt_err_t rt_ospi_open(rt_device_t dev, rt_uint16_t oflag)
     struct gd32_ospi *drv = ospi_dev->gd32_ospi_drv;
 
     rcu_periph_clock_enable(drv->ospi_clk);
+    ospi_enable(drv->ospi_periph);
 
     return RT_EOK;
 }
@@ -471,6 +605,24 @@ static rt_err_t rt_ospi_control(rt_device_t dev, int cmd, void *args)
         /* abort to exit memory-mapped mode */
         ospi_transmission_abort(drv->ospi_periph);
         return RT_EOK;
+    }
+
+    case OSPI_CTRL_MDMA_WRITE:
+    {
+        RT_ASSERT(args != RT_NULL);
+        struct rt_ospi_mdma_transfer *xfer = (struct rt_ospi_mdma_transfer *)args;
+        LOG_D("OSPI MDMA write: src=0x%08X dst=0x%08X size=%d",
+              xfer->src_addr, xfer->dst_addr, xfer->total_size);
+        return _ospi_mdma_transfer(xfer->src_addr, xfer->dst_addr, xfer->total_size);
+    }
+
+    case OSPI_CTRL_MDMA_READ:
+    {
+        RT_ASSERT(args != RT_NULL);
+        struct rt_ospi_mdma_transfer *xfer = (struct rt_ospi_mdma_transfer *)args;
+        LOG_D("OSPI MDMA read: src=0x%08X dst=0x%08X size=%d",
+              xfer->src_addr, xfer->dst_addr, xfer->total_size);
+        return _ospi_mdma_transfer(xfer->src_addr, xfer->dst_addr, xfer->total_size);
     }
 
     default:

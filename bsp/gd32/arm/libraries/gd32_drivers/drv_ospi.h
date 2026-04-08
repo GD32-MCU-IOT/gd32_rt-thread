@@ -25,6 +25,8 @@ extern "C" {
 #define OSPI_CTRL_ADDR_SET        (0x02)
 #define OSPI_CTRL_ENTER_MMAP      (0x03)
 #define OSPI_CTRL_EXIT_MMAP       (0x04)
+#define OSPI_CTRL_MDMA_WRITE      (0x05)
+#define OSPI_CTRL_MDMA_READ       (0x06)
 
 /* OSPI memory mapped base address (GD32H7xx) */
 #define OSPI0_MAPPED_ADDR         (0x90000000U)
@@ -54,6 +56,14 @@ struct gd32_ospi_dev
     struct gd32_ospi *gd32_ospi_drv;
     ospi_parameter_struct ospi_param;
     uint32_t psram_addr;
+};
+
+/* OSPI MDMA transfer parameter structure */
+struct rt_ospi_mdma_transfer
+{
+    uint32_t src_addr;          /* source address (RAM buffer or OSPI mapped address) */
+    uint32_t dst_addr;          /* destination address (OSPI mapped address or RAM buffer) */
+    uint32_t total_size;        /* total transfer size in bytes */
 };
 
 /* OSPI PSRAM configuration structure */

@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2006-2024, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2024-12-20     RT-Thread    first version for GD32H77x UART DMA support
+ * 2026-03-31     RT-Thread    first version for GD32H77x
  */
 
 #ifndef __UART_CONFIG_H__
@@ -26,7 +26,7 @@ extern "C" {
         .rcu      = UART0_RX_DMA_RCU,                               \
         .channel  = UART0_RX_DMA_CHANNEL,                           \
         .request  = UART0_RX_DMA_REQUEST,                           \
-        .dma_irq  = UART0_RX_DMA_IRQ,                               \
+        .irq      = UART0_RX_DMA_IRQ,                               \
     }
 #endif /* UART0_DMA_RX_CONFIG */
 #endif /* BSP_UART0_RX_USING_DMA */
@@ -40,7 +40,7 @@ extern "C" {
         .rcu      = UART0_TX_DMA_RCU,                               \
         .channel  = UART0_TX_DMA_CHANNEL,                           \
         .request  = UART0_TX_DMA_REQUEST,                           \
-        .dma_irq  = UART0_TX_DMA_IRQ,                               \
+        .irq      = UART0_TX_DMA_IRQ,                               \
     }
 #endif /* UART0_DMA_TX_CONFIG */
 #endif /* BSP_UART0_TX_USING_DMA */
@@ -54,7 +54,7 @@ extern "C" {
         .rcu      = UART1_RX_DMA_RCU,                               \
         .channel  = UART1_RX_DMA_CHANNEL,                           \
         .request  = UART1_RX_DMA_REQUEST,                           \
-        .dma_irq  = UART1_RX_DMA_IRQ,                               \
+        .irq      = UART1_RX_DMA_IRQ,                               \
     }
 #endif /* UART1_DMA_RX_CONFIG */
 #endif /* BSP_UART1_RX_USING_DMA */
@@ -68,7 +68,7 @@ extern "C" {
         .rcu      = UART1_TX_DMA_RCU,                               \
         .channel  = UART1_TX_DMA_CHANNEL,                           \
         .request  = UART1_TX_DMA_REQUEST,                           \
-        .dma_irq  = UART1_TX_DMA_IRQ,                               \
+        .irq      = UART1_TX_DMA_IRQ,                               \
     }
 #endif /* UART1_DMA_TX_CONFIG */
 #endif /* BSP_UART1_TX_USING_DMA */
@@ -82,7 +82,7 @@ extern "C" {
         .rcu      = UART2_RX_DMA_RCU,                               \
         .channel  = UART2_RX_DMA_CHANNEL,                           \
         .request  = UART2_RX_DMA_REQUEST,                           \
-        .dma_irq  = UART2_RX_DMA_IRQ,                               \
+        .irq      = UART2_RX_DMA_IRQ,                               \
     }
 #endif /* UART2_DMA_RX_CONFIG */
 #endif /* BSP_UART2_RX_USING_DMA */
@@ -96,7 +96,7 @@ extern "C" {
         .rcu      = UART2_TX_DMA_RCU,                               \
         .channel  = UART2_TX_DMA_CHANNEL,                           \
         .request  = UART2_TX_DMA_REQUEST,                           \
-        .dma_irq  = UART2_TX_DMA_IRQ,                               \
+        .irq      = UART2_TX_DMA_IRQ,                               \
     }
 #endif /* UART2_DMA_TX_CONFIG */
 #endif /* BSP_UART2_TX_USING_DMA */
@@ -110,7 +110,7 @@ extern "C" {
         .rcu      = UART3_RX_DMA_RCU,                               \
         .channel  = UART3_RX_DMA_CHANNEL,                           \
         .request  = UART3_RX_DMA_REQUEST,                           \
-        .dma_irq  = UART3_RX_DMA_IRQ,                               \
+        .irq      = UART3_RX_DMA_IRQ,                               \
     }
 #endif /* UART3_DMA_RX_CONFIG */
 #endif /* BSP_UART3_RX_USING_DMA */
@@ -124,7 +124,7 @@ extern "C" {
         .rcu      = UART3_TX_DMA_RCU,                               \
         .channel  = UART3_TX_DMA_CHANNEL,                           \
         .request  = UART3_TX_DMA_REQUEST,                           \
-        .dma_irq  = UART3_TX_DMA_IRQ,                               \
+        .irq      = UART3_TX_DMA_IRQ,                               \
     }
 #endif /* UART3_DMA_TX_CONFIG */
 #endif /* BSP_UART3_TX_USING_DMA */
@@ -138,7 +138,7 @@ extern "C" {
         .rcu      = UART4_RX_DMA_RCU,                               \
         .channel  = UART4_RX_DMA_CHANNEL,                           \
         .request  = UART4_RX_DMA_REQUEST,                           \
-        .dma_irq  = UART4_RX_DMA_IRQ,                               \
+        .irq      = UART4_RX_DMA_IRQ,                               \
     }
 #endif /* UART4_DMA_RX_CONFIG */
 #endif /* BSP_UART4_RX_USING_DMA */
@@ -152,7 +152,7 @@ extern "C" {
         .rcu      = UART4_TX_DMA_RCU,                               \
         .channel  = UART4_TX_DMA_CHANNEL,                           \
         .request  = UART4_TX_DMA_REQUEST,                           \
-        .dma_irq  = UART4_TX_DMA_IRQ,                               \
+        .irq      = UART4_TX_DMA_IRQ,                               \
     }
 #endif /* UART4_DMA_TX_CONFIG */
 #endif /* BSP_UART4_TX_USING_DMA */
@@ -166,7 +166,7 @@ extern "C" {
         .rcu      = UART5_RX_DMA_RCU,                               \
         .channel  = UART5_RX_DMA_CHANNEL,                           \
         .request  = UART5_RX_DMA_REQUEST,                           \
-        .dma_irq  = UART5_RX_DMA_IRQ,                               \
+        .irq      = UART5_RX_DMA_IRQ,                               \
     }
 #endif /* UART5_DMA_RX_CONFIG */
 #endif /* BSP_UART5_RX_USING_DMA */
@@ -180,7 +180,7 @@ extern "C" {
         .rcu      = UART5_TX_DMA_RCU,                               \
         .channel  = UART5_TX_DMA_CHANNEL,                           \
         .request  = UART5_TX_DMA_REQUEST,                           \
-        .dma_irq  = UART5_TX_DMA_IRQ,                               \
+        .irq      = UART5_TX_DMA_IRQ,                               \
     }
 #endif /* UART5_DMA_TX_CONFIG */
 #endif /* BSP_UART5_TX_USING_DMA */
@@ -194,7 +194,7 @@ extern "C" {
         .rcu      = UART6_RX_DMA_RCU,                               \
         .channel  = UART6_RX_DMA_CHANNEL,                           \
         .request  = UART6_RX_DMA_REQUEST,                           \
-        .dma_irq  = UART6_RX_DMA_IRQ,                               \
+        .irq      = UART6_RX_DMA_IRQ,                               \
     }
 #endif /* UART6_DMA_RX_CONFIG */
 #endif /* BSP_UART6_RX_USING_DMA */
@@ -208,7 +208,7 @@ extern "C" {
         .rcu      = UART6_TX_DMA_RCU,                               \
         .channel  = UART6_TX_DMA_CHANNEL,                           \
         .request  = UART6_TX_DMA_REQUEST,                           \
-        .dma_irq  = UART6_TX_DMA_IRQ,                               \
+        .irq      = UART6_TX_DMA_IRQ,                               \
     }
 #endif /* UART6_DMA_TX_CONFIG */
 #endif /* BSP_UART6_TX_USING_DMA */
@@ -222,7 +222,7 @@ extern "C" {
         .rcu      = UART7_RX_DMA_RCU,                               \
         .channel  = UART7_RX_DMA_CHANNEL,                           \
         .request  = UART7_RX_DMA_REQUEST,                           \
-        .dma_irq  = UART7_RX_DMA_IRQ,                               \
+        .irq      = UART7_RX_DMA_IRQ,                               \
     }
 #endif /* UART7_DMA_RX_CONFIG */
 #endif /* BSP_UART7_RX_USING_DMA */
@@ -236,7 +236,7 @@ extern "C" {
         .rcu      = UART7_TX_DMA_RCU,                               \
         .channel  = UART7_TX_DMA_CHANNEL,                           \
         .request  = UART7_TX_DMA_REQUEST,                           \
-        .dma_irq  = UART7_TX_DMA_IRQ,                               \
+        .irq      = UART7_TX_DMA_IRQ,                               \
     }
 #endif /* UART7_DMA_TX_CONFIG */
 #endif /* BSP_UART7_TX_USING_DMA */

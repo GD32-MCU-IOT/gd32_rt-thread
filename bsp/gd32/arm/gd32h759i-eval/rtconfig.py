@@ -17,10 +17,9 @@ if os.getenv('RTT_ROOT'):
 # EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
 if  CROSS_TOOL == 'gcc':
     PLATFORM    = 'gcc'
-    # Use a safe default path that exists; actual compiler path can be provided via RTT_EXEC_PATH
-    EXEC_PATH   = r'C:/Windows/System32'
+    EXEC_PATH   = r'/usr/bin'
 elif CROSS_TOOL == 'keil':
-    PLATFORM    = 'armcc'
+    PLATFORM    = 'armclang'
     EXEC_PATH   = r'C:/Keil_v5'
 elif CROSS_TOOL == 'iar':
     PLATFORM    = 'iccarm'
@@ -44,7 +43,7 @@ if PLATFORM == 'gcc':
     OBJDUMP = PREFIX + 'objdump'
     OBJCPY = PREFIX + 'objcopy'
 
-    DEVICE = ' -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections'
+    DEVICE = ' -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -DGD32H759'
     CFLAGS = DEVICE + ' -Dgcc'
     AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb '
     LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread.map,-cref,-u,Reset_Handler -T board/linker_scripts/link.ld'
@@ -63,10 +62,10 @@ if PLATFORM == 'gcc':
 
     POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
 
-elif PLATFORM == 'armcc':
+elif PLATFORM == 'armclang':
     # toolchains
-    CC = 'armcc'
-    CXX = 'armcc'
+    CC = 'armclang'
+    CXX = 'armclang'
     AS = 'armasm'
     AR = 'armar'
     LINK = 'armlink'
@@ -76,13 +75,13 @@ elif PLATFORM == 'armcc':
     CFLAGS = '-c ' + DEVICE + ' --apcs=interwork --c99'
     AFLAGS = DEVICE + ' --apcs=interwork '
     LFLAGS = DEVICE + ' --scatter "board\linker_scripts\link.sct" --info sizes --info totals --info unused --info veneers --list rtthread.map --strict'
-    CFLAGS += ' -I' + EXEC_PATH + '/ARM/ARMCC/include'
-    LFLAGS += ' --libpath=' + EXEC_PATH + '/ARM/ARMCC/lib'
+    CFLAGS += ' -I' + EXEC_PATH + '/ARM/ARMCLANG/include'
+    LFLAGS += ' --libpath=' + EXEC_PATH + '/ARM/ARMCLANG/lib'
 
     CFLAGS += ' -D__MICROLIB '
     AFLAGS += ' --pd "__MICROLIB SETA 1" '
     LFLAGS += ' --library_type=microlib '
-    EXEC_PATH += '/ARM/ARMCC/bin/'
+    EXEC_PATH += '/ARM/ARMCLANG/bin/'
 
     if BUILD == 'debug':
         CFLAGS += ' -g -O0'

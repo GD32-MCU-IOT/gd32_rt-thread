@@ -22,7 +22,7 @@ extern "C" {
 #define UART0_RX_DMA_PERIPH              DMA0
 #define UART0_RX_DMA_FLAG                DMA_INTF_FTFIF
 #define UART0_RX_DMA_RCU                 RCU_DMA0
-#define UART0_RX_DMA_CHANNEL             Channel0
+#define UART0_RX_DMA_CHANNEL             DMA_CH0
 #define UART0_RX_DMA_REQUEST             DMA_REQUEST_USART0_RX
 #define UART0_RX_DMA_IRQ                 DMA0_Channel0_IRQn
 #endif
@@ -33,7 +33,7 @@ extern "C" {
 #define UART0_TX_DMA_PERIPH              DMA0
 #define UART0_TX_DMA_FLAG                DMA_INTF_FTFIF
 #define UART0_TX_DMA_RCU                 RCU_DMA0
-#define UART0_TX_DMA_CHANNEL             Channel1
+#define UART0_TX_DMA_CHANNEL             DMA_CH1
 #define UART0_TX_DMA_REQUEST             DMA_REQUEST_USART0_TX
 #define UART0_TX_DMA_IRQ                 DMA0_Channel1_IRQn
 #endif
@@ -44,7 +44,7 @@ extern "C" {
 #define UART1_RX_DMA_PERIPH              DMA0
 #define UART1_RX_DMA_FLAG                DMA_INTF_FTFIF
 #define UART1_RX_DMA_RCU                 RCU_DMA0
-#define UART1_RX_DMA_CHANNEL             Channel2
+#define UART1_RX_DMA_CHANNEL             DMA_CH2
 #define UART1_RX_DMA_REQUEST             DMA_REQUEST_USART1_RX
 #define UART1_TX_DMA_IRQ                 DMA0_Channel2_IRQn
 #endif
@@ -55,7 +55,7 @@ extern "C" {
 #define UART1_TX_DMA_PERIPH              DMA0
 #define UART1_TX_DMA_FLAG                DMA_INTF_FTFIF
 #define UART1_TX_DMA_RCU                 RCU_DMA0
-#define UART1_TX_DMA_CHANNEL             Channel3
+#define UART1_TX_DMA_CHANNEL             DMA_CH3
 #define UART1_TX_DMA_REQUEST             DMA_REQUEST_USART1_TX
 #define UART1_TX_DMA_IRQ                 DMA0_Channel3_IRQn
 #endif
@@ -66,7 +66,7 @@ extern "C" {
 #define UART2_RX_DMA_PERIPH              DMA0
 #define UART2_RX_DMA_FLAG                DMA_INTF_FTFIF
 #define UART2_RX_DMA_RCU                 RCU_DMA0
-#define UART2_RX_DMA_CHANNEL             Channel4
+#define UART2_RX_DMA_CHANNEL             DMA_CH4
 #define UART2_RX_DMA_REQUEST             DMA_REQUEST_USART2_RX
 #define UART2_RX_DMA_IRQ                 DMA0_Channel4_IRQn
 #endif
@@ -77,7 +77,7 @@ extern "C" {
 #define UART2_TX_DMA_PERIPH              DMA0
 #define UART2_TX_DMA_FLAG                DMA_INTF_FTFIF
 #define UART2_TX_DMA_RCU                 RCU_DMA0
-#define UART2_TX_DMA_CHANNEL             Channel5
+#define UART2_TX_DMA_CHANNEL             DMA_CH5
 #define UART2_TX_DMA_REQUEST             DMA_REQUEST_USART2_TX
 #define UART2_TX_DMA_IRQ                 DMA0_Channel5_IRQn
 #endif
@@ -105,8 +105,8 @@ extern "C" {
 #define SPI0_TX_DMA_IRQ                 DMA0_Channel7_IRQn
 #endif
 
-/* DMA1 Channel0 - SPI1_RX */
-#if defined(BSP_SPI1_USING_DMA) && !defined(SPI1_RX_DMA_PERIPH)
+/* DMA1 Channel0 */
+#if defined(BSP_SPI1_RX_USING_DMA) && !defined(SPI1_RX_DMA_PERIPH)
 #define SPI1_DMA_RX_IRQHandler          DMA1_Channel0_IRQHandler
 #define SPI1_RX_DMA_PERIPH              DMA1
 #define SPI1_RX_DMA_FLAG                DMA_INTF_FTFIF
@@ -114,10 +114,18 @@ extern "C" {
 #define SPI1_RX_DMA_CHANNEL             DMA_CH0
 #define SPI1_RX_DMA_REQUEST             DMA_REQUEST_SPI1_RX
 #define SPI1_RX_DMA_IRQ                 DMA1_Channel0_IRQn
+#elif defined(BSP_UART3_RX_USING_DMA) && !defined(UART3_RX_DMA_PERIPH)
+#define UART3_DMA_RX_IRQHandler          DMA1_Channel0_IRQHandler
+#define UART3_RX_DMA_PERIPH              DMA1
+#define UART3_RX_DMA_FLAG                DMA_INTF_FTFIF
+#define UART3_RX_DMA_RCU                 RCU_DMA1
+#define UART3_RX_DMA_CHANNEL             DMA_CH0
+#define UART3_RX_DMA_REQUEST             DMA_REQUEST_UART3_RX
+#define UART3_RX_DMA_IRQ                 DMA1_Channel0_IRQn
 #endif
 
-/* DMA1 Channel1 - SPI1_TX */
-#if defined(BSP_SPI1_USING_DMA) && !defined(SPI1_TX_DMA_PERIPH)
+/* DMA1 Channel1 */
+#if defined(BSP_SPI1_TX_USING_DMA) && !defined(SPI1_TX_DMA_PERIPH)
 #define SPI1_DMA_TX_IRQHandler          DMA1_Channel1_IRQHandler
 #define SPI1_TX_DMA_PERIPH              DMA1
 #define SPI1_TX_DMA_FLAG                DMA_INTF_FTFIF
@@ -125,6 +133,14 @@ extern "C" {
 #define SPI1_TX_DMA_CHANNEL             DMA_CH1
 #define SPI1_TX_DMA_REQUEST             DMA_REQUEST_SPI1_TX
 #define SPI1_TX_DMA_IRQ                 DMA1_Channel1_IRQn
+#elif defined(BSP_UART3_TX_USING_DMA) && !defined(UART3_TX_DMA_PERIPH)
+#define UART3_DMA_TX_IRQHandler          DMA1_Channel1_IRQHandler
+#define UART3_TX_DMA_PERIPH              DMA1
+#define UART3_TX_DMA_FLAG                DMA_INTF_FTFIF
+#define UART3_TX_DMA_RCU                 RCU_DMA1
+#define UART3_TX_DMA_CHANNEL             DMA_CH1
+#define UART3_TX_DMA_REQUEST             DMA_REQUEST_UART3_TX
+#define UART3_TX_DMA_IRQ                 DMA1_Channel1_IRQn
 #endif
 
 /* DMA1 Channel2 - SPI2_RX */

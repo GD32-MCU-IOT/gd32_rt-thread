@@ -736,11 +736,16 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         static rt_uint8_t dummy_tx = 0xFF;
         static rt_uint8_t dummy_rx = 0;
         
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
         /* Cache-aligned DMA buffers (used when original buffers are not 32-byte aligned) */
         void *dma_tx_buf = RT_NULL;
         void *dma_rx_buf = RT_NULL;
         const rt_uint8_t *dma_send_ptr = send_ptr;
         rt_uint8_t *dma_recv_ptr = recv_ptr;
+#else
+        const rt_uint8_t *dma_send_ptr = send_ptr;
+        rt_uint8_t *dma_recv_ptr = recv_ptr;
+#endif
         
         LOG_D("spi DMA transfer start: %d", size);
 
@@ -749,10 +754,12 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         spi_current_data_num_config(spi_periph, size);
 #endif
 
-        /* DCache coherency: ensure DMA buffers are 32-byte cache-line aligned */
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+        /* DCache coherency: ensure DMA buffers are 32-byte cache-line aligned.
+         * Only needed for MCUs with DCache (H7xx series). */
         if (send_ptr != RT_NULL)
         {
-            if (RT_IS_ALIGN((rt_uint32_t)send_ptr, 32))
+            if (RT_IS_ALIGN((rt_uint32_t)send_ptr, 32) && RT_IS_ALIGN(size, 32))
             {
                 dma_send_ptr = send_ptr;
             }
@@ -792,6 +799,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 dma_recv_ptr = (rt_uint8_t *)dma_rx_buf;
             }
         }
+#endif /* H7xx DCache */
         
         /* Configure RX DMA */
         if (spi_device->dma_rx != RT_NULL)
@@ -874,8 +882,10 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
             {
 				LOG_E("%s DMA transfer timeout", spi_device->bus_name);
                 gd32_spi_dma_cleanup(spi_device, spi_periph);
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
                 if (dma_tx_buf != RT_NULL) rt_free_align(dma_tx_buf);
                 if (dma_rx_buf != RT_NULL) rt_free_align(dma_rx_buf);
+#endif
                 ret = -RT_EIO;
                 goto _exit;
             }
@@ -886,6 +896,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         /* Disable DMA and clear flags */
         gd32_spi_dma_cleanup(spi_device, spi_periph);
 
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
         /* DCache coherency: invalidate RX buffer and copy back if re-aligned.
          * Must invalidate full cache lines (32 bytes) to avoid corrupting
          * adjacent heap metadata when size is not cache-line aligned. */
@@ -907,6 +918,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         {
             rt_free_align(dma_rx_buf);
         }
+#endif /* H7xx DCache */
         
         LOG_D("spi DMA transfer finish");
     }

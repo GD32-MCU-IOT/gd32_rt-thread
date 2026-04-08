@@ -1,0 +1,11 @@
+Import('RTT_ROOT')
+Import('rtconfig')
+from building import *
+
+cwd = GetCurrentDir()
+CPPPATH = [cwd + '/GD32M53x_standard_peripheral/Include']
+src = Glob('GD32M53x_standard_peripheral/Source/*.c')
+
+group = DefineGroup('Libraries', src, depend = ['SOC_SERIES_GD32M53x'], CPPPATH = CPPPATH)
+
+Return('group')

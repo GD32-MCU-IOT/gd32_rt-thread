@@ -46,7 +46,7 @@ extern "C" {
 #define UART1_RX_DMA_RCU                 RCU_DMA0
 #define UART1_RX_DMA_CHANNEL             DMA_CH2
 #define UART1_RX_DMA_REQUEST             DMA_REQUEST_USART1_RX
-#define UART1_TX_DMA_IRQ                 DMA0_Channel2_IRQn
+#define UART1_RX_DMA_IRQ                 DMA0_Channel2_IRQn
 #endif
 
 /* DMA0 Channel3 */

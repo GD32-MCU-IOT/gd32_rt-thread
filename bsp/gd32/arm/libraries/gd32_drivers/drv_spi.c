@@ -47,10 +47,36 @@
 #define gd32_dma_deinit(periph, ch)                 dma_deinit(periph, ch)
 #endif
 
+#ifndef BSP_SPI_XFER_TIMEOUT
+#define BSP_SPI_XFER_TIMEOUT 1000
+#endif
+
 #if defined(BSP_USING_SPI0) || defined(BSP_USING_SPI1) || defined(BSP_USING_SPI2) || defined(BSP_USING_SPI3) || defined(BSP_USING_SPI4) || defined(BSP_USING_SPI5)
 #define LOG_TAG              "drv.spi"
 
 #include <rtdbg.h>
+
+/**
+ * @brief Wait for SPI flag with timeout
+ * @param periph SPI peripheral
+ * @param flag   SPI flag to wait for
+ * @retval RT_EOK on success, -RT_ETIMEOUT on timeout
+ */
+rt_inline rt_err_t gd32_spi_wait_flag(uint32_t periph, uint32_t flag)
+{
+    rt_tick_t timeout = rt_tick_from_millisecond(BSP_SPI_XFER_TIMEOUT);
+    rt_tick_t start = rt_tick_get();
+
+    while (RESET == spi_i2s_flag_get(periph, flag))
+    {
+        if (rt_tick_get() - start > timeout)
+        {
+            LOG_E("spi wait flag 0x%x timeout", flag);
+            return -RT_ETIMEOUT;
+        }
+    }
+    return RT_EOK;
+}
 
 #ifdef BSP_USING_SPI0
 static struct rt_spi_bus spi_bus0;
@@ -735,26 +761,19 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         /* Prepare dummy buffer for TX or RX only transfers */
         static rt_uint8_t dummy_tx = 0xFF;
         static rt_uint8_t dummy_rx = 0;
-        
+        const rt_uint8_t *dma_send_ptr = send_ptr;
+        rt_uint8_t *dma_recv_ptr = recv_ptr;
+
+        LOG_D("spi DMA transfer start: %d", size);
+
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
         /* Cache-aligned DMA buffers (used when original buffers are not 32-byte aligned) */
         void *dma_tx_buf = RT_NULL;
         void *dma_rx_buf = RT_NULL;
-        const rt_uint8_t *dma_send_ptr = send_ptr;
-        rt_uint8_t *dma_recv_ptr = recv_ptr;
-#else
-        const rt_uint8_t *dma_send_ptr = send_ptr;
-        rt_uint8_t *dma_recv_ptr = recv_ptr;
-#endif
-        
-        LOG_D("spi DMA transfer start: %d", size);
 
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
         /* H7xx requires setting the data frame number before DMA transfer */
         spi_current_data_num_config(spi_periph, size);
-#endif
 
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
         /* DCache coherency: ensure DMA buffers are 32-byte cache-line aligned.
          * Only needed for MCUs with DCache (H7xx series). */
         if (send_ptr != RT_NULL)
@@ -855,7 +874,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
 #endif
         
         /* Wait for transfer complete with timeout */
-        rt_tick_t timeout = rt_tick_from_millisecond(BSP_SPI_DMA_TIMEOUT);
+        rt_tick_t timeout = rt_tick_from_millisecond(BSP_SPI_XFER_TIMEOUT);
         rt_tick_t start = rt_tick_get();
         
         while (1)
@@ -946,18 +965,34 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 /* Wait until the transmit buffer is empty */
                 #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
                 spi_master_transfer_start(spi_periph, SPI_TRANS_START);
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_TP));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_TP) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 #else
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_TBE));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_TBE) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 #endif
                 /* Send the byte */
                 spi_i2s_data_transmit(spi_periph, data);
 
                 /* Wait until a data is received */
                 #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RP));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_RP) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 #else
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RBNE));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_RBNE) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 #endif
                 /* Get the received data */
                 data = spi_i2s_data_receive(spi_periph);
@@ -987,18 +1022,34 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 /* Wait until the transmit buffer is empty */
                 #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
                 spi_master_transfer_start(spi_periph, SPI_TRANS_START);
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_TP));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_TP) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 #else
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_TBE));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_TBE) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 #endif
                 /* Send the byte */
                 spi_i2s_data_transmit(spi_periph, data);
 
                 /* Wait until a data is received */
                 #if defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32H77x)
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RP));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_RP) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 #else
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RBNE));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_RBNE) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 #endif
                 /* Get the received data */
                 data = spi_i2s_data_receive(spi_periph);
@@ -1027,12 +1078,20 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 }
 
                 /* Wait until the transmit buffer is empty */
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_TP));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_TP) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 /* Send the byte */
                 spi_i2s_data_transmit(spi_periph, data);
 
                 /* Wait until a data is received */
-                while(RESET == spi_i2s_flag_get(spi_periph, SPI_FLAG_RP));
+                if (gd32_spi_wait_flag(spi_periph, SPI_FLAG_RP) != RT_EOK)
+                {
+                    ret = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 /* Get the received data */
                 data = spi_i2s_data_receive(spi_periph);
 

@@ -194,6 +194,14 @@ menu "On-chip Peripheral Drivers"
             config BSP_USING_SPI_DMA
                 bool
 
+            config BSP_SPI_XFER_TIMEOUT
+                int "SPI transfer timeout (ms)"
+                range 1 60000
+                default 1000
+                help
+                    Maximum wait time for a SPI transfer to complete.
+                    Applies to both DMA and polling transfer modes.
+
             config BSP_USING_SPI0
                 bool "Enable SPI0 BUS"
                 default n
@@ -262,14 +270,6 @@ menu "On-chip Peripheral Drivers"
                     help
                         Transfers smaller than this will use polling mode.
                         DMA mode is used when buffer length is greater than or equal to this value.
-
-                config BSP_SPI_DMA_TIMEOUT
-                    int "SPI DMA transfer timeout (ms)"
-                    range 1 60000
-                    default 1000
-                    help
-                        Maximum wait time for a SPI DMA transfer to complete.
-                        The driver reports a timeout once this limit is reached.
             endif
         endif
 

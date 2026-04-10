@@ -187,18 +187,19 @@ void gd32_spi_init(struct gd32_spi *gd32_spi)
     case SPI4:
         /* enable SPI clock */
         rcu_periph_clock_enable(RCU_GPIOF);
+        rcu_periph_clock_enable(RCU_GPIOH);
 
         /*GPIO pin configuration*/
-        gpio_af_set(GPIOF, GPIO_AF_5, GPIO_PIN_7);
-        gpio_af_set(GPIOF, GPIO_AF_5, GPIO_PIN_8);
+        gpio_af_set(GPIOH, GPIO_AF_5, GPIO_PIN_6);
+        gpio_af_set(GPIOH, GPIO_AF_5, GPIO_PIN_7);
         gpio_af_set(GPIOF, GPIO_AF_5, GPIO_PIN_9);
 
-        gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_7);
-        gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_8);
+        gpio_mode_set(GPIOH, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_6);
+        gpio_mode_set(GPIOH, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_7);
         gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_9);
 
-        gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_7);
-        gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_8);
+        gpio_output_options_set(GPIOH, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_6);
+        gpio_output_options_set(GPIOH, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_7);
         gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, GPIO_PIN_9);
         break;
 #endif

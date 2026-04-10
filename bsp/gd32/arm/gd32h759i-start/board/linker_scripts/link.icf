@@ -16,7 +16,7 @@ define symbol __ICFEDIT_size_heap__   = 0x2000;
 export symbol __ICFEDIT_region_RAM_end__;
 
 define symbol __region_DTCMRAM_start__ = 0x20000000;
-define symbol __region_DTCMRAM_end__   = 0x2000FFFF;
+define symbol __region_DTCMRAM_end__   = 0x2001FFFF;  /* DTCM RAM 128KB */
 
 define symbol __region_ITCMRAM_start__ = 0x00000000;
 define symbol __region_ITCMRAM_end__   = 0x0000FFFF;
@@ -42,3 +42,4 @@ place in ROM_region   { readonly };
 place in RAM_region   { readwrite,
                         block CSTACK, block HEAP };
 place in DTCMRAM_region  { section .dtcmram };
+place in ITCMRAM_region  { section .itcmram };

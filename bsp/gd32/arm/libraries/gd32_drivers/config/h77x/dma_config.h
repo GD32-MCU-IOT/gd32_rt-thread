@@ -1,4 +1,3 @@
-      
 /*
  * Copyright (c) 2006-2024, RT-Thread Development Team
  *
@@ -312,5 +311,3 @@ extern "C" {
 #endif
 
 #endif /* __DMA_CONFIG_H__ */
-
-    

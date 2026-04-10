@@ -262,107 +262,86 @@ menu "On-chip Peripheral Drivers"
         default n
         select RT_USING_SPI
         if BSP_USING_SPI
-            config BSP_USING_SPI_TX_DMA
-                bool
+            config BSP_USING_SPI_DMA
+                bool                
 
-            config BSP_USING_SPI_RX_DMA
-                bool
+            config BSP_SPI_XFER_TIMEOUT
+                int "SPI transfer timeout (ms)"
+                range 1 60000
+                default 1000
+                help
+                    Maximum wait time for a SPI transfer to complete.
+                    Applies to both DMA and polling transfer modes.
 
             config BSP_USING_SPI0
                 bool "Enable SPI0 BUS"
                 default n
-                
-            config BSP_SPI0_TX_USING_DMA
-                bool "Enable SPI0 TX DMA"
+
+            config BSP_SPI0_USING_DMA
+                bool "Enable SPI0 DMA"
                 depends on BSP_USING_SPI0
-                select BSP_USING_SPI_TX_DMA
-                default n
-                
-            config BSP_SPI0_RX_USING_DMA
-                bool "Enable SPI0 RX DMA"  
-                depends on BSP_USING_SPI0
-                select BSP_USING_SPI_RX_DMA
+                select BSP_USING_SPI_DMA
                 default n
 
             config BSP_USING_SPI1
                 bool "Enable SPI1 BUS"
                 default n
-                
-            config BSP_SPI1_TX_USING_DMA
-                bool "Enable SPI1 TX DMA"
+
+            config BSP_SPI1_USING_DMA
+                bool "Enable SPI1 DMA"
                 depends on BSP_USING_SPI1
-                select BSP_USING_SPI_TX_DMA
-                default n
-                
-            config BSP_SPI1_RX_USING_DMA
-                bool "Enable SPI1 RX DMA"
-                depends on BSP_USING_SPI1
-                select BSP_USING_SPI_RX_DMA
+                select BSP_USING_SPI_DMA
                 default n
 
             config BSP_USING_SPI2
                 bool "Enable SPI2 BUS"
                 default n
-                
-            config BSP_SPI2_TX_USING_DMA
-                bool "Enable SPI2 TX DMA"
+
+            config BSP_SPI2_USING_DMA
+                bool "Enable SPI2 DMA"
                 depends on BSP_USING_SPI2
-                select BSP_USING_SPI_TX_DMA
-                default n
-                
-            config BSP_SPI2_RX_USING_DMA
-                bool "Enable SPI2 RX DMA"
-                depends on BSP_USING_SPI2
-                select BSP_USING_SPI_RX_DMA
+                select BSP_USING_SPI_DMA
                 default n
 
             config BSP_USING_SPI3
                 bool "Enable SPI3 BUS"
                 default n
-                
-            config BSP_SPI3_TX_USING_DMA
-                bool "Enable SPI3 TX DMA"
+
+            config BSP_SPI3_USING_DMA
+                bool "Enable SPI3 DMA"
                 depends on BSP_USING_SPI3
-                select BSP_USING_SPI_TX_DMA
-                default n
-                
-            config BSP_SPI3_RX_USING_DMA
-                bool "Enable SPI3 RX DMA"
-                depends on BSP_USING_SPI3
-                select BSP_USING_SPI_RX_DMA
+                select BSP_USING_SPI_DMA
                 default n
 
             config BSP_USING_SPI4
                 bool "Enable SPI4 BUS"
                 default n
-                
-            config BSP_SPI4_TX_USING_DMA
-                bool "Enable SPI4 TX DMA"
+
+            config BSP_SPI4_USING_DMA
+                bool "Enable SPI4 DMA"
                 depends on BSP_USING_SPI4
-                select BSP_USING_SPI_TX_DMA
-                default n
-                
-            config BSP_SPI4_RX_USING_DMA
-                bool "Enable SPI4 RX DMA"
-                depends on BSP_USING_SPI4
-                select BSP_USING_SPI_RX_DMA
+                select BSP_USING_SPI_DMA
                 default n
 
             config BSP_USING_SPI5
                 bool "Enable SPI5 BUS"
                 default n
-                
-            config BSP_SPI5_TX_USING_DMA
-                bool "Enable SPI5 TX DMA"
+
+            config BSP_SPI5_USING_DMA
+                bool "Enable SPI5 DMA"
                 depends on BSP_USING_SPI5
-                select BSP_USING_SPI_TX_DMA
+                select BSP_USING_SPI_DMA
                 default n
-                
-            config BSP_SPI5_RX_USING_DMA
-                bool "Enable SPI5 RX DMA"
-                depends on BSP_USING_SPI5
-                select BSP_USING_SPI_RX_DMA
-                default n
+
+            if BSP_USING_SPI_DMA
+                config BSP_SPI_DMA_TRANS_MIN_LEN
+                    int "SPI DMA minimum transfer length"
+                    range 4 65535
+                    default 16
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+            endif
         endif
 
     menuconfig BSP_USING_I2C

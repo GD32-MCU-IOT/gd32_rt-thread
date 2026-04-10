@@ -44,6 +44,7 @@ struct dma_config
                                                 .rcu        = RCU_DMA##dmax,                    \
                                                 .request    = (uint32_t)(reqx),                 \
                                                 .irq        = DMA##dmax##_Channel##chx##_IRQn,  \
+                                                .data_width = DMA_PERIPH_WIDTH_8BIT,            \
                                             }
 
 struct dma_config
@@ -54,6 +55,7 @@ struct dma_config
     dma_channel_enum channel;
     uint32_t request;
     IRQn_Type irq;
+    uint32_t data_width;
 };
 
 #else

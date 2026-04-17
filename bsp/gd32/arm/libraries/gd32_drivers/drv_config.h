@@ -25,6 +25,7 @@ extern "C" {
 #include "config/f527/dma_config.h"
 #include "config/f527/uart_config.h"
 #include "config/f527/spi_config.h"
+#include "config/f527/i2c_config.h"
 #elif defined(SOC_SERIES_GD32H7xx)
 #include "config/h7xx/dma_config.h"
 #include "config/h7xx/uart_config.h"

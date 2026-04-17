@@ -444,7 +444,13 @@
 #define BSP_SPI_DMA_TRANS_MIN_LEN 16
 #define BSP_SPI_XFER_TIMEOUT 1000
 #define BSP_USING_I2C
+#define BSP_USING_I2C_TX_DMA
+#define BSP_USING_I2C_RX_DMA
+#define BSP_I2C_DMA_TIMEOUT 1000
+#define BSP_I2C_DMA_TRANS_MIN_LEN 4
 #define BSP_USING_HARD_I2C0
+#define BSP_I2C0_TX_USING_DMA
+#define BSP_I2C0_RX_USING_DMA
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

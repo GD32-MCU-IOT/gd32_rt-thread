@@ -25,7 +25,7 @@ extern "C" {
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx)
+ && !defined(SOC_SERIES_GD32F5xx) 
 struct gd32_i2c_bus
 {
     uint32_t i2c_periph;             /* Todo: 3bits */
@@ -50,6 +50,7 @@ struct gd32_i2c_bus
 
 #if defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)
 #include "drv_dma.h"
+#include "drv_config.h"
 #endif
 
 struct gd32_i2c_bus

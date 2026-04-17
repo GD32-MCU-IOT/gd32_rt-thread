@@ -23,13 +23,13 @@
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
 
 // <o> Internal SRAM memory size[Kbytes] <8-512>
-//  <i>Default: 448
+//  <i>Default: 512
 #ifdef __ICCARM__
 // Use *.icf ram symbal, to avoid hardcode.
 extern char __ICFEDIT_region_RAM_end__;
 #define GD32_SRAM_END          &__ICFEDIT_region_RAM_end__
 #else
-#define GD32_SRAM_SIZE         448
+#define GD32_SRAM_SIZE         512
 #define GD32_SRAM_END          (0x20000000 + GD32_SRAM_SIZE * 1024)
 #endif
 
@@ -45,6 +45,24 @@ extern int __bss_end;
 #endif
 
 #define HEAP_END          GD32_SRAM_END
+
+#if defined(BSP_I2C0_TX_USING_DMA) && !defined(I2C0_TX_DMA_INSTANCE)
+#define I2C0_DMA_TX_IRQHandler         DMA0_Channel6_IRQHandler
+#define I2C0_TX_DMA_RCC                RCU_DMA0
+#define I2C0_TX_DMA_INSTANCE           DMA0
+#define I2C0_TX_DMA_CHANNEL            DMA_CH6
+#define I2C0_TX_DMA_IRQ                DMA0_Channel6_IRQn
+#define I2C0_TX_DMA_SUBPERI            DMA_SUBPERI1
+#endif
+
+#if defined(BSP_I2C0_RX_USING_DMA) && !defined(I2C0_RX_DMA_INSTANCE)
+#define I2C0_DMA_RX_IRQHandler         DMA0_Channel0_IRQHandler
+#define I2C0_RX_DMA_RCC                RCU_DMA0
+#define I2C0_RX_DMA_INSTANCE           DMA0
+#define I2C0_RX_DMA_CHANNEL            DMA_CH0
+#define I2C0_RX_DMA_IRQ                DMA0_Channel0_IRQn
+#define I2C0_RX_DMA_SUBPERI            DMA_SUBPERI1
+#endif
 
 #ifdef BSP_USING_SPI_DMA
 #if defined(BSP_SPI5_USING_DMA) && !defined(SPI5_TX_DMA_PERIPH)

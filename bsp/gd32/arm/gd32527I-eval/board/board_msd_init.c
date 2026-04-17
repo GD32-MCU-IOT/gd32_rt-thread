@@ -12,6 +12,9 @@
 #include <rthw.h>
 #include <rtthread.h>
 #include <board.h>
+#include "drv_hard_i2c.h"
+#include "drv_spi.h"
+#include "drv_usart.h"
 
 #ifdef RT_USING_I2C
 /**
@@ -51,6 +54,7 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
 #endif
 #ifdef BSP_USING_HARD_I2C3
     case I2C3:
+        /* I2C3: SCL=PF14, SDA=PF15, AF4 */
         rcu_periph_clock_enable(RCU_GPIOF);
         gpio_af_set(GPIOF, GPIO_AF_4, GPIO_PIN_14 | GPIO_PIN_15);
         gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_14 | GPIO_PIN_15);
@@ -59,18 +63,20 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
 #endif
 #ifdef BSP_USING_HARD_I2C4
     case I2C4:
-        rcu_periph_clock_enable(RCU_GPIOG);
-        gpio_af_set(GPIOG, GPIO_AF_6, GPIO_PIN_7 | GPIO_PIN_8);
-        gpio_mode_set(GPIOG, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_7 | GPIO_PIN_8);
-        gpio_output_options_set(GPIOG, GPIO_OTYPE_OD, GPIO_OSPEED_MAX, GPIO_PIN_7 | GPIO_PIN_8);
+        /* I2C4 alternate pins: SCL=PF1, SDA=PF0, AF4 */
+        rcu_periph_clock_enable(RCU_GPIOF);
+        gpio_af_set(GPIOF, GPIO_AF_4, GPIO_PIN_0 | GPIO_PIN_1);
+        gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_0 | GPIO_PIN_1);
+        gpio_output_options_set(GPIOF, GPIO_OTYPE_OD, GPIO_OSPEED_MAX, GPIO_PIN_0 | GPIO_PIN_1);
         break;
 #endif
 #ifdef BSP_USING_HARD_I2C5
     case I2C5:
-        rcu_periph_clock_enable(RCU_GPIOH);
-        gpio_af_set(GPIOH, GPIO_AF_4, GPIO_PIN_14 | GPIO_PIN_15);
-        gpio_mode_set(GPIOH, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_14 | GPIO_PIN_15);
-        gpio_output_options_set(GPIOH, GPIO_OTYPE_OD, GPIO_OSPEED_MAX, GPIO_PIN_14 | GPIO_PIN_15);
+        /* I2C5: SCL=PF11, SDA=PF12, AF4 */
+        rcu_periph_clock_enable(RCU_GPIOF);
+        gpio_af_set(GPIOF, GPIO_AF_4, GPIO_PIN_11 | GPIO_PIN_12);
+        gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_11 | GPIO_PIN_12);
+        gpio_output_options_set(GPIOF, GPIO_OTYPE_OD, GPIO_OSPEED_MAX, GPIO_PIN_11 | GPIO_PIN_12);
         break;
 #endif
     default:

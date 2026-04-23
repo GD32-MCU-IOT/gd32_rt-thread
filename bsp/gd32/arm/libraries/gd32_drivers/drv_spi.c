@@ -17,6 +17,7 @@
 
 #define SPI0                            SPI
 #define RCU_SPI0                        RCU_SPI
+#define SPI0_IRQn                       SPI_IRQn
 
 #define spi_i2s_flag_get(periph, flag)          spi_flag_get(flag)
 #define spi_i2s_data_transmit(periph, data)     spi_data_transmit(data)
@@ -100,7 +101,7 @@ static struct rt_spi_bus spi_bus5;
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx)
+ && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -464,7 +465,7 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
 {
     dma_single_data_parameter_struct dma_init_struct;
     uint32_t spi_periph = spi_device->spi_periph;
-    
+
     /* Enable DMA clock */
     if (spi_device->dma_tx != RT_NULL && spi_device->dma_tx->periph == DMA0)
     {
@@ -495,33 +496,32 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     dma_init_struct.priority = DMA_PRIORITY_HIGH;
     dma_init_struct.memory0_addr = 0;
     dma_init_struct.number = 0;
-    
+
     /* RX DMA configuration */
     if (spi_device->dma_rx != RT_NULL)
     {
         gd32_dma_deinit(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
-        
+
         dma_init_struct.periph_memory_width = spi_device->dma_rx->data_width;
         dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
         dma_init_struct.periph_addr = (uint32_t)&SPI_RXDATA_REG(spi_periph);
         gd32_dma_request_config(&dma_init_struct, spi_device->dma_rx);
-        
+
         dma_single_data_mode_init(spi_device->dma_rx->periph, spi_device->dma_rx->channel, &dma_init_struct);
         gd32_dma_subperiph_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, spi_device->dma_rx);
         dma_circulation_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
         dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
     }
-    
+
     /* TX DMA configuration */
     if (spi_device->dma_tx != RT_NULL)
     {
         gd32_dma_deinit(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
-        
+
         dma_init_struct.periph_memory_width = spi_device->dma_tx->data_width;
         dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
         dma_init_struct.periph_addr = (uint32_t)&SPI_TXDATA_REG(spi_periph);
         gd32_dma_request_config(&dma_init_struct, spi_device->dma_tx);
-        
         dma_single_data_mode_init(spi_device->dma_tx->periph, spi_device->dma_tx->channel, &dma_init_struct);
         gd32_dma_subperiph_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, spi_device->dma_tx);
         dma_circulation_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
@@ -567,7 +567,7 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
 
     /* Call board-level SPI GPIO initialization */
     gd32_spi_init(spi_device);
-    
+
 #if defined(BSP_USING_SPI_DMA)
     /* Call board-level DMA initialization if DMA is enabled */
     if (spi_device->dma_tx != RT_NULL || spi_device->dma_rx != RT_NULL)
@@ -757,7 +757,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         const rt_uint8_t * send_ptr = message->send_buf;
         rt_uint8_t * recv_ptr = message->recv_buf;
         rt_uint32_t size = message->length;
-        
+
         /* Prepare dummy buffer for TX or RX only transfers */
         static rt_uint8_t dummy_tx = 0xFF;
         static rt_uint8_t dummy_rx = 0;
@@ -797,7 +797,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
             }
             rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, (void *)dma_send_ptr, RT_ALIGN(size, 32));
         }
-        
+
         if (recv_ptr != RT_NULL)
         {
             if (RT_IS_ALIGN((rt_uint32_t)recv_ptr, 32) && RT_IS_ALIGN(size, 32))
@@ -819,49 +819,49 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
             }
         }
 #endif /* H7xx DCache */
-        
+
         /* Configure RX DMA */
         if (spi_device->dma_rx != RT_NULL)
         {
             dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
-            
+
             if (recv_ptr != RT_NULL)
             {
-                dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, 
+                dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel,
                                          DMA_MEMORY_0, (uint32_t)dma_recv_ptr);
                 dma_memory_address_generation_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_MEMORY_INCREASE_ENABLE);
             }
             else
             {
-                dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, 
+                dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel,
                                          DMA_MEMORY_0, (uint32_t)&dummy_rx);
                 dma_memory_address_generation_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_MEMORY_INCREASE_DISABLE);
             }
-            
+
             dma_transfer_number_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, size);
             dma_interrupt_enable(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_CHXCTL_FTFIE);
             dma_channel_enable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
             spi_dma_enable(spi_periph, SPI_DMA_RECEIVE);
         }
-        
+
         /* Configure TX DMA */
         if (spi_device->dma_tx != RT_NULL)
         {
             dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
-            
+
             if (send_ptr != RT_NULL)
             {
-                dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, 
+                dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel,
                                          DMA_MEMORY_0, (uint32_t)dma_send_ptr);
                 dma_memory_address_generation_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_MEMORY_INCREASE_ENABLE);
             }
             else
             {
-                dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, 
+                dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel,
                                          DMA_MEMORY_0, (uint32_t)&dummy_tx);
                 dma_memory_address_generation_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_MEMORY_INCREASE_DISABLE);
             }
-            
+
             dma_transfer_number_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, size);
             dma_interrupt_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_CHXCTL_FTFIE);
             dma_channel_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
@@ -872,31 +872,31 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         /* H7xx requires explicit master transfer start */
         spi_master_transfer_start(spi_periph, SPI_TRANS_START);
 #endif
-        
+
         /* Wait for transfer complete with timeout */
         rt_tick_t timeout = rt_tick_from_millisecond(BSP_SPI_XFER_TIMEOUT);
         rt_tick_t start = rt_tick_get();
-        
+
         while (1)
         {
             rt_bool_t tx_done = RT_TRUE;
             rt_bool_t rx_done = RT_TRUE;
-            
+
             if (spi_device->dma_tx != RT_NULL)
             {
                 tx_done = (dma_flag_get(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_FLAG_FTF) == SET);
             }
-            
+
             if (spi_device->dma_rx != RT_NULL)
             {
                 rx_done = (dma_flag_get(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_FLAG_FTF) == SET);
             }
-            
+
             if (tx_done && rx_done)
             {
                 break;
             }
-            
+
             if (rt_tick_get() - start > timeout)
             {
 				LOG_E("%s DMA transfer timeout", spi_device->bus_name);
@@ -908,7 +908,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 ret = -RT_EIO;
                 goto _exit;
             }
-            
+
             rt_thread_mdelay(1);
         }
 
@@ -927,7 +927,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
                 rt_memcpy(recv_ptr, dma_recv_ptr, size);
             }
         }
-        
+
         /* Free aligned temporary buffers */
         if (dma_tx_buf != RT_NULL)
         {
@@ -938,7 +938,7 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
             rt_free_align(dma_rx_buf);
         }
 #endif /* H7xx DCache */
-        
+
         LOG_D("spi DMA transfer finish");
     }
     else

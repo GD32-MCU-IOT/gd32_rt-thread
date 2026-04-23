@@ -1,0 +1,17 @@
+// Empty macro file to override device default .dmac behavior
+// This prevents the problematic ConnectUnderReset script from running
+
+execUserPreload()
+{
+    // Empty - do nothing
+}
+
+execUserSetup()
+{
+    // Empty - do nothing
+}
+
+execUserReset()
+{
+    // Empty - do nothing
+}

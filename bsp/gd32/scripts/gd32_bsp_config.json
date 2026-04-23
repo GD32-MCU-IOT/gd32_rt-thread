@@ -5,7 +5,7 @@
     "CI 使用 'legs' 字段（RT-Thread 标准格式）",
     "本地测试使用 'local_test' 字段"
   ],
-  
+
   "legs": [
     {
       "RTT_BSP": "gd32_arm",
@@ -40,11 +40,13 @@
         "gd32/arm/gd32f350r-eval",
         "gd32/arm/gd32e517z-eval",
         "gd32/arm/gd32307c-eval",
+        "gd32/arm/gd32m531r-eval",
         "gd32/arm/gd32h75ey-eval"
+
       ]
     }
   ],
-  
+
   "local_test": {
     "test_name": "GD32 ARM BSP Local Build Test",
     "version": "2.0",
@@ -80,6 +82,7 @@
       "gd32f350r-eval",
       "gd32e517z-eval",
       "gd32307c-eval",
+      "gd32m531r-eval",
       "gd32h75ey-eval"
     ],
     "excluded_bsps": [],

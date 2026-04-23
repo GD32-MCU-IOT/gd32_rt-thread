@@ -126,8 +126,7 @@ struct rt_i2c_bus_device i2c5;
 #define i2c_transfer_byte_number_config_gd(periph, n) i2c_transfer_byte_number_config(n)
 #define i2c_start_on_bus_gd(periph)                  i2c_start_on_bus()
 #define i2c_stop_on_bus_gd(periph)                   i2c_stop_on_bus()
-/* make baseline write path compile */
-#define i2c_data_transmit(periph, data)              i2c_data_transmit(data)
+#define i2c_data_transmit_gd(periph, data)           i2c_data_transmit(data)
 
 #define I2C_FLAG_RBNE_GD                     I2C_FLAG_RBNE
 #define I2C_STAT_GD(periph)                  I2C_STAT
@@ -593,10 +592,10 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
   * @param  periph      I2C peripheral (used for I2C flag check)
   * @param  flag        Flag or legacy control bit to wait for
   * @param  set         RT_TRUE = wait for flag SET, RT_FALSE = wait for flag RESET
-  * @param  dma         DMA config pointer (RT_NULL for I2C, non-NULL for DMA)
+  * @param  dma_ctx     DMA config pointer (RT_NULL for I2C, non-NULL for DMA)
   * @retval RT_EOK on success, -RT_ETIMEOUT on timeout
   */
-static int gd32_timeout_wait_flag(uint32_t periph, uint32_t flag, rt_bool_t set, struct dma_config *dma)
+static int gd32_timeout_wait_flag(uint32_t periph, uint32_t flag, rt_bool_t set, void *dma_ctx)
 {
     rt_tick_t timeout = rt_tick_from_millisecond(I2C_TIMEOUT_MS);
     rt_tick_t start = rt_tick_get();
@@ -606,6 +605,8 @@ static int gd32_timeout_wait_flag(uint32_t periph, uint32_t flag, rt_bool_t set,
         FlagStatus status;
 
 #if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
+    struct dma_config *dma = (struct dma_config *)dma_ctx;
+
         if(dma != RT_NULL)
         {
             /* DMA flag check */

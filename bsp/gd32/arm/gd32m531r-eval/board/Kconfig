@@ -1,0 +1,178 @@
+menu "Hardware Drivers Config"
+
+config SOC_SERIES_GD32M53x
+    bool
+    default y
+
+config SOC_GD32M53X
+    bool
+    select SOC_SERIES_GD32M53x
+    select ARCH_ARM_CORTEX_M33
+    select RT_USING_COMPONENTS_INIT
+    select RT_USING_USER_MAIN
+    default y
+
+menu "Onboard Peripheral Drivers"
+    menuconfig BSP_USING_SPI_FLASH
+        bool "Enable SPI FLASH (W25Q128)"
+        select BSP_USING_SPI
+        select BSP_USING_SPI0
+        select RT_USING_SFUD
+        select RT_SFUD_USING_SFDP
+        default n
+
+    menuconfig BSP_USING_EEPROM
+        bool "Enable I2C EEPROM (AT24C02)"
+        select BSP_USING_I2C
+        select BSP_USING_HARD_I2C0
+        default n
+endmenu
+
+menu "On-chip Peripheral Drivers"
+    config BSP_USING_GPIO
+        bool "Enable GPIO"
+        select RT_USING_PIN
+        default y
+
+    menuconfig BSP_USING_UART
+        bool "Enable UART"
+        default y
+        select RT_USING_SERIAL
+        if BSP_USING_UART
+            config BSP_USING_UART_TX_DMA
+                bool
+                select RT_SERIAL_USING_DMA
+
+            config BSP_USING_UART_RX_DMA
+                bool
+                select RT_SERIAL_USING_DMA
+
+            config BSP_USING_UART0
+                bool "Enable UART0"
+                default y
+
+            config BSP_UART0_RX_USING_DMA
+                bool "Enable UART0 RX DMA"
+                depends on BSP_USING_UART0
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART0_TX_USING_DMA
+                bool "Enable UART0 TX DMA"
+                depends on BSP_USING_UART0
+                select BSP_USING_UART_TX_DMA
+                default n
+
+            config BSP_USING_UART1
+                bool "Enable UART1"
+                default n
+
+            config BSP_UART1_RX_USING_DMA
+                bool "Enable UART1 RX DMA"
+                depends on BSP_USING_UART1
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART1_TX_USING_DMA
+                bool "Enable UART1 TX DMA"
+                depends on BSP_USING_UART1
+                select BSP_USING_UART_TX_DMA
+                default n
+
+            config BSP_USING_UART2
+                bool "Enable UART2"
+                depends on !BSP_USING_HARD_I2C0
+                default n
+
+            config BSP_UART2_RX_USING_DMA
+                bool "Enable UART2 RX DMA"
+                depends on BSP_USING_UART2
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART2_TX_USING_DMA
+                bool "Enable UART2 TX DMA"
+                depends on BSP_USING_UART2
+                select BSP_USING_UART_TX_DMA
+                default n
+
+            config BSP_USING_UART3
+                bool "Enable UART3"
+                default n
+
+            config BSP_UART3_RX_USING_DMA
+                bool "Enable UART3 RX DMA"
+                depends on BSP_USING_UART3
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART3_TX_USING_DMA
+                bool "Enable UART3 TX DMA"
+                depends on BSP_USING_UART3
+                select BSP_USING_UART_TX_DMA
+                default n
+        endif
+
+    menuconfig BSP_USING_SPI
+        bool "Enable SPI BUS"
+        default n
+        select RT_USING_SPI
+        if BSP_USING_SPI
+            config BSP_USING_SPI_TX_DMA
+                bool
+
+            config BSP_USING_SPI_RX_DMA
+                bool
+
+            config BSP_USING_SPI0
+                bool "Enable SPI0 BUS"
+                default n
+
+            config BSP_SPI0_TX_USING_DMA
+                bool "Enable SPI0 TX DMA"
+                depends on BSP_USING_SPI0
+                select BSP_USING_SPI_TX_DMA
+                default n
+
+            config BSP_SPI0_RX_USING_DMA
+                bool "Enable SPI0 RX DMA"
+                depends on BSP_USING_SPI0
+                select BSP_USING_SPI_RX_DMA
+                default n
+        endif
+
+    menuconfig BSP_USING_I2C
+        bool "Enable I2C BUS"
+        default n
+        select RT_USING_I2C
+        if BSP_USING_I2C
+            config BSP_USING_I2C_TX_DMA
+                bool
+
+            config BSP_USING_I2C_RX_DMA
+                bool
+
+            config BSP_USING_HARD_I2C0
+                bool "Enable I2C0 BUS"
+                default y
+
+            config BSP_I2C0_TX_USING_DMA
+                bool "Enable I2C0 TX DMA"
+                depends on BSP_USING_HARD_I2C0
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C0_RX_USING_DMA
+                bool "Enable I2C0 RX DMA"
+                depends on BSP_USING_HARD_I2C0
+                select BSP_USING_I2C_RX_DMA
+                default n
+        endif
+
+    source "$(BSP_DIR)/../libraries/gd32_drivers/Kconfig"
+endmenu
+
+menu "Board extended module Drivers"
+endmenu
+
+endmenu

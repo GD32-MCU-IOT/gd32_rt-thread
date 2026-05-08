@@ -341,6 +341,24 @@ menu "On-chip Peripheral Drivers"
                 depends on BSP_USING_HARD_I2C3
                 select BSP_USING_I2C_RX_DMA
                 default n
+
+            config BSP_I2C_XFER_TIMEOUT
+                int "I2C transfer timeout (ms)"
+                range 1 60000
+                default 1000
+                help
+                    Maximum wait time for an I2C transfer to complete.
+                    Applies to both DMA and polling transfer modes.
+
+            if BSP_USING_I2C_TX_DMA || BSP_USING_I2C_RX_DMA
+                config BSP_I2C_DMA_TRANS_MIN_LEN
+                    int "I2C DMA minimum transfer length"
+                    range 1 256
+                    default 4
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+            endif
         endif
 
     source "$(BSP_DIR)/../libraries/gd32_drivers/Kconfig"

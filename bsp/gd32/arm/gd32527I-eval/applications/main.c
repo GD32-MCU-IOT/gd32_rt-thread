@@ -554,23 +554,13 @@ static void uart_dma_thread_entry(void *parameter)
 
     while (1)
     {
-        /* wait for DMA RX data */
         rt_sem_take(&uart_dma_rx_sem, RT_WAITING_FOREVER);
 
-        /* read data in batch */
-        len = rt_device_read(uart_dma_serial, 0, rx_buf, RX_BUF_SIZE);
-        if (len < 0)
-        {
-            /* Read error, skip this iteration */
-            rt_kprintf("[UART DMA] RX read error! ret=%d\n", len);
-            continue;
-        }
-        else if (len > 0)
+        /* drain all available data from ring buffer */
+        while ((len = rt_device_read(uart_dma_serial, 0, rx_buf, RX_BUF_SIZE)) > 0)
         {
             rx_count++;
             total_rx_bytes += len;
-
-            /* Echo back using DMA TX */
             uart_dma_send(rx_buf, (rt_size_t)len);
         }
     }

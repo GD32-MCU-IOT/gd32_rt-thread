@@ -1,28 +1,37 @@
 /*
- * Copyright (c) 2006-2024, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2024-10-22     RT-Thread    first implementation for GD32M53x
+ * 2026-05-13     RT-Thread    first implementation for GD32M53x
  */
-
 #include <stdint.h>
 #include <rthw.h>
 #include <rtthread.h>
+#include <board.h>
 
-#include "board.h"
-#include "gd32m53x.h"
-
-/* Function declarations */
-#ifdef RT_USING_SERIAL
-extern int rt_hw_usart_init(void);
+#ifdef RT_USING_SERIAL_V2
+#include "drv_usart_v2.h"
+#else
+#include "drv_usart.h"
 #endif
 
-#ifdef RT_USING_I2C
-extern int rt_hw_i2c_init(void);
-#endif
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
+  */
+void Error_Handler(void)
+{
+    /* USER CODE BEGIN Error_Handler */
+    /* User can add his own implementation to report the HAL error return state */
+    while (1)
+    {
+    }
+    /* USER CODE END Error_Handler */
+}
 
 /** System Clock Configuration
 */
@@ -34,6 +43,7 @@ void SystemClock_Config(void)
 
 /**
  * This is the timer interrupt service routine.
+ *
  */
 void SysTick_Handler(void)
 {
@@ -70,17 +80,4 @@ void rt_hw_board_init()
 #endif
 }
 
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
-void Error_Handler(void)
-{
-    /* USER CODE BEGIN Error_Handler */
-    /* User can add his own implementation to report the HAL error return state */
-    while (1)
-    {
-    }
-    /* USER CODE END Error_Handler */
-}
+/*@}*/

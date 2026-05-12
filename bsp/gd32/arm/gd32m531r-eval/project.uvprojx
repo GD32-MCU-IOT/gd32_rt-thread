@@ -334,9 +334,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>-fno-strict-aliasing</MiscControls>
-              <Define>GD32M53X, __STDC_LIMIT_MACROS, USE_STDPERIPH_DRIVER, __RTTHREAD__, RT_USING_ARMLIBC, __CLK_TCK=RT_TICK_PER_SECOND, RT_USING_LIBC</Define>
+              <Define>RT_USING_ARMLIBC, __STDC_LIMIT_MACROS, GD32M53X, USE_STDPERIPH_DRIVER, __RTTHREAD__, RT_USING_LIBC, __CLK_TCK=RT_TICK_PER_SECOND</Define>
               <Undefine />
-              <IncludePath>..\..\..\..\libcpu\arm\cortex-m33;packages\gd32-arm-cmsis-latest\GD32M53x;packages\at24cxx-latest;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\libc\posix\ipc;applications;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\smp_call;..\..\..\..\components\drivers\include;.;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\drivers\include;..\..\..\..\include;..\..\..\..\components\net\utest;..\..\..\..\libcpu\arm\common;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\drivers\spi\sfud\inc;..\..\..\..\components\libc\posix\io\eventfd;packages\gd32-arm-series-latest\GD32M53x\GD32M53x_standard_peripheral\Include;..\..\..\..\components\drivers\include;board;..\..\..\..\components\drivers\spi;packages\gd32-arm-cmsis-latest\GD32M53x\GD\GD32M53x\Include;..\..\..\..\components\drivers\include;..\..\..\..\components\finsh;..\..\..\..\components\drivers\include;..\libraries\gd32_drivers;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\drivers\phy</IncludePath>
+              <IncludePath>..\..\..\..\components\drivers\spi\sfud\inc;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\drivers\spi;board;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\phy;..\..\..\..\components\net\utest;..\..\..\..\libcpu\arm\cortex-m33;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\smp_call;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\libc\posix\io\poll;packages\gd32-arm-cmsis-latest\GD32M53x\GD\GD32M53x\Include;..\..\..\..\components\finsh;applications;.;..\..\..\..\components\libc\compilers\common\include;packages\gd32-arm-cmsis-latest\GD32M53x;..\..\..\..\include;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;packages\at24cxx-latest;packages\gd32-arm-series-latest\GD32M53x\GD32M53x_standard_peripheral\Include;..\..\..\..\libcpu\arm\common;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\libraries\gd32_drivers;..\..\..\..\components\drivers\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -986,16 +986,23 @@
           <GroupName>Finsh</GroupName>
           <Files>
             <File>
-              <FileName>msh_parse.c</FileName>
+              <FileName>msh.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
             </File>
           </Files>
           <Files>
             <File>
-              <FileName>cmd.c</FileName>
+              <FileName>msh_file.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>msh_parse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
             </File>
           </Files>
           <Files>
@@ -1007,16 +1014,9 @@
           </Files>
           <Files>
             <File>
-              <FileName>msh.c</FileName>
+              <FileName>cmd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
-            </File>
-          </Files>
-          <Files>
-            <File>
-              <FileName>msh_file.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
+              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2006-2024 RT-Thread Development Team
+ * Copyright (c) 2006-2026 RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2021-08-20     BruceOu      first implementation
+ * 2026-05-13     BruceOu      first implementation
  */
 
 #include <stdint.h>
@@ -124,16 +124,17 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
 #ifdef BSP_USING_UART1
     case UART1:
         /* UART GPIO clock */
-        rcu_periph_clock_enable(RCU_GPIOA);
+        rcu_periph_clock_enable(RCU_GPIOG);
+        rcu_periph_clock_enable(RCU_GPIOF);
         /*GPIO pin configuration*/
-        gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_2);
-        gpio_af_set(GPIOA, GPIO_AF_0, GPIO_PIN_3);
+        gpio_af_set(GPIOG, GPIO_AF_6, GPIO_PIN_15);
+        gpio_af_set(GPIOF, GPIO_AF_6, GPIO_PIN_14);
 
-        gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_2);
-        gpio_mode_set(GPIOA, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_3);
+        gpio_mode_set(GPIOG, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_15);
+        gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_14);
 
-        gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_HIGH, GPIO_PIN_2);
-        gpio_output_options_set(GPIOA, GPIO_OTYPE_PP, GPIO_OSPEED_HIGH, GPIO_PIN_3);
+        gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_HIGH, GPIO_PIN_14);
+        gpio_output_options_set(GPIOG, GPIO_OTYPE_PP, GPIO_OSPEED_HIGH, GPIO_PIN_15);
         break;
 #endif
 #ifdef BSP_USING_UART2

@@ -126,7 +126,8 @@ struct rt_i2c_bus_device i2c5;
 #define i2c_transfer_byte_number_config_gd(periph, n) i2c_transfer_byte_number_config(n)
 #define i2c_start_on_bus_gd(periph)                  i2c_start_on_bus()
 #define i2c_stop_on_bus_gd(periph)                   i2c_stop_on_bus()
-#define i2c_data_transmit_gd(periph, data)           i2c_data_transmit(data)
+/* make baseline write path compile */
+#define i2c_data_transmit_gd(periph, data)              i2c_data_transmit(data)
 
 #define I2C_FLAG_RBNE_GD                     I2C_FLAG_RBNE
 #define I2C_STAT_GD(periph)                  I2C_STAT
@@ -228,7 +229,6 @@ struct rt_i2c_bus_device i2c5;
 #define GD32_I2C_FIRST_FRAME_RELOAD          BIT(5)    /* First msg: START, use RELOAD for next NO_START msg */
 #define GD32_I2C_NEXT_FRAME_NO_START         BIT(6)    /* Continue from RELOAD, no START needed */
 #define GD32_I2C_NEXT_FRAME_RELOAD           BIT(7)    /* Middle msg: RESTART, use RELOAD for next NO_START msg */
-#endif
 
 #if defined (SOC_SERIES_GD32F5xx)
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1 || (periph) == I2C2)
@@ -271,6 +271,7 @@ struct rt_i2c_bus_device i2c5;
     if(autoend) _ctl1 |= I2C_CTL1_AUTOEND_GD; \
     I2C_CTL1_REG(periph) = _ctl1; \
 } while(0)
+#endif /* GD32_I2C_HAS_NEW_IP */
 
 #if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
 /* Static DMA configuration for each I2C */

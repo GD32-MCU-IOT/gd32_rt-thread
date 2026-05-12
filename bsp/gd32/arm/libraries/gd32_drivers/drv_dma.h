@@ -58,7 +58,7 @@ struct dma_config
     uint32_t data_width;
 };
 
-#elif defined(SOC_SERIES_GD32F30x)
+#elif defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
 /* Fixed DMA channel mapping - no sub-peripheral selection */
 #define DRV_DMA_CONFIG(dmax, chx)           {                                                   \
                                                 .periph     = DMA##dmax,                        \
@@ -101,7 +101,7 @@ struct dma_config
 
 #endif
 
-#if defined(SOC_SERIES_GD32F30x)
+#if defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
 /* DMA init struct type and functions */
 #define dma_single_data_parameter_struct     dma_parameter_struct
 #define dma_single_data_para_struct_init(s)  dma_struct_para_init(s)

@@ -180,8 +180,7 @@ struct rt_i2c_bus_device i2c5;
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
 #define gd32_i2c_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
 #define gd32_i2c_dma_subperiph_config(periph, ch, cfg)
-#elif defined(SOC_SERIES_GD32F30x)
-/* F30x has fixed DMA channel mapping, no request or subperipheral selection */
+#elif defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
 #define gd32_i2c_dma_request_config(init_s, dma_cfg)
 #define gd32_i2c_dma_subperiph_config(periph, ch, cfg)
 #else
@@ -211,6 +210,22 @@ struct rt_i2c_bus_device i2c5;
 #define i2c_dma_disable_gd                   i2c_add_dma_disable
 #define I2C_DMA_TRANSMIT_GD                  I2C_ADD_DMA_TRANSMIT
 #define I2C_DMA_RECEIVE_GD                   I2C_ADD_DMA_RECEIVE
+#endif
+#elif defined(SOC_SERIES_GD32E51x)
+#define I2C_CTL1_REG(periph)                 I2C2_CTL1(periph)
+#define I2C_CTL1_BYTENUM_GD                  I2C2_CTL1_BYTENUM
+#define I2C_CTL1_RELOAD_GD                   I2C2_CTL1_RELOAD
+#define I2C_CTL1_AUTOEND_GD                  I2C2_CTL1_AUTOEND
+#define I2C_CTL0_GD(periph)                  I2C2_CTL0(periph)
+#define I2C_TDATA_GD(periph)                 I2C2_TDATA(periph)
+#define I2C_RDATA_GD(periph)                 I2C2_RDATA(periph)
+#define I2C_FLAG_TCR_GD                      I2C2_FLAG_TCR
+#define MAX_RELOAD_SIZE                      255
+#if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
+#define i2c_dma_enable_gd                    i2c2_dma_enable
+#define i2c_dma_disable_gd                   i2c2_dma_disable
+#define I2C_DMA_TRANSMIT_GD                  I2C2_DMA_TRANSMIT
+#define I2C_DMA_RECEIVE_GD                   I2C2_DMA_RECEIVE
 #endif
 #elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
 #define I2C_CTL1_REG(periph)                 I2C_CTL1(periph)

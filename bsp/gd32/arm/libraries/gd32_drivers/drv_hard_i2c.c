@@ -276,7 +276,7 @@ static struct dma_config i2c5_dma_tx_cfg = I2C5_TX_DMA_CONFIG;
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x)
 static const struct gd32_i2c_bus gd_i2c_config[] = {
 #ifdef BSP_USING_HARD_I2C0
     {
@@ -968,7 +968,7 @@ static int gd32_i2c_legacy_dma_read(const struct gd32_i2c_bus *i2c_bus, const st
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x)
 /**
   * @brief  This function initializes the i2c pin.
   * @param  i2c
@@ -1002,6 +1002,11 @@ static void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
     gpio_output_options_set(i2c->sda_port, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, i2c->sda_pin);
 #endif
 #endif
+}
+#else
+#warning "gd32_i2c_gpio_init should be defined in board_msd_init.c"
+rt_weak void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
+{
 }
 #endif
 

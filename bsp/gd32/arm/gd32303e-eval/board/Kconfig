@@ -27,6 +27,18 @@ menu "On-chip Peripheral Drivers"
         default y
         select RT_USING_SERIAL
         if BSP_USING_UART
+            config BSP_SERIAL_USING_TX_DMA
+                bool
+
+            config BSP_USING_UART_TX_DMA
+                bool
+                select RT_SERIAL_USING_DMA
+                select BSP_SERIAL_USING_TX_DMA
+
+            config BSP_USING_UART_RX_DMA
+                bool
+                select RT_SERIAL_USING_DMA
+
             config BSP_USING_UART0
                 bool "Enable UART0"
                 default n
@@ -34,7 +46,13 @@ menu "On-chip Peripheral Drivers"
             config BSP_UART0_RX_USING_DMA
                 bool "Enable UART0 RX DMA"
                 depends on BSP_USING_UART0
-                select RT_SERIAL_USING_DMA
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART0_TX_USING_DMA
+                bool "Enable UART0 TX DMA"
+                depends on BSP_USING_UART0
+                select BSP_USING_UART_TX_DMA
                 default n
 
             config BSP_USING_UART1
@@ -44,7 +62,13 @@ menu "On-chip Peripheral Drivers"
             config BSP_UART1_RX_USING_DMA
                 bool "Enable UART1 RX DMA"
                 depends on BSP_USING_UART1
-                select RT_SERIAL_USING_DMA
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART1_TX_USING_DMA
+                bool "Enable UART1 TX DMA"
+                depends on BSP_USING_UART1
+                select BSP_USING_UART_TX_DMA
                 default n
 
             config BSP_USING_UART2
@@ -54,7 +78,13 @@ menu "On-chip Peripheral Drivers"
             config BSP_UART2_RX_USING_DMA
                 bool "Enable UART2 RX DMA"
                 depends on BSP_USING_UART2
-                select RT_SERIAL_USING_DMA
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART2_TX_USING_DMA
+                bool "Enable UART2 TX DMA"
+                depends on BSP_USING_UART2
+                select BSP_USING_UART_TX_DMA
                 default n
 
             config BSP_USING_UART3
@@ -64,7 +94,13 @@ menu "On-chip Peripheral Drivers"
             config BSP_UART3_RX_USING_DMA
                 bool "Enable UART3 RX DMA"
                 depends on BSP_USING_UART3
-                select RT_SERIAL_USING_DMA
+                select BSP_USING_UART_RX_DMA
+                default n
+
+            config BSP_UART3_TX_USING_DMA
+                bool "Enable UART3 TX DMA"
+                depends on BSP_USING_UART3
+                select BSP_USING_UART_TX_DMA
                 default n
 
             config BSP_USING_UART4
@@ -74,8 +110,31 @@ menu "On-chip Peripheral Drivers"
             config BSP_UART4_RX_USING_DMA
                 bool "Enable UART4 RX DMA"
                 depends on BSP_USING_UART4
-                select RT_SERIAL_USING_DMA
+                select BSP_USING_UART_RX_DMA
                 default n
+
+            config BSP_UART4_TX_USING_DMA
+                bool "Enable UART4 TX DMA"
+                depends on BSP_USING_UART4
+                select BSP_USING_UART_TX_DMA
+                default n
+
+            config BSP_UART_POLL_TX_TIMEOUT_MS
+                int "Polling TX timeout in milliseconds"
+                range 100 10000
+                default 1000
+                help
+                    Timeout value for polling TX operations in milliseconds.
+
+            if BSP_USING_UART_TX_DMA
+                config BSP_UART_DMA_TX_THRESHOLD
+                    int "UART DMA TX minimum transfer length"
+                    range 1 256
+                    default 8
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+            endif
         endif
 
     menuconfig BSP_USING_SPI
@@ -83,20 +142,118 @@ menu "On-chip Peripheral Drivers"
         default n
         select RT_USING_SPI
         if BSP_USING_SPI
+            config BSP_USING_SPI_DMA
+                bool
+
+            config BSP_SPI_XFER_TIMEOUT
+                int "SPI transfer timeout (ms)"
+                range 1 60000
+                default 1000
+                help
+                    Maximum wait time for a SPI transfer to complete.
+                    Applies to both DMA and polling transfer modes.
+
+            config BSP_USING_SPI0
+                bool "Enable SPI0 BUS"
+                default n
+
+            config BSP_SPI0_USING_DMA
+                bool "Enable SPI0 DMA"
+                depends on BSP_USING_SPI0
+                select BSP_USING_SPI_DMA
+                default n
+
             config BSP_USING_SPI1
                 bool "Enable SPI1 BUS"
                 default n
 
-            config BSP_SPI1_TX_USING_DMA
-                bool "Enable SPI1 TX DMA"
+            config BSP_SPI1_USING_DMA
+                bool "Enable SPI1 DMA"
                 depends on BSP_USING_SPI1
+                select BSP_USING_SPI_DMA
                 default n
 
-            config BSP_SPI1_RX_USING_DMA
-                bool "Enable SPI1 RX DMA"
-                depends on BSP_USING_SPI1
-                select BSP_SPI1_TX_USING_DMA
+            config BSP_USING_SPI2
+                bool "Enable SPI2 BUS"
                 default n
+
+            config BSP_SPI2_USING_DMA
+                bool "Enable SPI2 DMA"
+                depends on BSP_USING_SPI2
+                select BSP_USING_SPI_DMA
+                default n
+
+            if BSP_USING_SPI_DMA
+                config BSP_SPI_DMA_TRANS_MIN_LEN
+                    int "SPI DMA minimum transfer length"
+                    range 4 65535
+                    default 16
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+            endif
+        endif
+
+    menuconfig BSP_USING_I2C
+        bool "Enable I2C BUS"
+        default n
+        select RT_USING_I2C
+        if BSP_USING_I2C
+            config BSP_USING_I2C_TX_DMA
+                bool
+
+            config BSP_USING_I2C_RX_DMA
+                bool
+
+            config BSP_USING_HARD_I2C0
+                bool "Enable I2C0 BUS"
+                default n
+
+            config BSP_I2C0_TX_USING_DMA
+                bool "Enable I2C0 TX DMA"
+                depends on BSP_USING_HARD_I2C0
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C0_RX_USING_DMA
+                bool "Enable I2C0 RX DMA"
+                depends on BSP_USING_HARD_I2C0
+                select BSP_USING_I2C_RX_DMA
+                default n
+
+            config BSP_USING_HARD_I2C1
+                bool "Enable I2C1 BUS"
+                default n
+
+            config BSP_I2C1_TX_USING_DMA
+                bool "Enable I2C1 TX DMA"
+                depends on BSP_USING_HARD_I2C1
+                select BSP_USING_I2C_TX_DMA
+                default n
+
+            config BSP_I2C1_RX_USING_DMA
+                bool "Enable I2C1 RX DMA"
+                depends on BSP_USING_HARD_I2C1
+                select BSP_USING_I2C_RX_DMA
+                default n
+
+            if BSP_USING_I2C_TX_DMA || BSP_USING_I2C_RX_DMA
+                config BSP_I2C_DMA_TRANS_MIN_LEN
+                    int "I2C DMA minimum transfer length"
+                    range 1 256
+                    default 8
+                    help
+                        Transfers smaller than this will use polling mode.
+                        DMA mode is used when buffer length is greater than or equal to this value.
+
+                config BSP_I2C_DMA_TIMEOUT
+                    int "I2C DMA transfer timeout (ms)"
+                    range 1 60000
+                    default 1000
+                    help
+                        Maximum wait time for an I2C DMA transfer to complete.
+                        The driver reports a timeout once this limit is reached.
+            endif
         endif
 
     menuconfig BSP_USING_ADC

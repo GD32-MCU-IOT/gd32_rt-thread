@@ -58,6 +58,26 @@ struct dma_config
     uint32_t data_width;
 };
 
+#elif defined(SOC_SERIES_GD32F30x)
+/* Fixed DMA channel mapping - no sub-peripheral selection */
+#define DRV_DMA_CONFIG(dmax, chx)           {                                                   \
+                                                .periph     = DMA##dmax,                        \
+                                                .channel    = DMA_CH##chx,                      \
+                                                .rcu        = RCU_DMA##dmax,                    \
+                                                .irq        = DMA##dmax##_Channel##chx##_IRQn,  \
+                                                .data_width = DMA_PERIPHERAL_WIDTH_8BIT,        \
+                                            }
+
+struct dma_config
+{
+    uint32_t periph;
+    uint32_t dma_flag;
+    rcu_periph_enum rcu;
+    dma_channel_enum channel;
+    IRQn_Type irq;
+    uint32_t data_width;
+};
+
 #else
 
 #define DRV_DMA_CONFIG(dmax, chx, subx)     {                                                   \

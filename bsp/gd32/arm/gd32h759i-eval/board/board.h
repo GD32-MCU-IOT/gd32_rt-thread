@@ -45,4 +45,45 @@ extern int __bss_end;
 
 #define HEAP_END          GD32_SRAM_END
 
+/*
+ * Board-level DMA override policy:
+ * 1. Treat config/h7xx/dma_config.h as the family-level truth table.
+ * 2. Check the DMA-enabled peripherals selected by rtconfig.h.
+ * 3. Add board.h overrides only when the board's intended DMA set shares the
+ *    same DMA controller and channel.
+ *
+ * GD32H759I-EVAL default DMA set from rtconfig.h:
+ *   - UART3 RX/TX DMA: DMA1 CH0/1
+ *   - SPI3 RX/TX DMA:  DMA1 CH4/5
+ *   - I2C1 bus enabled, DMA optional
+ *
+ * Board decision:
+ *   - Keep UART3 on DMA1 CH0/1 for the default DMA demo path.
+ *   - Keep SPI3 on DMA1 CH4/5.
+ *   - If I2C1 DMA is enabled, move it from the family default DMA1 CH0/1 to
+ *     DMA0 CH2/3 so it does not collide with UART3 DMA.
+ */
+
+/* I2C1 RX DMA override: DMA0 Channel2 instead of the family default DMA1 CH0 */
+#if defined(BSP_I2C1_RX_USING_DMA) && !defined(I2C1_RX_DMA_PERIPH)
+#define I2C1_DMA_RX_IRQHandler          DMA0_Channel2_IRQHandler
+#define I2C1_RX_DMA_PERIPH              DMA0
+#define I2C1_RX_DMA_FLAG                DMA_INTF_FTFIF
+#define I2C1_RX_DMA_RCU                 RCU_DMA0
+#define I2C1_RX_DMA_CHANNEL             DMA_CH2
+#define I2C1_RX_DMA_REQUEST             DMA_REQUEST_I2C1_RX
+#define I2C1_RX_DMA_IRQ                 DMA0_Channel2_IRQn
+#endif
+
+/* I2C1 TX DMA override: DMA0 Channel3 instead of the family default DMA1 CH1 */
+#if defined(BSP_I2C1_TX_USING_DMA) && !defined(I2C1_TX_DMA_PERIPH)
+#define I2C1_DMA_TX_IRQHandler          DMA0_Channel3_IRQHandler
+#define I2C1_TX_DMA_PERIPH              DMA0
+#define I2C1_TX_DMA_FLAG                DMA_INTF_FTFIF
+#define I2C1_TX_DMA_RCU                 RCU_DMA0
+#define I2C1_TX_DMA_CHANNEL             DMA_CH3
+#define I2C1_TX_DMA_REQUEST             DMA_REQUEST_I2C1_TX
+#define I2C1_TX_DMA_IRQ                 DMA0_Channel3_IRQn
+#endif
+
 #endif /* __BOARD_H__ */

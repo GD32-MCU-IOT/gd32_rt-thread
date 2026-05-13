@@ -53,4 +53,24 @@ extern int __bss_end;
 
 #define HEAP_END          GD32_SRAM_END
 
+/*
+ * Board-level DMA override policy:
+ * 1. Treat config/h75e/dma_config.h as the family-level truth table.
+ * 2. Check the DMA-enabled peripherals selected by rtconfig.h.
+ * 3. Add board.h overrides only when the board's intended DMA set shares the
+ *    same DMA controller and channel.
+ *
+ * GD32H75EY-EVAL default DMA set from rtconfig.h:
+ *   - UART3 RX/TX DMA: DMA1 CH0/1
+ *   - SPI4 RX/TX DMA:  DMA1 CH6/7
+ *   - I2C3 bus enabled, DMA disabled by default
+ *
+ * Board decision:
+ *   - No board-level DMA override is needed for the default configuration.
+ *   - If I2C3 DMA is enabled later, it still uses DMA0 CH4/5 and does not
+ *     collide with the default UART3 or SPI4 DMA paths.
+ *   - Add overrides only if this board later enables another DMA client from
+ *     the same family conflict groups, such as UART2 or SPI5 on DMA0 CH4/5.
+ */
+
 #endif /* __BOARD_H__ */

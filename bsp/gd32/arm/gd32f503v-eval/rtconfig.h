@@ -160,10 +160,12 @@
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
 #define RT_USING_SPI
+#define RT_USING_SPI_ISR
 #define RT_USING_QSPI
 #define RT_USING_SFUD
 #define RT_SFUD_USING_SFDP
 #define RT_SFUD_USING_FLASH_INFO_TABLE
+#define RT_SFUD_USING_QSPI
 #define RT_SFUD_SPI_MAX_HZ 50000000
 #define RT_USING_PIN
 /* end of Device Drivers */
@@ -443,8 +445,9 @@
 #define BSP_USING_UART0
 #define BSP_USING_UART1
 #define BSP_USING_SPI
-#define BSP_USING_SPI0
 #define BSP_USING_QSPI
+#define BSP_USING_QSPI0
+#define BSP_QSPI_XFER_TIMEOUT 1000
 #define BSP_USING_I2C
 #define BSP_USING_HARD_I2C0
 #define BSP_USING_HARD_I2C1

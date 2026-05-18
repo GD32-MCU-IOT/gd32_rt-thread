@@ -17,6 +17,35 @@
 
 #include <rtdbg.h>
 
+#ifndef BSP_QSPI_XFER_TIMEOUT
+#define BSP_QSPI_XFER_TIMEOUT 1000
+#endif
+
+/**
+ * @brief Wait for a QSPI flag with timeout
+ * @param bus       QSPI bus
+ * @param flag      SPI flag to wait for
+ * @param wait_set  RT_TRUE: wait until flag is SET; RT_FALSE: wait until RESET
+ * @retval RT_EOK on success, -RT_ETIMEOUT on timeout
+ */
+static rt_err_t gd32_qspi_wait_flag(struct gd32_qspi_bus *bus, uint32_t flag, rt_bool_t wait_set)
+{
+    rt_tick_t timeout = rt_tick_from_millisecond(BSP_QSPI_XFER_TIMEOUT);
+    rt_tick_t start = rt_tick_get();
+    FlagStatus expect = wait_set ? SET : RESET;
+
+    while (expect != spi_i2s_flag_get(bus->spi_periph, flag))
+    {
+        if (rt_tick_get() - start > timeout)
+        {
+            LOG_E("qspi wait flag 0x%x timeout", flag);
+            return -RT_ETIMEOUT;
+        }
+    }
+
+    return RT_EOK;
+}
+
 static struct rt_spi_bus qspi_bus0;
 
 static const struct gd32_qspi_bus qspi_bus_obj[] = {
@@ -87,6 +116,9 @@ static rt_err_t gd32_qspi_configure(struct rt_spi_device *device, struct rt_spi_
 
     RT_ASSERT(device != RT_NULL);
     RT_ASSERT(cfg != RT_NULL);
+
+    /* Enable SPI peripheral clock */
+    rcu_periph_clock_enable(bus->spi_clk);
 
     gd32_qspi_gpio_init(bus);
 
@@ -166,6 +198,12 @@ static rt_err_t gd32_qspi_configure(struct rt_spi_device *device, struct rt_spi_
     spi_init(bus->spi_periph, &spi_init_struct);
     spi_enable(bus->spi_periph);
 
+    /* Wait for SPI to be ready after re-initialization */
+    if (gd32_qspi_wait_flag(bus, SPI_FLAG_TRANS, RT_FALSE) != RT_EOK)
+    {
+        return -RT_ETIMEOUT;
+    }
+
     uint32_t div_table[] = {2, 4, 8, 16, 32, 64, 128, 256};
     uint32_t div_idx = (spi_init_struct.prescale >> 3) & 0x7;
     uint32_t actual_hz = spi_apb_clock / div_table[div_idx];
@@ -194,12 +232,20 @@ static rt_ssize_t gd32_qspi_xfer(struct rt_spi_device *device, struct rt_spi_mes
     if (qmsg->instruction.qspi_lines)
     {
         gd32_qspi_set_lines(bus, qmsg->instruction.qspi_lines, RT_FALSE);
-        
-        while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TBE));
+
+        if (gd32_qspi_wait_flag(bus, SPI_FLAG_TBE, RT_TRUE) != RT_EOK)
+        {
+            result = -RT_ETIMEOUT;
+            goto _exit;
+        }
         spi_i2s_data_transmit(bus->spi_periph, qmsg->instruction.content);
-        while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_RBNE));
+        if (gd32_qspi_wait_flag(bus, SPI_FLAG_RBNE, RT_TRUE) != RT_EOK)
+        {
+            result = -RT_ETIMEOUT;
+            goto _exit;
+        }
         spi_i2s_data_receive(bus->spi_periph);
-        
+
         result += 1;
     }
 
@@ -214,9 +260,17 @@ static rt_ssize_t gd32_qspi_xfer(struct rt_spi_device *device, struct rt_spi_mes
             
             for (rt_size_t i = 0; i < addr_len; i++)
             {
-                while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TBE));
+                if (gd32_qspi_wait_flag(bus, SPI_FLAG_TBE, RT_TRUE) != RT_EOK)
+                {
+                    result = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 spi_i2s_data_transmit(bus->spi_periph, addr_buf[i]);
-                while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_RBNE));
+                if (gd32_qspi_wait_flag(bus, SPI_FLAG_RBNE, RT_TRUE) != RT_EOK)
+                {
+                    result = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 spi_i2s_data_receive(bus->spi_periph);
             }
             result += addr_len;
@@ -233,9 +287,17 @@ static rt_ssize_t gd32_qspi_xfer(struct rt_spi_device *device, struct rt_spi_mes
             gd32_qspi_set_lines(bus, qmsg->alternate_bytes.qspi_lines, RT_FALSE);
             for (rt_size_t i = 0; i < alt_len; i++)
             {
-                while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TBE));
+                if (gd32_qspi_wait_flag(bus, SPI_FLAG_TBE, RT_TRUE) != RT_EOK)
+                {
+                    result = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 spi_i2s_data_transmit(bus->spi_periph, alt_buf[i]);
-                while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_RBNE));
+                if (gd32_qspi_wait_flag(bus, SPI_FLAG_RBNE, RT_TRUE) != RT_EOK)
+                {
+                    result = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 spi_i2s_data_receive(bus->spi_periph);
             }
             result += alt_len;
@@ -261,13 +323,25 @@ static rt_ssize_t gd32_qspi_xfer(struct rt_spi_device *device, struct rt_spi_mes
 
         for (rt_size_t i = 0; i < dummy_bytes_to_send; i++)
         {
-            while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TBE));
+            if (gd32_qspi_wait_flag(bus, SPI_FLAG_TBE, RT_TRUE) != RT_EOK)
+            {
+                result = -RT_ETIMEOUT;
+                goto _exit;
+            }
             spi_i2s_data_transmit(bus->spi_periph, 0xA5);
-            while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_RBNE));
+            if (gd32_qspi_wait_flag(bus, SPI_FLAG_RBNE, RT_TRUE) != RT_EOK)
+            {
+                result = -RT_ETIMEOUT;
+                goto _exit;
+            }
             spi_i2s_data_receive(bus->spi_periph);
         }
-        while (SET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TRANS));
-        
+        if (gd32_qspi_wait_flag(bus, SPI_FLAG_TRANS, RT_FALSE) != RT_EOK)
+        {
+            result = -RT_ETIMEOUT;
+            goto _exit;
+        }
+
         result += dummy_bytes_to_send;
     }
 
@@ -284,12 +358,24 @@ static rt_ssize_t gd32_qspi_xfer(struct rt_spi_device *device, struct rt_spi_mes
             
             while (size--)
             {
-                while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TBE));
+                if (gd32_qspi_wait_flag(bus, SPI_FLAG_TBE, RT_TRUE) != RT_EOK)
+                {
+                    result = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 spi_i2s_data_transmit(bus->spi_periph, *send_ptr++);
-                while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_RBNE));
+                if (gd32_qspi_wait_flag(bus, SPI_FLAG_RBNE, RT_TRUE) != RT_EOK)
+                {
+                    result = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 spi_i2s_data_receive(bus->spi_periph);
             }
-            while (SET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TRANS));
+            if (gd32_qspi_wait_flag(bus, SPI_FLAG_TRANS, RT_FALSE) != RT_EOK)
+            {
+                result = -RT_ETIMEOUT;
+                goto _exit;
+            }
             result = msg->length;
         }
         else if (msg->recv_buf)
@@ -299,18 +385,31 @@ static rt_ssize_t gd32_qspi_xfer(struct rt_spi_device *device, struct rt_spi_mes
             
             while (size--)
             {
-                while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TBE));
+                if (gd32_qspi_wait_flag(bus, SPI_FLAG_TBE, RT_TRUE) != RT_EOK)
+                {
+                    result = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 spi_i2s_data_transmit(bus->spi_periph, 0xA5); 
                 
-                while (RESET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_RBNE));
+                if (gd32_qspi_wait_flag(bus, SPI_FLAG_RBNE, RT_TRUE) != RT_EOK)
+                {
+                    result = -RT_ETIMEOUT;
+                    goto _exit;
+                }
                 *recv_ptr++ = spi_i2s_data_receive(bus->spi_periph);
             }
-            while (SET == spi_i2s_flag_get(bus->spi_periph, SPI_FLAG_TRANS));
-            
+            if (gd32_qspi_wait_flag(bus, SPI_FLAG_TRANS, RT_FALSE) != RT_EOK)
+            {
+                result = -RT_ETIMEOUT;
+                goto _exit;
+            }
+
             result = msg->length;
         }
     }
 
+_exit:
     if (msg->cs_release && !(device->config.mode & RT_SPI_NO_CS) && (device->cs_pin != PIN_NONE))
     {
         rt_pin_write(device->cs_pin, (device->config.mode & RT_SPI_CS_HIGH) ? PIN_LOW : PIN_HIGH);
@@ -336,6 +435,8 @@ rt_err_t rt_hw_qspi_device_attach(const char *bus_name, const char *device_name,
     qspi_device = (struct rt_qspi_device *)rt_malloc(sizeof(struct rt_qspi_device));
     RT_ASSERT(qspi_device != RT_NULL);
 
+    rt_memset(qspi_device, 0, sizeof(struct rt_qspi_device));
+
     /* Set optional callback functions and line width */
     qspi_device->enter_qspi_mode = enter_qspi_mode;
     qspi_device->exit_qspi_mode = exit_qspi_mode;
@@ -354,9 +455,14 @@ rt_err_t rt_hw_qspi_device_attach(const char *bus_name, const char *device_name,
     if (result != RT_EOK)
     {
         LOG_E("%s attach to %s faild, %d\n", device_name, bus_name, result);
+        rt_free(qspi_device);
+        return result;
     }
 
-    RT_ASSERT(result == RT_EOK);
+    /* Set default SPI config AFTER attach (attach clears device->config) */
+    qspi_device->parent.config.data_width = 8;
+    qspi_device->parent.config.mode = RT_SPI_MODE_0 | RT_SPI_MSB;
+    qspi_device->parent.config.max_hz = 50000000;
 
     LOG_D("%s attach to %s done", device_name, bus_name);
 

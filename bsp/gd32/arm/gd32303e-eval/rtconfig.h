@@ -77,10 +77,6 @@
 /* kservice options */
 
 /* end of kservice options */
-#define RT_USING_DEBUG
-#define RT_DEBUGING_ASSERT
-#define RT_DEBUGING_COLOR
-#define RT_DEBUGING_CONTEXT
 
 /* Inter-Thread communication */
 
@@ -145,7 +141,6 @@
 #define RT_SYSTEM_WORKQUEUE_PRIORITY 23
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
-#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
@@ -399,30 +394,13 @@
 
 #define BSP_USING_GPIO
 #define BSP_USING_UART
-#define BSP_SERIAL_USING_TX_DMA
-#define BSP_USING_UART_TX_DMA
-#define BSP_USING_UART_RX_DMA
 #define BSP_USING_UART0
-#define BSP_USING_UART1
-#define BSP_USING_UART2
-#define BSP_UART2_RX_USING_DMA
-#define BSP_UART2_TX_USING_DMA
 #define BSP_UART_POLL_TX_TIMEOUT_MS 1000
-#define BSP_UART_DMA_TX_THRESHOLD 8
 #define BSP_USING_SPI
-#define BSP_USING_SPI_DMA
 #define BSP_SPI_XFER_TIMEOUT 1000
 #define BSP_USING_SPI0
-#define BSP_SPI0_USING_DMA
-#define BSP_SPI_DMA_TRANS_MIN_LEN 16
 #define BSP_USING_I2C
-#define BSP_USING_I2C_TX_DMA
-#define BSP_USING_I2C_RX_DMA
 #define BSP_USING_HARD_I2C0
-#define BSP_I2C0_TX_USING_DMA
-#define BSP_I2C0_RX_USING_DMA
-#define BSP_I2C_DMA_TRANS_MIN_LEN 8
-#define BSP_I2C_DMA_TIMEOUT 1000
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

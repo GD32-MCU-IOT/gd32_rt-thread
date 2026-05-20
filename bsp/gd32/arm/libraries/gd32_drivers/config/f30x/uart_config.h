@@ -23,7 +23,6 @@ extern "C" {
 #define UART0_DMA_RX_CONFIG                                         \
     {                                                               \
         .periph     = UART0_RX_DMA_PERIPH,                         \
-        .dma_flag   = DMA_FLAG_FTF,                                 \
         .rcu        = UART0_RX_DMA_RCU,                             \
         .channel    = UART0_RX_DMA_CHANNEL,                         \
         .irq        = UART0_RX_DMA_IRQ,                             \
@@ -36,7 +35,6 @@ extern "C" {
 #define UART0_DMA_TX_CONFIG                                         \
     {                                                               \
         .periph     = UART0_TX_DMA_PERIPH,                         \
-        .dma_flag   = DMA_FLAG_FTF,                                 \
         .rcu        = UART0_TX_DMA_RCU,                             \
         .channel    = UART0_TX_DMA_CHANNEL,                         \
         .irq        = UART0_TX_DMA_IRQ,                             \
@@ -50,7 +48,6 @@ extern "C" {
 #define UART1_DMA_RX_CONFIG                                         \
     {                                                               \
         .periph     = UART1_RX_DMA_PERIPH,                         \
-        .dma_flag   = DMA_FLAG_FTF,                                 \
         .rcu        = UART1_RX_DMA_RCU,                             \
         .channel    = UART1_RX_DMA_CHANNEL,                         \
         .irq        = UART1_RX_DMA_IRQ,                             \
@@ -63,7 +60,6 @@ extern "C" {
 #define UART1_DMA_TX_CONFIG                                         \
     {                                                               \
         .periph     = UART1_TX_DMA_PERIPH,                         \
-        .dma_flag   = DMA_FLAG_FTF,                                 \
         .rcu        = UART1_TX_DMA_RCU,                             \
         .channel    = UART1_TX_DMA_CHANNEL,                         \
         .irq        = UART1_TX_DMA_IRQ,                             \
@@ -77,7 +73,6 @@ extern "C" {
 #define UART2_DMA_RX_CONFIG                                         \
     {                                                               \
         .periph     = UART2_RX_DMA_PERIPH,                         \
-        .dma_flag   = DMA_FLAG_FTF,                                 \
         .rcu        = UART2_RX_DMA_RCU,                             \
         .channel    = UART2_RX_DMA_CHANNEL,                         \
         .irq        = UART2_RX_DMA_IRQ,                             \
@@ -90,7 +85,6 @@ extern "C" {
 #define UART2_DMA_TX_CONFIG                                         \
     {                                                               \
         .periph     = UART2_TX_DMA_PERIPH,                         \
-        .dma_flag   = DMA_FLAG_FTF,                                 \
         .rcu        = UART2_TX_DMA_RCU,                             \
         .channel    = UART2_TX_DMA_CHANNEL,                         \
         .irq        = UART2_TX_DMA_IRQ,                             \
@@ -104,7 +98,6 @@ extern "C" {
 #define UART3_DMA_RX_CONFIG                                         \
     {                                                               \
         .periph     = UART3_RX_DMA_PERIPH,                         \
-        .dma_flag   = DMA_FLAG_FTF,                                 \
         .rcu        = UART3_RX_DMA_RCU,                             \
         .channel    = UART3_RX_DMA_CHANNEL,                         \
         .irq        = UART3_RX_DMA_IRQ,                             \
@@ -117,7 +110,6 @@ extern "C" {
 #define UART3_DMA_TX_CONFIG                                         \
     {                                                               \
         .periph     = UART3_TX_DMA_PERIPH,                         \
-        .dma_flag   = DMA_FLAG_FTF,                                 \
         .rcu        = UART3_TX_DMA_RCU,                             \
         .channel    = UART3_TX_DMA_CHANNEL,                         \
         .irq        = UART3_TX_DMA_IRQ,                             \

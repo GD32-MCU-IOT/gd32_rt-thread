@@ -29,6 +29,12 @@
 #define I2C_DMA_TRANS_MIN_LEN   4
 #endif
 
+/* F30x-specific I2C DMA compatibility (common DMA macros are in drv_dma.h) */
+#if defined(SOC_SERIES_GD32F30x)
+/* F30x I2C DMA enable function has a different name */
+#define i2c_dma_config(periph, state)        i2c_dma_enable(periph, state)
+#endif
+
 #if !defined(BSP_USING_HARD_I2C0) && !defined(BSP_USING_HARD_I2C1) && !defined(BSP_USING_HARD_I2C2) && !defined(BSP_USING_HARD_I2C3)  && !defined(BSP_USING_HARD_I2C4)  && !defined(BSP_USING_HARD_I2C5)
 #error "Please define at least one BSP_USING_I2Cx"
 /* this driver can be disabled at menuconfig → RT-Thread Components → Device Drivers */
@@ -174,6 +180,10 @@ struct rt_i2c_bus_device i2c5;
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
 #define gd32_i2c_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
 #define gd32_i2c_dma_subperiph_config(periph, ch, cfg)
+#elif defined(SOC_SERIES_GD32F30x)
+/* F30x has fixed DMA channel mapping, no request or subperipheral selection */
+#define gd32_i2c_dma_request_config(init_s, dma_cfg)
+#define gd32_i2c_dma_subperiph_config(periph, ch, cfg)
 #else
 #define gd32_i2c_dma_request_config(init_s, dma_cfg)
 #define gd32_i2c_dma_subperiph_config(periph, ch, cfg)  dma_channel_subperipheral_select(periph, ch, (cfg)->subperiph)
@@ -229,7 +239,6 @@ struct rt_i2c_bus_device i2c5;
 #define GD32_I2C_FIRST_FRAME_RELOAD          BIT(5)    /* First msg: START, use RELOAD for next NO_START msg */
 #define GD32_I2C_NEXT_FRAME_NO_START         BIT(6)    /* Continue from RELOAD, no START needed */
 #define GD32_I2C_NEXT_FRAME_RELOAD           BIT(7)    /* Middle msg: RESTART, use RELOAD for next NO_START msg */
-#endif
 
 #if defined (SOC_SERIES_GD32F5xx)
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1 || (periph) == I2C2)
@@ -272,6 +281,7 @@ struct rt_i2c_bus_device i2c5;
     if(autoend) _ctl1 |= I2C_CTL1_AUTOEND_GD; \
     I2C_CTL1_REG(periph) = _ctl1; \
 } while(0)
+#endif
 
 #if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
 /* Static DMA configuration for each I2C */
@@ -672,12 +682,12 @@ static void gd32_i2c_dma_config_channel(struct dma_config *dma, uint32_t periph_
     gd32_dma_deinit(dma->periph, dma->channel);
     dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.periph_addr = periph_addr;
-    dma_init_struct.memory0_addr = (uint32_t)buf;
+    GD32_DMA_SET_MEMADDR(&dma_init_struct, (uint32_t)buf);
     dma_init_struct.direction = direction;
     dma_init_struct.number = len;
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.periph_memory_width = dma->data_width;
+    GD32_DMA_SET_DATAWIDTH(&dma_init_struct, dma->data_width);
     dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
     /* Configure either the DMA request field or the subperipheral selector. */
     gd32_i2c_dma_request_config(&dma_init_struct, dma);

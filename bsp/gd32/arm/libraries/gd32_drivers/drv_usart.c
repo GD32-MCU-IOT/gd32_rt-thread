@@ -31,49 +31,6 @@
 #define gd32_dma_deinit(periph, ch)                 dma_deinit(periph, ch)
 #endif
 
-/* Compatibility macros: remap F30x/F10x/F20x DMA API to F4xx-style API signatures.
- * This allows driver code to use a single (F4xx-style) API set without #ifdef. */
-#if defined(SOC_SERIES_GD32F30x)
-
-/* DMA init struct: F30x dma_parameter_struct → F4xx dma_single_data_parameter_struct */
-#define dma_single_data_parameter_struct            dma_parameter_struct
-#define dma_single_data_para_struct_init(s)         dma_struct_para_init(s)
-#define dma_single_data_mode_init(p, ch, s)         dma_init(p, ch, s)
-
-/* Direction enums */
-#define DMA_PERIPH_TO_MEMORY                        DMA_PERIPHERAL_TO_MEMORY
-#define DMA_MEMORY_TO_PERIPH                        DMA_MEMORY_TO_PERIPHERAL
-
-/* Data width enums: F4xx DMA_PERIPH_WIDTH → F30x DMA_PERIPHERAL_WIDTH */
-#define DMA_PERIPH_WIDTH_8BIT                       DMA_PERIPHERAL_WIDTH_8BIT
-#define DMA_PERIPH_WIDTH_16BIT                      DMA_PERIPHERAL_WIDTH_16BIT
-#define DMA_PERIPH_WIDTH_32BIT                      DMA_PERIPHERAL_WIDTH_32BIT
-
-/* DMA error flags: F30x has no FIFO/access error, map to generic DMA_FLAG_ERR */
-#define DMA_FLAG_FEE                                DMA_FLAG_ERR
-#define DMA_FLAG_TAE                                DMA_FLAG_ERR
-
-/* DMA memory address config: F4xx 4-arg → F30x 3-arg (ignore memory index) */
-#define dma_memory_address_config(p, ch, idx, addr) \
-    dma_memory_address_config(p, ch, (uint32_t)(addr))
-
-/* F30x struct field remapping via accessor macros */
-#define GD32_DMA_SET_MEMADDR(s, v)              ((s)->memory_addr = (v))
-/* F30x has separate periph_width (bits 8:9) / memory_width (bits 10:11).
- * CHCTL_MWIDTH(n) = CHCTL_PWIDTH(n) << 2, so shift converts between them. */
-#define GD32_DMA_SET_DATAWIDTH(s, v)            do { (s)->periph_width = (v); \
-                                                    (s)->memory_width = (v) << 2; } while(0)
-/* F30x has no circular_mode field; use dma_circulation_disable() API instead */
-#define GD32_DMA_SET_CIRCULAR(s, v)             ((void)0)
-
-#else
-/* F4xx/F5xx/H7xx: use native field names */
-#define GD32_DMA_SET_MEMADDR(s, v)              ((s)->memory0_addr = (v))
-#define GD32_DMA_SET_DATAWIDTH(s, v)            ((s)->periph_memory_width = (v))
-#define GD32_DMA_SET_CIRCULAR(s, v)             ((s)->circular_mode = (v))
-
-#endif /* F30x/F10x/F20x API remapping */
-
 /* USART data register address macros for DMA configuration */
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
 #define USART_DATA_TX(usartx) (&USART_TDATA(usartx))
@@ -640,6 +597,7 @@ static struct gd32_uart uart_obj[] = {
 #ifdef RT_SERIAL_USING_DMA
 static void dma_tx_done_isr(uint32_t dma_periph, dma_channel_enum dma_ch)
 {
+    dma_channel_disable(dma_periph, dma_ch);
     dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_FTF);
     dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_HTF);
     dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_FEE);
@@ -1255,7 +1213,7 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
     /* configure DMA mode - non-circular mode */
     dma_circulation_disable(uart->dma_rx->periph, uart->dma_rx->channel);
 
-    dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->dma_flag);
+    dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_FTF);
     /* Enable Full-Transfer interrupt only */
     dma_interrupt_enable(uart->dma_rx->periph, uart->dma_rx->channel, DMA_CHXCTL_FTFIE);
 }
@@ -1421,7 +1379,7 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
         dma_memory_address_config(uart->dma_tx->periph, uart->dma_tx->channel, DMA_MEMORY_0, (uint32_t)buf);
         dma_transfer_number_config(uart->dma_tx->periph, uart->dma_tx->channel, size);
 
-        dma_flag_clear(uart->dma_tx->periph, uart->dma_tx->channel, uart->dma_tx->dma_flag);
+        dma_flag_clear(uart->dma_tx->periph, uart->dma_tx->channel, DMA_FLAG_FTF);
         dma_interrupt_enable(uart->dma_tx->periph, uart->dma_tx->channel, DMA_CHXCTL_FTFIE);
 
         usart_flag_clear(uart->uart_periph, USART_FLAG_TBE);
@@ -1492,7 +1450,7 @@ static void dma_rx_done_isr(struct rt_serial_device *serial)
 
     struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
 
-    if (dma_flag_get(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->dma_flag) != RESET) {
+    if (dma_flag_get(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_FTF) != RESET) {
         /* disable dma, stop receive data */
         dma_channel_disable(uart->dma_rx->periph, uart->dma_rx->channel);
 
@@ -1510,7 +1468,7 @@ static void dma_rx_done_isr(struct rt_serial_device *serial)
         rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
 
         /* Restart DMA for next reception */
-        dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->dma_flag);
+        dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_FTF);
         uart->last_recv_index = 0;
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
         dma_memory_address_config(uart->dma_rx->periph, uart->dma_rx->channel, DMA_MEMORY_0, (uint32_t)uart->dma_rx_buffer);

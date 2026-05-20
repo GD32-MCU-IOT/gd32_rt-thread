@@ -23,7 +23,6 @@ extern "C" {
 #define SPI0_TX_DMA_CONFIG                          \
     {                                               \
         .periph     = SPI0_TX_DMA_PERIPH,           \
-        .dma_flag   = DMA_FLAG_FTF,                 \
         .rcu        = SPI0_TX_DMA_RCU,              \
         .channel    = SPI0_TX_DMA_CHANNEL,          \
         .irq        = SPI0_TX_DMA_IRQ,              \
@@ -34,7 +33,6 @@ extern "C" {
 #define SPI0_RX_DMA_CONFIG                          \
     {                                               \
         .periph     = SPI0_RX_DMA_PERIPH,           \
-        .dma_flag   = DMA_FLAG_FTF,                 \
         .rcu        = SPI0_RX_DMA_RCU,              \
         .channel    = SPI0_RX_DMA_CHANNEL,          \
         .irq        = SPI0_RX_DMA_IRQ,              \
@@ -49,7 +47,6 @@ extern "C" {
 #define SPI1_TX_DMA_CONFIG                          \
     {                                               \
         .periph     = SPI1_TX_DMA_PERIPH,           \
-        .dma_flag   = DMA_FLAG_FTF,                 \
         .rcu        = SPI1_TX_DMA_RCU,              \
         .channel    = SPI1_TX_DMA_CHANNEL,          \
         .irq        = SPI1_TX_DMA_IRQ,              \
@@ -60,7 +57,6 @@ extern "C" {
 #define SPI1_RX_DMA_CONFIG                          \
     {                                               \
         .periph     = SPI1_RX_DMA_PERIPH,           \
-        .dma_flag   = DMA_FLAG_FTF,                 \
         .rcu        = SPI1_RX_DMA_RCU,              \
         .channel    = SPI1_RX_DMA_CHANNEL,          \
         .irq        = SPI1_RX_DMA_IRQ,              \
@@ -75,7 +71,6 @@ extern "C" {
 #define SPI2_TX_DMA_CONFIG                          \
     {                                               \
         .periph     = SPI2_TX_DMA_PERIPH,           \
-        .dma_flag   = DMA_FLAG_FTF,                 \
         .rcu        = SPI2_TX_DMA_RCU,              \
         .channel    = SPI2_TX_DMA_CHANNEL,          \
         .irq        = SPI2_TX_DMA_IRQ,              \
@@ -86,7 +81,6 @@ extern "C" {
 #define SPI2_RX_DMA_CONFIG                          \
     {                                               \
         .periph     = SPI2_RX_DMA_PERIPH,           \
-        .dma_flag   = DMA_FLAG_FTF,                 \
         .rcu        = SPI2_RX_DMA_RCU,              \
         .channel    = SPI2_RX_DMA_CHANNEL,          \
         .irq        = SPI2_RX_DMA_IRQ,              \

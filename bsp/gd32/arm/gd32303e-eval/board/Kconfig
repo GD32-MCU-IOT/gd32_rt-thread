@@ -206,7 +206,7 @@ menu "On-chip Peripheral Drivers"
                 bool
 
             config BSP_USING_HARD_I2C0
-                bool "Enable I2C0 BUS"
+                bool "Enable I2C0 BUS (Hardware)"
                 default n
 
             config BSP_I2C0_TX_USING_DMA
@@ -222,7 +222,7 @@ menu "On-chip Peripheral Drivers"
                 default n
 
             config BSP_USING_HARD_I2C1
-                bool "Enable I2C1 BUS"
+                bool "Enable I2C1 BUS (Hardware)"
                 default n
 
             config BSP_I2C1_TX_USING_DMA
@@ -254,6 +254,38 @@ menu "On-chip Peripheral Drivers"
                         Maximum wait time for an I2C DMA transfer to complete.
                         The driver reports a timeout once this limit is reached.
             endif
+
+            menuconfig BSP_USING_SOFT_I2C0
+                bool "Enable Soft I2C0 BUS (bit-bang)"
+                select RT_USING_I2C_BITOPS
+                default n
+                if BSP_USING_SOFT_I2C0
+                    config BSP_SOFT_I2C0_SCL_PIN
+                        int "Soft I2C0 SCL pin number"
+                        default 22
+                        help
+                            GPIO pin number for SCL (e.g. PB6 = 22)
+
+                    config BSP_SOFT_I2C0_SDA_PIN
+                        int "Soft I2C0 SDA pin number"
+                        default 23
+                        help
+                            GPIO pin number for SDA (e.g. PB7 = 23)
+                endif
+
+            menuconfig BSP_USING_SOFT_I2C1
+                bool "Enable Soft I2C1 BUS (bit-bang)"
+                select RT_USING_I2C_BITOPS
+                default n
+                if BSP_USING_SOFT_I2C1
+                    config BSP_SOFT_I2C1_SCL_PIN
+                        int "Soft I2C1 SCL pin number"
+                        default 24
+
+                    config BSP_SOFT_I2C1_SDA_PIN
+                        int "Soft I2C1 SDA pin number"
+                        default 25
+                endif
         endif
 
     menuconfig BSP_USING_ADC

@@ -45,6 +45,7 @@ extern "C" {
 #include "config/f30x/dma_config.h"
 #include "config/f30x/uart_config.h"
 #include "config/f30x/spi_config.h"
+#include "config/f30x/i2c_config.h"
 #endif
 
 #ifdef __cplusplus

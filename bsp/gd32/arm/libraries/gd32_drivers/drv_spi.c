@@ -17,6 +17,7 @@
 
 #define SPI0                            SPI
 #define RCU_SPI0                        RCU_SPI
+#define SPI0_IRQn                       SPI_IRQn
 
 #define spi_i2s_flag_get(periph, flag)          spi_flag_get(flag)
 #define spi_i2s_data_transmit(periph, data)     spi_data_transmit(data)
@@ -100,7 +101,7 @@ static struct rt_spi_bus spi_bus5;
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx)
+ && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -617,6 +618,16 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
         #if defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32F3x0 \
          || defined SOC_SERIES_GD32M53x
         spi_src = spi_periph == SPI0? CK_APB2:CK_APB1;
+        #elif defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32H77x
+        /* SPI default clock source */
+        if (spi_periph == SPI0 || spi_periph == SPI1 || spi_periph == SPI2)
+        {
+            spi_src = CK_PLL0Q;
+        }
+        else
+        {
+            spi_src = CK_APB2;
+        }
         #else
         if (spi_periph == SPI1 || spi_periph == SPI2)
         {

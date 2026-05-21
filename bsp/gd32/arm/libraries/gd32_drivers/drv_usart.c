@@ -1182,6 +1182,7 @@ static int gd32_uart_getc(struct rt_serial_device *serial)
 }
 
 #ifdef RT_SERIAL_USING_DMA
+
 static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_recv_len,
                             void *mem_base_addr)
 {
@@ -1190,8 +1191,8 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
 
     /* rx dma config */
     uart->setting_recv_len = setting_recv_len;
-    /* Initialize last_recv_index to 0 - represents total bytes received so far */
-    uart->last_recv_index = 0;
+    /* Initialize last_recv_index to DMA counter initial value (circular mode) */
+    uart->last_recv_index = setting_recv_len;
     gd32_dma_deinit(uart->dma_rx->periph, uart->dma_rx->channel);
 
     dma_single_data_para_struct_init(&dma_init_struct);
@@ -1210,12 +1211,14 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
 #if defined(SOC_SERIES_GD32F5xx)
     dma_channel_subperipheral_select(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->subperiph);
 #endif
-    /* configure DMA mode - non-circular mode */
-    dma_circulation_disable(uart->dma_rx->periph, uart->dma_rx->channel);
+    /* configure DMA mode - circular mode for continuous reception */
+    dma_circulation_enable(uart->dma_rx->periph, uart->dma_rx->channel);
 
     dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_FTF);
-    /* Enable Full-Transfer interrupt only */
-    dma_interrupt_enable(uart->dma_rx->periph, uart->dma_rx->channel, DMA_CHXCTL_FTFIE);
+    dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_HTF);
+    /* Enable Full-Transfer and Half-Transfer interrupts for circular RX */
+    dma_interrupt_enable(uart->dma_rx->periph, uart->dma_rx->channel, DMA_INT_FTF);
+    dma_interrupt_enable(uart->dma_rx->periph, uart->dma_rx->channel, DMA_INT_HTF);
 }
 
 static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
@@ -1380,7 +1383,7 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
         dma_transfer_number_config(uart->dma_tx->periph, uart->dma_tx->channel, size);
 
         dma_flag_clear(uart->dma_tx->periph, uart->dma_tx->channel, DMA_FLAG_FTF);
-        dma_interrupt_enable(uart->dma_tx->periph, uart->dma_tx->channel, DMA_CHXCTL_FTFIE);
+        dma_interrupt_enable(uart->dma_tx->periph, uart->dma_tx->channel, DMA_INT_FTF);
 
         usart_flag_clear(uart->uart_periph, USART_FLAG_TBE);
         usart_flag_clear(uart->uart_periph, USART_FLAG_TC);
@@ -1400,6 +1403,73 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
 #endif
 
 /**
+ * Unified DMA receive ISR handler for circular mode.
+ * Handles IDLE, Half-Transfer and Full-Transfer interrupt events.
+ * last_recv_index stores the DMA remaining counter at last processing point.
+ *
+ * @param serial serial device
+ * @param isr_flag UART_RX_DMA_IT_IDLE_FLAG / UART_RX_DMA_IT_HT_FLAG / UART_RX_DMA_IT_TC_FLAG
+ */
+static void dma_recv_isr(struct rt_serial_device *serial, rt_uint8_t isr_flag)
+{
+    struct gd32_uart *uart = (struct gd32_uart *) serial->parent.user_data;
+    rt_base_t level;
+    rt_size_t recv_len = 0;
+    rt_size_t counter;
+
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+    struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
+#endif
+
+    level = rt_hw_interrupt_disable();
+    counter = dma_transfer_number_get(uart->dma_rx->periph, uart->dma_rx->channel);
+
+    switch (isr_flag)
+    {
+    case UART_RX_DMA_IT_IDLE_FLAG:
+        /* IDLE: counter may be anywhere, handle both directions */
+        if (counter <= uart->last_recv_index)
+            recv_len = uart->last_recv_index - counter;
+        else
+            recv_len = uart->setting_recv_len + uart->last_recv_index - counter;
+        break;
+
+    case UART_RX_DMA_IT_HT_FLAG:
+        /* Half-transfer: counter is decreasing, should be less than last */
+        if (counter < uart->last_recv_index)
+            recv_len = uart->last_recv_index - counter;
+        break;
+
+    case UART_RX_DMA_IT_TC_FLAG:
+        /* Full-transfer: counter just reloaded, should be >= last */
+        if (counter >= uart->last_recv_index)
+            recv_len = uart->setting_recv_len + uart->last_recv_index - counter;
+        break;
+    }
+
+    if (recv_len)
+    {
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+        /* Invalidate DMA buffer cache, then copy to rx_fifo->buffer */
+        rt_size_t recv_start = uart->setting_recv_len - uart->last_recv_index;
+        rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, uart->dma_rx_buffer, serial->config.bufsz);
+        if (recv_start + recv_len <= uart->setting_recv_len) {
+            rt_memcpy(rx_fifo->buffer + recv_start,
+                      uart->dma_rx_buffer + recv_start, recv_len);
+        } else {
+            rt_size_t first_part = uart->setting_recv_len - recv_start;
+            rt_memcpy(rx_fifo->buffer + recv_start,
+                      uart->dma_rx_buffer + recv_start, first_part);
+            rt_memcpy(rx_fifo->buffer, uart->dma_rx_buffer, recv_len - first_part);
+        }
+#endif
+        uart->last_recv_index = counter;
+        rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
+    }
+    rt_hw_interrupt_enable(level);
+}
+
+/**
  * Serial port receive idle process. This need add to uart idle ISR.
  *
  * @param serial serial device
@@ -1407,30 +1477,8 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
 static void dma_uart_rx_idle_isr(struct rt_serial_device *serial)
 {
     struct gd32_uart *uart = (struct gd32_uart *) serial->parent.user_data;
-    rt_size_t recv_total_index, recv_len;
 
-    struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
-
-    recv_total_index = uart->setting_recv_len -
-                       dma_transfer_number_get(uart->dma_rx->periph, uart->dma_rx->channel);
-
-    /* Non-circular mode: recv_total_index always >= last_recv_index */
-    RT_ASSERT(recv_total_index >= uart->last_recv_index);
-    recv_len = recv_total_index - uart->last_recv_index;
-
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
-    /* Invalidate DMA buffer cache, then copy to rx_fifo->buffer */
-    if (recv_len > 0) {
-        rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, uart->dma_rx_buffer, serial->config.bufsz);
-        rt_memcpy(rx_fifo->buffer + uart->last_recv_index,
-                  uart->dma_rx_buffer + uart->last_recv_index, recv_len);
-    }
-#endif
-    uart->last_recv_index = recv_total_index;
-
-    if (recv_len) {
-        rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
-    }
+    dma_recv_isr(serial, UART_RX_DMA_IT_IDLE_FLAG);
 
     /* read a data for clear receive idle interrupt flag */
     usart_data_receive(uart->uart_periph);
@@ -1439,44 +1487,24 @@ static void dma_uart_rx_idle_isr(struct rt_serial_device *serial)
 
 /**
  * DMA receive done process. This need add to DMA receive done ISR.
- * Uses non-circular mode: disable DMA, process data, re-enable DMA.
+ * Uses circular mode: handles both half-transfer and full-transfer interrupts.
  *
  * @param serial serial device
  */
 static void dma_rx_done_isr(struct rt_serial_device *serial)
 {
     struct gd32_uart *uart = (struct gd32_uart *) serial->parent.user_data;
-    rt_size_t recv_len;
 
-    struct rt_serial_rx_fifo *rx_fifo = (struct rt_serial_rx_fifo *)serial->serial_rx;
+    /* Check and handle half-transfer interrupt */
+    if (dma_flag_get(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_HTF) != RESET) {
+        dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_HTF);
+        dma_recv_isr(serial, UART_RX_DMA_IT_HT_FLAG);
+    }
 
+    /* Check and handle full-transfer interrupt */
     if (dma_flag_get(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_FTF) != RESET) {
-        /* disable dma, stop receive data */
-        dma_channel_disable(uart->dma_rx->periph, uart->dma_rx->channel);
-
-        recv_len = uart->setting_recv_len - uart->last_recv_index;
-
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
-        /* Invalidate DMA buffer cache, then copy to rx_fifo->buffer */
-        if (recv_len > 0) {
-            rt_hw_cpu_dcache_ops(RT_HW_CACHE_INVALIDATE, uart->dma_rx_buffer, serial->config.bufsz);
-            rt_memcpy(rx_fifo->buffer + uart->last_recv_index,
-                      uart->dma_rx_buffer + uart->last_recv_index, recv_len);
-        }
-#endif
-
-        rt_hw_serial_isr(serial, RT_SERIAL_EVENT_RX_DMADONE | (recv_len << 8));
-
-        /* Restart DMA for next reception */
         dma_flag_clear(uart->dma_rx->periph, uart->dma_rx->channel, DMA_FLAG_FTF);
-        uart->last_recv_index = 0;
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
-        dma_memory_address_config(uart->dma_rx->periph, uart->dma_rx->channel, DMA_MEMORY_0, (uint32_t)uart->dma_rx_buffer);
-#else
-        dma_memory_address_config(uart->dma_rx->periph, uart->dma_rx->channel, DMA_MEMORY_0, (uint32_t)rx_fifo->buffer);
-#endif
-        dma_transfer_number_config(uart->dma_rx->periph, uart->dma_rx->channel, uart->setting_recv_len);
-        dma_channel_enable(uart->dma_rx->periph, uart->dma_rx->channel);
+        dma_recv_isr(serial, UART_RX_DMA_IT_TC_FLAG);
     }
 }
 

@@ -141,6 +141,13 @@ void gd32_uart_gpio_init(struct gd32_uart *uart);
 
 #endif
 
+#ifdef RT_SERIAL_USING_DMA
+/* DMA RX ISR flag types */
+#define UART_RX_DMA_IT_IDLE_FLAG    0x00
+#define UART_RX_DMA_IT_HT_FLAG      0x01
+#define UART_RX_DMA_IT_TC_FLAG      0x02
+#endif
+
 int rt_hw_usart_init(void);
 
 #ifdef __cplusplus

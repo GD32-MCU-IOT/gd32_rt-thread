@@ -101,11 +101,6 @@ struct dma_config
 
 #endif
 
-/*
- * F30x DMA API compatibility: remap F4xx-style names to F30x equivalents.
- * GD32F30x uses dma_parameter_struct / dma_init() and different field names.
- * These macros allow all drivers (UART, SPI, I2C) to share a single F4xx-style API.
- */
 #if defined(SOC_SERIES_GD32F30x)
 /* DMA init struct type and functions */
 #define dma_single_data_parameter_struct     dma_parameter_struct

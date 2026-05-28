@@ -41,6 +41,11 @@ extern "C" {
 #include "config/h75e/uart_config.h"
 #include "config/h75e/spi_config.h"
 #include "config/h75e/i2c_config.h"
+#elif defined(SOC_SERIES_GD32F30x)
+#include "config/f30x/dma_config.h"
+#include "config/f30x/uart_config.h"
+#include "config/f30x/spi_config.h"
+#include "config/f30x/i2c_config.h"
 #endif
 
 #ifdef __cplusplus

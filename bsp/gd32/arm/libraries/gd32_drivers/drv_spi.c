@@ -35,6 +35,12 @@
 #define SPI_TXDATA_REG(periph)                      SPI_TDATA(periph)
 #define gd32_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
 #define gd32_dma_subperiph_config(periph, ch, cfg)
+#elif defined(SOC_SERIES_GD32F30x)
+/* F30x/F10x/F20x: fixed DMA channel mapping, no subperiph */
+#define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
+#define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
+#define gd32_dma_request_config(init_s, dma_cfg)
+#define gd32_dma_subperiph_config(periph, ch, cfg)
 #else
 #define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
 #define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
@@ -101,7 +107,8 @@ static struct rt_spi_bus spi_bus5;
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x)
+ && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x) \
+ && !defined(SOC_SERIES_GD32F30x)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -409,7 +416,8 @@ static struct rt_spi_ops gd32_spi_ops =
 #if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx)
+ && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) \
+ && !defined(SOC_SERIES_GD32F30x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -456,8 +464,10 @@ static void gd32_spi_init(struct gd32_spi *gd32_spi)
 
 }
 #else
-/* For series excluded above: gd32_spi_init() must be provided by the board-level
- * BSP (e.g., board_msd_init.c), as GPIO/clock configuration is board-specific. */
+#warning "gd32_spi_init should be defined in board_msd_init.c"
+rt_weak void gd32_spi_init(struct gd32_spi *gd32_spi)
+{
+}
 #endif
 
 #if defined(BSP_USING_SPI_DMA)
@@ -494,7 +504,7 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.priority = DMA_PRIORITY_HIGH;
-    dma_init_struct.memory0_addr = 0;
+    GD32_DMA_SET_MEMADDR(&dma_init_struct, 0);
     dma_init_struct.number = 0;
     
     /* RX DMA configuration */
@@ -502,7 +512,7 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     {
         gd32_dma_deinit(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
         
-        dma_init_struct.periph_memory_width = spi_device->dma_rx->data_width;
+        GD32_DMA_SET_DATAWIDTH(&dma_init_struct, spi_device->dma_rx->data_width);
         dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
         dma_init_struct.periph_addr = (uint32_t)&SPI_RXDATA_REG(spi_periph);
         gd32_dma_request_config(&dma_init_struct, spi_device->dma_rx);
@@ -518,7 +528,7 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     {
         gd32_dma_deinit(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
         
-        dma_init_struct.periph_memory_width = spi_device->dma_tx->data_width;
+        GD32_DMA_SET_DATAWIDTH(&dma_init_struct, spi_device->dma_tx->data_width);
         dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
         dma_init_struct.periph_addr = (uint32_t)&SPI_TXDATA_REG(spi_periph);
         gd32_dma_request_config(&dma_init_struct, spi_device->dma_tx);

@@ -37,6 +37,9 @@
 #define USART_DATA_RX(usartx) (&USART_RDATA(usartx))
 /* ARM Cortex-M7 cache line size for DMA buffer alignment */
 #define RT_DMA_CACHE_LINE_SIZE  32
+#elif defined(SOC_GD32F5HC)
+#define USART_DATA_TX(usartx) (&USART_TDATA(usartx))
+#define USART_DATA_RX(usartx) (&USART_RDATA(usartx))
 #else
 #define USART_DATA_TX(usartx) (&USART_DATA(usartx))
 #define USART_DATA_RX(usartx) (&USART_DATA(usartx))
@@ -218,7 +221,7 @@ struct dma_config uart7_txdma = UART7_DMA_TX_CONFIG;
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F5HC)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -856,7 +859,7 @@ void UART7_IRQHandler(void)
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F5HC)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:
@@ -1202,7 +1205,7 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
 #endif
     dma_init_struct.periph_addr  = (uint32_t)USART_DATA_RX(uart->uart_periph);
     dma_single_data_mode_init(uart->dma_rx->periph, uart->dma_rx->channel, &dma_init_struct);
-#if defined(SOC_SERIES_GD32F5xx)
+#if defined(SOC_SERIES_GD32F5xx) || defined(SOC_SERIES_GD32F5HC)
     dma_channel_subperipheral_select(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->subperiph);
 #endif
     /* configure DMA mode - circular mode for continuous reception */
@@ -1312,7 +1315,7 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     dma_init_struct.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
     dma_init_struct.periph_addr  = (uint32_t)USART_DATA_TX(uart->uart_periph);
     dma_single_data_mode_init(uart->dma_tx->periph, uart->dma_tx->channel, &dma_init_struct);
-#if defined(SOC_SERIES_GD32F5xx)
+#if defined(SOC_SERIES_GD32F5xx) || defined(SOC_SERIES_GD32F5HC)
     dma_channel_subperipheral_select(uart->dma_tx->periph, uart->dma_tx->channel, uart->dma_tx->subperiph);
 #endif
     /* configure DMA mode */

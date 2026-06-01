@@ -202,7 +202,8 @@ struct rt_i2c_bus_device i2c5;
 #define I2C_DMA_TRANSMIT_GD                  I2C_ADD_DMA_TRANSMIT
 #define I2C_DMA_RECEIVE_GD                   I2C_ADD_DMA_RECEIVE
 #endif
-#elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+#elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
+   || defined(SOC_SERIES_GD32F5HC)
 #define I2C_CTL1_REG(periph)                 I2C_CTL1(periph)
 #define I2C_CTL1_BYTENUM_GD                  I2C_CTL1_BYTENUM
 #define I2C_CTL1_RELOAD_GD                   I2C_CTL1_RELOAD
@@ -257,7 +258,7 @@ struct rt_i2c_bus_device i2c5;
     defined(SOC_SERIES_GD32L23x) || defined(SOC_SERIES_GD32F50x) || \
     defined(SOC_SERIES_GD32G5x3) || defined(SOC_SERIES_GD32H77x) || \
     defined(SOC_SERIES_GD32M53x) || defined(SOC_SERIES_GD32F5xx) || \
-    defined(SOC_SERIES_GD32E51x)
+    defined(SOC_SERIES_GD32E51x) || defined(SOC_SERIES_GD32F5HC)
 #define GD32_I2C_HAS_NEW_IP
 #endif
 

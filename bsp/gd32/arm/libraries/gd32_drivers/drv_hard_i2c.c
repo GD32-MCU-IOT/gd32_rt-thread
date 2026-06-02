@@ -248,7 +248,7 @@ struct rt_i2c_bus_device i2c5;
 #define IS_I2C_LEGACY(periph)  (1)
 #elif defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32L23x) \
    || defined (SOC_SERIES_GD32F50x) || defined (SOC_SERIES_GD32G5x3) || defined (SOC_SERIES_GD32H77x) \
-   || defined (SOC_SERIES_GD32M53x) || defined (SOC_SERIES_GD32F5HC)
+   || defined (SOC_SERIES_GD32M53x)
 #define IS_I2C_LEGACY(periph)  (0)
 #elif defined SOC_SERIES_GD32E51x
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1)
@@ -268,7 +268,7 @@ struct rt_i2c_bus_device i2c5;
     defined(SOC_SERIES_GD32L23x) || defined(SOC_SERIES_GD32F50x) || \
     defined(SOC_SERIES_GD32G5x3) || defined(SOC_SERIES_GD32H77x) || \
     defined(SOC_SERIES_GD32M53x) || defined(SOC_SERIES_GD32F5xx) || \
-    defined(SOC_SERIES_GD32E51x) || defined(SOC_SERIES_GD32F5HC)
+    defined(SOC_SERIES_GD32E51x)
 #define GD32_I2C_HAS_NEW_IP
 #endif
 
@@ -282,7 +282,7 @@ struct rt_i2c_bus_device i2c5;
     if(autoend) _ctl1 |= I2C_CTL1_AUTOEND_GD; \
     I2C_CTL1_REG(periph) = _ctl1; \
 } while(0)
-#endif /* GD32_I2C_HAS_NEW_IP */
+#endif
 
 #if defined(BSP_USING_I2C_RX_DMA) || defined(BSP_USING_I2C_TX_DMA)
 /* Static DMA configuration for each I2C */

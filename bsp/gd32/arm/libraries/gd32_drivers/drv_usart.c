@@ -221,7 +221,7 @@ struct dma_config uart7_txdma = UART7_DMA_TX_CONFIG;
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F5HC)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32F5HC)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -600,6 +600,7 @@ static struct gd32_uart uart_obj[] = {
 #ifdef RT_SERIAL_USING_DMA
 static void dma_tx_done_isr(uint32_t dma_periph, dma_channel_enum dma_ch)
 {
+    dma_channel_disable(dma_periph, dma_ch);
     dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_FTF);
     dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_HTF);
     dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_FEE);
@@ -859,7 +860,7 @@ void UART7_IRQHandler(void)
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F5HC)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32F5HC)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:
@@ -938,6 +939,11 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
 
     NVIC_SetPriority(uart->irqn, 0);
     NVIC_EnableIRQ(uart->irqn);
+}
+#else
+#warning "gd32_uart_gpio_init should be define in board_msd_init.c"
+rt_weak void gd32_uart_gpio_init(struct gd32_uart *uart)
+{
 }
 #endif
 
@@ -1194,9 +1200,9 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
 
     dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.direction    = DMA_PERIPH_TO_MEMORY;
-    dma_init_struct.memory0_addr = (uint32_t)mem_base_addr;
+    GD32_DMA_SET_MEMADDR(&dma_init_struct, (uint32_t)mem_base_addr);
     dma_init_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
+    GD32_DMA_SET_DATAWIDTH(&dma_init_struct, DMA_PERIPH_WIDTH_8BIT);
     dma_init_struct.number       = uart->setting_recv_len;
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
@@ -1304,15 +1310,15 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.direction    = DMA_MEMORY_TO_PERIPH;
     dma_init_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
+    GD32_DMA_SET_DATAWIDTH(&dma_init_struct, DMA_PERIPH_WIDTH_8BIT);
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     dma_init_struct.request      = uart->dma_tx->request;
 #endif
     dma_init_struct.number       = 0;   /* will be set in transmit function */
-    dma_init_struct.memory0_addr = 0;   /* will be set in transmit function */
-    dma_init_struct.circular_mode = DMA_CIRCULAR_MODE_DISABLE;
+    GD32_DMA_SET_MEMADDR(&dma_init_struct, 0);   /* will be set in transmit function */
+    GD32_DMA_SET_CIRCULAR(&dma_init_struct, DMA_CIRCULAR_MODE_DISABLE);
     dma_init_struct.periph_addr  = (uint32_t)USART_DATA_TX(uart->uart_periph);
     dma_single_data_mode_init(uart->dma_tx->periph, uart->dma_tx->channel, &dma_init_struct);
 #if defined(SOC_SERIES_GD32F5xx) || defined(SOC_SERIES_GD32F5HC)

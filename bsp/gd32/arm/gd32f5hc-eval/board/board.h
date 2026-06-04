@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006-2024, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -43,17 +43,14 @@ extern int __bss_end;
  * DMA0 Channel0 - I2C0_RX    (subperi 1)
  * DMA0 Channel1 - UART2_RX   (subperi 4)  [console]
  * DMA0 Channel2 - I2C1_RX    (subperi 7)
- * DMA0 Channel3 - UART2_TX   (subperi 4)  [console]
+ * DMA0 Channel3 - SPI1_RX    (subperi 0)
  * DMA0 Channel4 - SPI1_TX    (subperi 0)
  * DMA0 Channel5 - SPI0_TX    (subperi 3)
  * DMA0 Channel6 - I2C0_TX    (subperi 1)
  * DMA0 Channel7 - I2C1_TX    (subperi 7)
- * ------------------------------------------------------------
- * DMA1 Channel3 - SPI1_RX    (subperi 0)
  * ============================================================
- * Note: SPI0_RX (DMA0 CH3 SUBPERI3) conflicts with UART2_TX.
- *       If SPI0 DMA is needed alongside UART2 DMA TX, disable
- *       BSP_UART2_TX_USING_DMA and use polling TX for console.
+ * Note: SPI1_RX (DMA0 CH3 SUBPERI0) conflicts with UART2_TX (SUBPERI4).
+ *       UART2 TX DMA is not enabled; console uses polling TX.
  */
 
 /* I2C0 DMA: TX on DMA0_CH6, RX on DMA0_CH0 */
@@ -125,11 +122,11 @@ extern int __bss_end;
 #endif
 
 #if defined(BSP_SPI1_USING_DMA) && !defined(SPI1_RX_DMA_PERIPH)
-#define SPI1_DMA_RX_IRQHandler          DMA1_Channel3_IRQHandler
-#define SPI1_RX_DMA_PERIPH              DMA1
-#define SPI1_RX_DMA_RCU                 RCU_DMA1
+#define SPI1_DMA_RX_IRQHandler          DMA0_Channel3_IRQHandler
+#define SPI1_RX_DMA_PERIPH              DMA0
+#define SPI1_RX_DMA_RCU                 RCU_DMA0
 #define SPI1_RX_DMA_CHANNEL             DMA_CH3
-#define SPI1_RX_DMA_IRQ                 DMA1_Channel3_IRQn
+#define SPI1_RX_DMA_IRQ                 DMA0_Channel3_IRQn
 #define SPI1_RX_DMA_SUBPERI             DMA_SUBPERI0
 #endif
 #endif /* BSP_USING_SPI_DMA */

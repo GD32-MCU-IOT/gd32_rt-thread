@@ -55,7 +55,7 @@ if PLATFORM == 'gcc':
         CFLAGS += ' -O0 -gdwarf-2'
         AFLAGS += ' -gdwarf-2'
     else:
-        CFLAGS += ' -O1'
+        CFLAGS += ' -O2'
 
     CXXFLAGS = CFLAGS
     POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
@@ -86,7 +86,7 @@ elif PLATFORM == 'armclang':
         CFLAGS += ' -O0 -gdwarf-2'
         AFLAGS += ' -g'
     else:
-        CFLAGS += ' -O1'
+        CFLAGS += ' -O2'
 
     CXXFLAGS = CFLAGS
     POST_ACTION = 'fromelf --bin $TARGET --output rtthread.bin \nfromelf -z $TARGET \n'
@@ -130,9 +130,9 @@ elif PLATFORM == 'iccarm':
 
     if BUILD == 'debug':
         CFLAGS += ' --debug'
-        CFLAGS += ' -O1'
+        CFLAGS += ' -On'
     else:
-        CFLAGS += ' -O1'
+        CFLAGS += ' -Oh'
 
     LFLAGS = ' --config "board/linker_scripts/link.icf"'
     LFLAGS += ' --entry __iar_program_start'

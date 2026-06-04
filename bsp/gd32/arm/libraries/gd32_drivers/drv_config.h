@@ -21,7 +21,7 @@ extern "C" {
 #include "config/e50x/dma_config.h"
 #include "config/e50x/uart_config.h"
 #include "config/e50x/spi_config.h"
-#elif defined(SOC_GD32F5HC)
+#elif defined(SOC_SERIES_GD32F5HC)
 #include "config/f5hc/dma_config.h"
 #include "config/f5hc/uart_config.h"
 #include "config/f5hc/spi_config.h"

@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2026-05-27     RT-Thread    first implementation for GD32F5HC
+ * 2026-05-27     RT-Thread    first implementation for GD32W51x_F5HC
  */
 
 #include <stdint.h>

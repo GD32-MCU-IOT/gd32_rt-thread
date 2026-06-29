@@ -11,6 +11,7 @@ GD32W51x_F5HC_standard_peripheral/Source/gd32w51x_f5hc_gpio.c
 GD32W51x_F5HC_standard_peripheral/Source/gd32w51x_f5hc_rcu.c
 GD32W51x_F5HC_standard_peripheral/Source/gd32w51x_f5hc_dma.c
 GD32W51x_F5HC_standard_peripheral/Source/gd32w51x_f5hc_exti.c
+GD32W51x_F5HC_standard_peripheral/Source/gd32w51x_f5hc_fmc.c
 GD32W51x_F5HC_standard_peripheral/Source/gd32w51x_f5hc_misc.c
 GD32W51x_F5HC_standard_peripheral/Source/gd32w51x_f5hc_syscfg.c
 ''')
@@ -43,7 +44,7 @@ if GetDepend(['BSP_USING_GD_DBG']):
 
 path = [cwd + '/GD32W51x_F5HC_standard_peripheral/Include']
 
-CPPDEFINES = ['USE_STDPERIPH_DRIVER']
+CPPDEFINES = ['USE_STDPERIPH_DRIVER', 'GD32W51x_F5HC']
 
 group = DefineGroup('Libraries', src, depend = ['SOC_GD32F5HC'], CPPPATH = path, CPPDEFINES = CPPDEFINES)
 

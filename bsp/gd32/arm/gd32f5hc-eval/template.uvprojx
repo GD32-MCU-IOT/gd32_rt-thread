@@ -13,16 +13,16 @@
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>GD32F5HCRI</Device>
+          <Device>GD32F5HCPI</Device>
           <Vendor>GigaDevice</Vendor>
           <PackID>GigaDevice.GD32W51x_F5HC_DFP.2.0.0</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x50000) IRAM2(0x30000000,0x50000) IROM(0x08000000,0x0200000) IROM2(0x0C000000,0x0200000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN2 -FF0GD32F5HC_NS -FS08000000 -FL0200000 -FF1GD32F5HC_S -FS1C000000 -FL1200000 -FP0($$Device:GD32F5HCRI$Flash\GD32F5HC_NS.FLM) -FP1($$Device:GD32F5HCRI$Flash\GD32F5HC_S.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC1000 -FN2 -FF0GD32F5HC_NS -FS08000000 -FL0200000 -FF1GD32F5HC_S -FS1C000000 -FL1200000 -FP0($$Device:GD32F5HCPI$Flash\GD32F5HC_NS.FLM) -FP1($$Device:GD32F5HCPI$Flash\GD32F5HC_S.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:GD32F5HCRI$Device\Include\gd32w51x_f5hc.h</RegisterFile>
+          <RegisterFile>$$Device:GD32F5HCPI$Device\Include\gd32w51x_f5hc.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -32,7 +32,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:GD32F5HCRI$SVD\GD32F5HC.svd</SFDFile>
+          <SFDFile>$$Device:GD32F5HCPI$SVD\GD32F5HC.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>

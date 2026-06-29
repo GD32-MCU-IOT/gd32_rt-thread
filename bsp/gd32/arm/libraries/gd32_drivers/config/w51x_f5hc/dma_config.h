@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2026-06-04     RT-Thread    DMA channel mapping for GD32F5HC per user manual tables 14-2/14-4
+ * 2026-06-04     RT-Thread    DMA channel mapping for GD32W51x_F5HC per user manual tables 14-2/14-4
  */
 
 #ifndef __DMA_CONFIG_H__
@@ -18,7 +18,7 @@ extern "C" {
 #endif
 
 /*
- * DMA Channel Allocation Table for GD32F5HC:
+ * DMA Channel Allocation Table for GD32W51x_F5HC:
  * ============================================================
  * DMA0 Channel0 - I2C0_RX    (subperi 1)
  * DMA0 Channel1 - USART2_RX  (subperi 4)

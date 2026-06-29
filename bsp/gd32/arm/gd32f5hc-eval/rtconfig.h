@@ -392,7 +392,7 @@
 
 /* Hardware Drivers Config */
 
-#define SOC_SERIES_GD32F5HC
+#define SOC_SERIES_GD32W51x_F5HC
 #define SOC_GD32F5HC
 
 /* Onboard Peripheral Drivers */
@@ -401,7 +401,6 @@
 
 #define BSP_USING_GPIO
 #define BSP_USING_UART
-#define BSP_USING_UART0
 #define BSP_USING_UART2
 #define BSP_UART_POLL_TX_TIMEOUT_MS 1000
 #define BSP_USING_SPI

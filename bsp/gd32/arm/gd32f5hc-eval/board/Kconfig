@@ -1,13 +1,13 @@
 menu "Hardware Drivers Config"
 
-config SOC_SERIES_GD32F5HC
+config SOC_SERIES_GD32W51x_F5HC
     bool
     select ARCH_ARM_CORTEX_SECURE
     default y
 
 config SOC_GD32F5HC
     bool
-    select SOC_SERIES_GD32F5HC
+    select SOC_SERIES_GD32W51x_F5HC
     select RT_USING_COMPONENTS_INIT
     select RT_USING_USER_MAIN
     default y

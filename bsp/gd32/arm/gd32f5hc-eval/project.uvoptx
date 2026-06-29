@@ -120,7 +120,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>UL2V8M</Key>
-          <Name>-U -O206 -S0 -C0 -P00 -TO65554 -TC10000000 -TT10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO7 -FD20000000 -FC2000 -FN2 -FF0GD32F5HC_NS.FLM -FS08000000 -FL0200000 -FP0($$Device:GD32F5HCRI$Flash\GD32F5HC_NS.FLM) -FF1GD32F5HC_S.FLM -FS1C000000 -FL1200000 -FP1($$Device:GD32F5HCRI$Flash\GD32F5HC_S.FLM)</Name>
+          <Name>-U-O206 -O206 -S0 -C0 -P00 -TO65554 -TC10000000 -TT10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO7 -FD20000000 -FC2000 -FN2 -FF0GD32F5HC_NS.FLM -FS08000000 -FL0200000 -FP0($$Device:GD32F5HCPI$Flash\GD32F5HC_NS.FLM) -FF1GD32F5HC_S.FLM -FS1C000000 -FL1200000 -FP1($$Device:GD32F5HCPI$Flash\GD32F5HC_S.FLM)</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
       <Breakpoint/>
@@ -662,30 +662,6 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\components\finsh\cmd.c</PathWithFileName>
-      <FilenameWithoutPath>cmd.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>7</GroupNumber>
-      <FileNumber>38</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
-      <PathWithFileName>..\..\..\..\components\finsh\msh_file.c</PathWithFileName>
-      <FilenameWithoutPath>msh_file.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>7</GroupNumber>
-      <FileNumber>39</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
       <PathWithFileName>..\..\..\..\components\finsh\shell.c</PathWithFileName>
       <FilenameWithoutPath>shell.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
@@ -693,7 +669,7 @@
     </File>
     <File>
       <GroupNumber>7</GroupNumber>
-      <FileNumber>40</FileNumber>
+      <FileNumber>38</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
@@ -705,13 +681,37 @@
     </File>
     <File>
       <GroupNumber>7</GroupNumber>
-      <FileNumber>41</FileNumber>
+      <FileNumber>39</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\..\..\components\finsh\msh_parse.c</PathWithFileName>
       <FilenameWithoutPath>msh_parse.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>7</GroupNumber>
+      <FileNumber>40</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\..\..\components\finsh\cmd.c</PathWithFileName>
+      <FilenameWithoutPath>cmd.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>7</GroupNumber>
+      <FileNumber>41</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\..\..\..\components\finsh\msh_file.c</PathWithFileName>
+      <FilenameWithoutPath>msh_file.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1082,7 +1082,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-cmsis-latest\GD32W51x\GD\GD32W51x_F5HC\Source\ARM\startup_gd32f5hc.s</PathWithFileName>
+      <PathWithFileName>packages\gd32-arm-cmsis-latest\GD32W51x_F5HC\GD\GD32W51x_F5HC\Source\ARM\startup_gd32f5hc.s</PathWithFileName>
       <FilenameWithoutPath>startup_gd32f5hc.s</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1094,7 +1094,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-cmsis-latest\GD32W51x\GD\GD32W51x_F5HC\Source\system_gd32w51x_f5hc.c</PathWithFileName>
+      <PathWithFileName>packages\gd32-arm-cmsis-latest\GD32W51x_F5HC\GD\GD32W51x_F5HC\Source\system_gd32w51x_f5hc.c</PathWithFileName>
       <FilenameWithoutPath>system_gd32w51x_f5hc.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1106,7 +1106,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_dbg.c</PathWithFileName>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_dbg.c</PathWithFileName>
       <FilenameWithoutPath>gd32w51x_f5hc_dbg.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1118,7 +1118,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_dma.c</PathWithFileName>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_dma.c</PathWithFileName>
       <FilenameWithoutPath>gd32w51x_f5hc_dma.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1130,7 +1130,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_exti.c</PathWithFileName>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_exti.c</PathWithFileName>
       <FilenameWithoutPath>gd32w51x_f5hc_exti.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -1142,8 +1142,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_gpio.c</PathWithFileName>
-      <FilenameWithoutPath>gd32w51x_f5hc_gpio.c</FilenameWithoutPath>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_fmc.c</PathWithFileName>
+      <FilenameWithoutPath>gd32w51x_f5hc_fmc.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1154,8 +1154,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_i2c.c</PathWithFileName>
-      <FilenameWithoutPath>gd32w51x_f5hc_i2c.c</FilenameWithoutPath>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_gpio.c</PathWithFileName>
+      <FilenameWithoutPath>gd32w51x_f5hc_gpio.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1166,8 +1166,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_misc.c</PathWithFileName>
-      <FilenameWithoutPath>gd32w51x_f5hc_misc.c</FilenameWithoutPath>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_i2c.c</PathWithFileName>
+      <FilenameWithoutPath>gd32w51x_f5hc_i2c.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1178,8 +1178,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_rcu.c</PathWithFileName>
-      <FilenameWithoutPath>gd32w51x_f5hc_rcu.c</FilenameWithoutPath>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_misc.c</PathWithFileName>
+      <FilenameWithoutPath>gd32w51x_f5hc_misc.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1190,8 +1190,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_spi.c</PathWithFileName>
-      <FilenameWithoutPath>gd32w51x_f5hc_spi.c</FilenameWithoutPath>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_rcu.c</PathWithFileName>
+      <FilenameWithoutPath>gd32w51x_f5hc_rcu.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1202,8 +1202,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_syscfg.c</PathWithFileName>
-      <FilenameWithoutPath>gd32w51x_f5hc_syscfg.c</FilenameWithoutPath>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_spi.c</PathWithFileName>
+      <FilenameWithoutPath>gd32w51x_f5hc_spi.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -1214,7 +1214,19 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_usart.c</PathWithFileName>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_syscfg.c</PathWithFileName>
+      <FilenameWithoutPath>gd32w51x_f5hc_syscfg.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>10</GroupNumber>
+      <FileNumber>82</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>packages\gd32-arm-series-latest\GD32W51x_F5HC\GD32W51x_F5HC_standard_peripheral\Source\gd32w51x_f5hc_usart.c</PathWithFileName>
       <FilenameWithoutPath>gd32w51x_f5hc_usart.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>

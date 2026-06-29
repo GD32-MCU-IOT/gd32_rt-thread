@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2026-05-27     Zhiwei Zhang first implementation for GD32F5HC-EVAL
+ * 2026-05-27     Zhiwei Zhang first implementation for GD32W51x_F5HC-EVAL
  */
 
 #include <rtthread.h>
@@ -21,7 +21,7 @@
 #define GD32_SPI_TEST
 #endif
 
-/* LED pins - GD32F5HC-EVAL board
+/* LED pins - GD32W51x_F5HC-EVAL board
  * LED1 = PB6, LED2 = PA15, LED3 = PA6, LED4 = PA1
  */
 #define LED1_PIN    GET_PIN(B, 6)
@@ -53,7 +53,7 @@ int main(void)
     rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
 
-    rt_kprintf("\n\rHello GD32F5HC-EVAL!\n\r");
+    rt_kprintf("\n\rHello GD32W51x_F5HC-EVAL!\n\r");
     rt_kprintf("RT-Thread BSP adaptation successful!\n\r");
 
 #ifdef GD32_I2C_EEPROM_TEST

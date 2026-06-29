@@ -213,7 +213,7 @@ struct rt_i2c_bus_device i2c5;
 #define I2C_DMA_RECEIVE_GD                   I2C_ADD_DMA_RECEIVE
 #endif
 #elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
-   || defined(SOC_SERIES_GD32F5HC)
+   || defined(SOC_SERIES_GD32W51x_F5HC)
 #define I2C_CTL1_REG(periph)                 I2C_CTL1(periph)
 #define I2C_CTL1_BYTENUM_GD                  I2C_CTL1_BYTENUM
 #define I2C_CTL1_RELOAD_GD                   I2C_CTL1_RELOAD
@@ -248,7 +248,7 @@ struct rt_i2c_bus_device i2c5;
 #define IS_I2C_LEGACY(periph)  (1)
 #elif defined (SOC_SERIES_GD32H7xx) || defined (SOC_SERIES_GD32H75E) || defined (SOC_SERIES_GD32L23x) \
    || defined (SOC_SERIES_GD32F50x) || defined (SOC_SERIES_GD32G5x3) || defined (SOC_SERIES_GD32H77x) \
-   || defined (SOC_SERIES_GD32M53x) || defined (SOC_SERIES_GD32F5HC)
+   || defined (SOC_SERIES_GD32M53x) || defined (SOC_SERIES_GD32W51x_F5HC)
 #define IS_I2C_LEGACY(periph)  (0)
 #elif defined SOC_SERIES_GD32E51x
 #define IS_I2C_LEGACY(periph)  ((periph) == I2C0 || (periph) == I2C1)
@@ -268,7 +268,7 @@ struct rt_i2c_bus_device i2c5;
     defined(SOC_SERIES_GD32L23x) || defined(SOC_SERIES_GD32F50x) || \
     defined(SOC_SERIES_GD32G5x3) || defined(SOC_SERIES_GD32H77x) || \
     defined(SOC_SERIES_GD32M53x) || defined(SOC_SERIES_GD32F5xx) || \
-    defined(SOC_SERIES_GD32E51x) || defined(SOC_SERIES_GD32F5HC)
+    defined(SOC_SERIES_GD32E51x) || defined(SOC_SERIES_GD32W51x_F5HC)
 #define GD32_I2C_HAS_NEW_IP
 #endif
 
@@ -328,7 +328,7 @@ static struct dma_config i2c5_dma_tx_cfg = I2C5_TX_DMA_CONFIG;
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32F5HC)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
 static const struct gd32_i2c_bus gd_i2c_config[] = {
 #ifdef BSP_USING_HARD_I2C0
     {
@@ -1106,7 +1106,7 @@ static int gd32_i2c_legacy_dma_read(const struct gd32_i2c_bus *i2c_bus, const st
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32F5HC)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
 /**
   * @brief  This function initializes the i2c pin.
   * @param  i2c

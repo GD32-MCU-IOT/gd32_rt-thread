@@ -1,4 +1,4 @@
-/* Linker script for GD32F5HC with GNU LD */
+/* Linker script for GD32W51x_F5HC with GNU LD */
 /* Memory Spaces Definitions */
 MEMORY
 {

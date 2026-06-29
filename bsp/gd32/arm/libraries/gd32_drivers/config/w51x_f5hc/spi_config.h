@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2026-06-04     RT-Thread    SPI DMA config for GD32F5HC
+ * 2026-06-04     RT-Thread    SPI DMA config for GD32W51x_F5HC
  */
 
 #ifndef __SPI_CONFIG_H__

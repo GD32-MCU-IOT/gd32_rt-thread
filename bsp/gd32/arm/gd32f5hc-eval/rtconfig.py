@@ -43,7 +43,7 @@ if PLATFORM == 'gcc':
     OBJDUMP = PREFIX + 'objdump'
     OBJCPY = PREFIX + 'objcopy'
 
-    DEVICE = ' -mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -DGD32F5HC -DSYS_NS=1'
+    DEVICE = ' -mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -DGD32W51x_F5HC -DGD32F5HC -DSYS_NS=1'
     CFLAGS = DEVICE + ' -g -Wall -ffunction-sections -fdata-sections'
     AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb '
     LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread.map,-cref,-u,Reset_Handler -T board/linker_scripts/link.ld'
@@ -70,7 +70,7 @@ elif PLATFORM == 'armclang':
     TARGET_EXT = 'axf'
 
     DEVICE = ' --cpu Cortex-M33 '
-    CFLAGS = ' -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 --target=arm-arm-none-eabi -mfloat-abi=hard -DGD32F5HC -DSYS_NS=1'
+    CFLAGS = ' -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 --target=arm-arm-none-eabi -mfloat-abi=hard -DGD32W51x_F5HC -DGD32F5HC -DSYS_NS=1'
     CFLAGS += ' -c -ffunction-sections -fdata-sections -fno-exceptions -fno-rtti -fshort-enums -fshort-wchar'
     AFLAGS = DEVICE + ' --apcs=interwork '
     LFLAGS = DEVICE + ' --info sizes --info totals --info unused --info veneers '
@@ -117,6 +117,7 @@ elif PLATFORM == 'iccarm':
     CFLAGS += ' --fpu=FPv5_sp'
     CFLAGS += ' --dlib_config "' + EXEC_PATH + '/arm/INC/c/DLib_Config_Normal.h"'
     CFLAGS += ' --silent'
+    CFLAGS += ' -DGD32W51x_F5HC'
     CFLAGS += ' -DGD32F5HC'
     CFLAGS += ' -DSYS_NS=1'
 

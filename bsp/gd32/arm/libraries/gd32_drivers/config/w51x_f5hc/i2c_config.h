@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2026-06-04     RT-Thread    I2C DMA config for GD32F5HC
+ * 2026-06-04     RT-Thread    I2C DMA config for GD32W51x_F5HC
  */
 
 #ifndef __I2C_CONFIG_H__

@@ -23,7 +23,7 @@ extern "C" {
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32F5HC)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
 #ifndef SOC_SERIES_GD32H7xx
 #undef RT_SERIAL_USING_DMA
 #endif

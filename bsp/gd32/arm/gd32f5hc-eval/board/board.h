@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2026-05-27     RT-Thread    first implementation for GD32F5HC
+ * 2026-05-27     RT-Thread    first implementation for GD32W51x_F5HC
  */
 #ifndef __BOARD_H__
 #define __BOARD_H__
@@ -38,7 +38,7 @@ extern int __bss_end;
 #define HEAP_END          GD32_SRAM_END
 
 /*
- * DMA Channel Allocation for GD32F5HC-EVAL:
+ * DMA Channel Allocation for GD32W51x_F5HC-EVAL:
  * ============================================================
  * DMA0 Channel0 - I2C0_RX    (subperi 1)
  * DMA0 Channel1 - UART2_RX   (subperi 4)  [console]

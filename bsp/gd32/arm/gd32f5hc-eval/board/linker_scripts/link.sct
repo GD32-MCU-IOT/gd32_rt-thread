@@ -1,5 +1,5 @@
 ; *************************************************************
-; *** Scatter-Loading Description File generated for GD32F5HC ***
+; *** Scatter-Loading Description File generated for GD32W51x_F5HC ***
 ; *************************************************************
 
 LR_IROM1 0x08000000 0x00200000  {    ; load region size_region (2048K Flash)

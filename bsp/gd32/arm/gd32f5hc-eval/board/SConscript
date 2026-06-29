@@ -14,7 +14,7 @@ board_msd_init.c
 
 path =  [cwd]
 
-CPPDEFINES = ['GD32F5HC']
+CPPDEFINES = ['GD32W51x_F5HC', 'GD32F5HC']
 group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
 
 Return('group')

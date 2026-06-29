@@ -1,12 +1,12 @@
-# GD32F5HC-EVAL 开发板 BSP 说明
+# GD32W51x_F5HC-EVAL 开发板 BSP 说明
 
 ## 简介
 
-GD32F5HC-EVAL 评估板使用 GD32F5HC 系列作为主控制器。该评估板是兆易创新推出的一款基于 ARM Cortex-M33 内核的开发板，具有丰富的板载资源，可以充分发挥 GD32F5HC 系列芯片的性能。
+GD32W51x_F5HC-EVAL 评估板使用 GD32W51x_F5HC 系列作为主控制器。该评估板是兆易创新推出的一款基于 ARM Cortex-M33 内核的开发板，具有丰富的板载资源，可以充分发挥 GD32W51x_F5HC 系列芯片的性能。
 
 该开发板常用 **板载资源** 如下：
 
-- **MCU**: GD32F5HC 系列，ARM Cortex-M33 内核
+- **MCU**: GD32W51x_F5HC 系列，ARM Cortex-M33 内核
 - **内存**:
   - 片内 SRAM：320KB
 - **板载外设**:

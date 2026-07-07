@@ -184,6 +184,11 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
         /* enable UART clock */
         rcu_periph_clock_enable(RCU_GPIOC);
         rcu_periph_clock_enable(RCU_AF);
+
+        /* connect port to USARTx_Tx */
+        gpio_init(GPIOC, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_6);
+        /* connect port to USARTx_Rx */
+        gpio_init(GPIOC, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, GPIO_PIN_7);
         
         gpio_afio_port_config(AFIO_PC6_USART5_CFG, ENABLE);
         gpio_afio_port_config(AFIO_PC7_USART5_CFG, ENABLE);

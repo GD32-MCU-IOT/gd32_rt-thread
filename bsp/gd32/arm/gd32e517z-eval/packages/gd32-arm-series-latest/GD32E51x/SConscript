@@ -12,6 +12,7 @@ GD32E51x_standard_peripheral/Source/gd32e51x_rcu.c
 GD32E51x_standard_peripheral/Source/gd32e51x_exti.c
 GD32E51x_standard_peripheral/Source/gd32e51x_misc.c
 GD32E51x_standard_peripheral/Source/gd32e51x_dbg.c
+GD32E51x_standard_peripheral/Source/gd32e51x_dma.c
 ''')
 
 if GetDepend(['RT_USING_SERIAL']):
@@ -45,7 +46,6 @@ if GetDepend(['RT_USING_WDT']):
 
 if GetDepend(['RT_USING_SDIO']):
     src += ['GD32E51x_standard_peripheral/Source/gd32e51x_sdio.c']
-    src += ['GD32E51x_standard_peripheral/Source/gd32e51x_dma.c']
 
 if GetDepend(['RT_USING_PWM']):
     src += ['GD32E51x_standard_peripheral/Source/gd32e51x_timer.c']

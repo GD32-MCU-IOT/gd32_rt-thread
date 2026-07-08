@@ -41,6 +41,10 @@
  || defined(SOC_SERIES_GD32W51x_F5HC)
 #define USART_DATA_TX(usartx) (&USART_TDATA(usartx))
 #define USART_DATA_RX(usartx) (&USART_RDATA(usartx))
+#elif defined(SOC_SERIES_GD32E51x)
+/* USART5 has dedicated data registers on E51x, others keep generic USART_DATA */
+#define USART_DATA_TX(usartx) (((usartx) == USART5) ? (&USART5_TDATA(usartx)) : (&USART_DATA(usartx)))
+#define USART_DATA_RX(usartx) (((usartx) == USART5) ? (&USART5_RDATA(usartx)) : (&USART_DATA(usartx)))
 #else
 #define USART_DATA_TX(usartx) (&USART_DATA(usartx))
 #define USART_DATA_RX(usartx) (&USART_DATA(usartx))
@@ -1046,6 +1050,13 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
             nvic_irq_disable(uart->dma_rx->irq);
 
             /* disable interrupt */
+#if defined SOC_SERIES_GD32E51x
+            if (uart->uart_periph == USART5)
+            {
+                usart5_interrupt_disable(USART5, USART5_INT_IDLE);
+            }
+            else
+#endif
             usart_interrupt_disable(uart->uart_periph, USART_INT_IDLE);
 
             dma_channel_disable(uart->dma_rx->periph, uart->dma_rx->channel);
@@ -1250,13 +1261,28 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
         rt_memset(uart->dma_rx_buffer, 0, aligned_bufsz);
     }
 #endif
-    if(SET == usart_flag_get(uart->uart_periph, USART_FLAG_IDLE)) {
-        usart_flag_clear(uart->uart_periph, USART_FLAG_IDLE);
-        usart_data_receive(uart->uart_periph);
-    }
+#if defined SOC_SERIES_GD32E51x
+    if (uart->uart_periph == USART5)
+    {
+        if (SET == usart5_flag_get(USART5, USART5_FLAG_IDLE)) {
+            usart5_flag_clear(USART5, USART5_FLAG_IDLE);
+            usart_data_receive(USART5);
+        }
 
-    /* enable idle interrupt */
-    usart_interrupt_enable(uart->uart_periph, USART_INT_IDLE);
+        /* enable idle interrupt */
+        usart5_interrupt_enable(USART5, USART5_INT_IDLE);
+    }
+    else
+#endif
+    {
+        if(SET == usart_flag_get(uart->uart_periph, USART_FLAG_IDLE)) {
+            usart_flag_clear(uart->uart_periph, USART_FLAG_IDLE);
+            usart_data_receive(uart->uart_periph);
+        }
+
+        /* enable idle interrupt */
+        usart_interrupt_enable(uart->uart_periph, USART_INT_IDLE);
+    }
     /* DMA clock enable */
     if(DMA0 == uart->dma_rx->periph) {
         rcu_periph_clock_enable(RCU_DMA0);
@@ -1362,6 +1388,20 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
             }
             /* wait for last byte fully shifted out with timeout */
             start_tick = rt_tick_get();
+#if defined SOC_SERIES_GD32E51x
+            if (uart->uart_periph == USART5)
+            {
+                while (usart5_flag_get(USART5, USART5_FLAG_TC) == RESET)
+                {
+                    if ((rt_tick_get() - start_tick) > timeout_ticks)
+                    {
+                        /* timeout error */
+                        return -RT_ETIMEOUT;
+                    }
+                }
+            }
+            else
+#endif
             while (usart_flag_get(uart->uart_periph, USART_FLAG_TC) == RESET)
             {
                 if ((rt_tick_get() - start_tick) > timeout_ticks)
@@ -1389,10 +1429,22 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
         dma_flag_clear(uart->dma_tx->periph, uart->dma_tx->channel, DMA_FLAG_FTF);
         dma_interrupt_enable(uart->dma_tx->periph, uart->dma_tx->channel, DMA_INT_FTF);
 
-        usart_flag_clear(uart->uart_periph, USART_FLAG_TBE);
-        usart_flag_clear(uart->uart_periph, USART_FLAG_TC);
-        /* enable transmit idle interrupt */
-        usart_interrupt_enable(uart->uart_periph, USART_INT_TC);
+#if defined SOC_SERIES_GD32E51x
+        if (uart->uart_periph == USART5)
+        {
+            usart5_flag_clear(USART5, USART5_FLAG_TBE);
+            usart5_flag_clear(USART5, USART5_FLAG_TC);
+            /* enable transmit complete interrupt */
+            usart5_interrupt_enable(USART5, USART5_INT_TC);
+        }
+        else
+#endif
+        {
+            usart_flag_clear(uart->uart_periph, USART_FLAG_TBE);
+            usart_flag_clear(uart->uart_periph, USART_FLAG_TC);
+            /* enable transmit complete interrupt */
+            usart_interrupt_enable(uart->uart_periph, USART_INT_TC);
+        }
 
         usart_dma_transmit_config(uart->uart_periph, USART_TRANSMIT_DMA_ENABLE);
         /* tx dma interrupt config */
@@ -1485,8 +1537,18 @@ static void dma_uart_rx_idle_isr(struct rt_serial_device *serial)
     dma_recv_isr(serial, UART_RX_DMA_IT_IDLE_FLAG);
 
     /* read a data for clear receive idle interrupt flag */
-    usart_data_receive(uart->uart_periph);
-    usart_flag_clear(uart->uart_periph, USART_FLAG_IDLE);
+#if defined SOC_SERIES_GD32E51x
+    if (uart->uart_periph == USART5)
+    {
+        usart_data_receive(USART5);
+        usart5_flag_clear(USART5, USART5_FLAG_IDLE);
+    }
+    else
+#endif
+    {
+        usart_data_receive(uart->uart_periph);
+        usart_flag_clear(uart->uart_periph, USART_FLAG_IDLE);
+    }
 }
 
 /**

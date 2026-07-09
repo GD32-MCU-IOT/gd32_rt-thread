@@ -2,12 +2,12 @@
 ;    \file    startup_gd32f50x.S
 ;    \brief   start up file
 ;
-;    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+;    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 ;*/
 ;
 ;/*
 ; * Copyright (c) 2009-2021 Arm Limited. All rights reserved.
-; * Copyright (c) 2025, GigaDevice Semiconductor Inc.
+; * Copyright (c) 2026, GigaDevice Semiconductor Inc.
 ; * SPDX-License-Identifier: Apache-2.0
 ; *
 ; * Licensed under the Apache License, Version 2.0 (the License); you may
@@ -26,7 +26,7 @@
 
   .syntax unified
   .cpu cortex-m33
-  .fpu softvfp
+  .fpu fpv5-sp-d16
   .thumb
 
 .global  Default_Handler
@@ -47,17 +47,12 @@ Reset_Handler:
 
   ldr     r4, =0x1ffff802
   ldr     r5, [r4]
-  lsr     r5, r5, #2
+  lsr     r5, r5, #3
   ands    r5, r5, #0x3
   cmp     r5, #0x3
   bne     Init
 
-  ldr     r0, =0x1ffff7e0
-  ldr     r2, [r0]
-  ldr     r0, =0xffff0000
-  and     r2, r2, r0
-  lsr     r2, r2, #16
-  lsl     r2, r2, #10
+  mov     r2, #0x8000   
   ldr     r1, =0x20000000
   mov     r0, #0x00
 SramInit:
@@ -98,7 +93,7 @@ Zerobss:
 /* Call static constructors */
   bl __libc_init_array
 /*Call the main function */
-  bl entry
+  bl  main
   bx lr
 .size  Reset_Handler, .-Reset_Handler
 
@@ -108,10 +103,10 @@ Infinite_Loop:
   b Infinite_Loop
   .size Default_Handler, .-Default_Handler
 
-  .section  .isr_vector,"a",%progbits
+  .section  .vectors,"a",%progbits
   .global __gVectors
 __gVectors:
-                    .word _estack                                 /* Top of Stack */
+                    .word _sp                                     /* Top of Stack */
                     .word Reset_Handler                           /* Reset Handler */
                     .word NMI_Handler                             /* NMI Handler */
                     .word HardFault_Handler                       /* Hard Fault Handler */
@@ -130,7 +125,7 @@ __gVectors:
 
                     /* External interrupts handler */
                     .word WWDGT_IRQHandler                        /* Vector Number 16,window watchdog timer interrupt */
-                    .word LVD_IRQHandler                          /* Vector Number 17,LVD through EXTI Line detect interrupt */
+                    .word LVD_VAVD_IRQHandler                          /* Vector Number 17,LVD/VAVD through EXTI Line detect interrupt */
                     .word TAMPER_IRQHandler                       /* Vector Number 18,Tamper through EXTI Line detect interrupt */
                     .word RTC_IRQHandler                          /* Vector Number 19,RTC global interrupt */
                     .word FMC_IRQHandler                          /* Vector Number 20,FMC global interrupt */
@@ -242,8 +237,8 @@ __gVectors:
   .weak WWDGT_IRQHandler
   .thumb_set WWDGT_IRQHandler,Default_Handler
 
-  .weak LVD_IRQHandler
-  .thumb_set LVD_IRQHandler,Default_Handler
+  .weak LVD_VAVD_IRQHandler
+  .thumb_set LVD_VAVD_IRQHandler,Default_Handler
 
   .weak TAMPER_IRQHandler
   .thumb_set TAMPER_IRQHandler,Default_Handler

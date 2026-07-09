@@ -12,7 +12,7 @@ board_msd_init.c
 
 path =  [cwd]
 
-CPPDEFINES = ['GD32F50X', 'GD32F503VG']
+CPPDEFINES = ['GD32F50X', 'GD32F503']
 group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
 
 Return('group')

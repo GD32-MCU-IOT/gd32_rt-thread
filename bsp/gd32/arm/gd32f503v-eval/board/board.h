@@ -48,6 +48,10 @@ extern int __bss_end;
 #define BSP_SPI0_FLASH_CS_PIN       GET_PIN(A, 4)
 #endif
 
+#ifndef BSP_SPI1_FLASH_CS_PIN
+#define BSP_SPI1_FLASH_CS_PIN       GET_PIN(B, 12)
+#endif
+
 #ifndef BSP_QSPI0_FLASH_CS_PIN
 #define BSP_QSPI0_FLASH_CS_PIN     GET_PIN(A, 4)
 #endif

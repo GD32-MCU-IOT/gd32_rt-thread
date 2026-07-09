@@ -2,11 +2,11 @@
     \file    gd32f50x_dma.h
     \brief   definitions for the DMA
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -546,22 +546,22 @@ typedef struct {
 #define DMAMUX_TRIGGER_EVT1_OUT           RG_CHXCFG_TID(1U)                                                            /*!< trigger input is Evt1_out */
 #define DMAMUX_TRIGGER_EVT2_OUT           RG_CHXCFG_TID(2U)                                                            /*!< trigger input is Evt2_out */
 #define DMAMUX_TRIGGER_EVT3_OUT           RG_CHXCFG_TID(3U)                                                            /*!< trigger input is Evt3_out */
-#define DMAMUX_TRIGGER_EXTI0_IT           RG_CHXCFG_TID(4U)                                                            /*!< trigger input is EXTI0 */
-#define DMAMUX_TRIGGER_EXTI1_IT           RG_CHXCFG_TID(5U)                                                            /*!< trigger input is EXTI1 */
-#define DMAMUX_TRIGGER_EXTI2_IT           RG_CHXCFG_TID(6U)                                                            /*!< trigger input is EXTI2 */
-#define DMAMUX_TRIGGER_EXTI3_IT           RG_CHXCFG_TID(7U)                                                            /*!< trigger input is EXTI3 */
-#define DMAMUX_TRIGGER_EXTI4_IT           RG_CHXCFG_TID(8U)                                                            /*!< trigger input is EXTI4 */
-#define DMAMUX_TRIGGER_EXTI5_IT           RG_CHXCFG_TID(9U)                                                            /*!< trigger input is EXTI5 */
-#define DMAMUX_TRIGGER_EXTI6_IT           RG_CHXCFG_TID(10U)                                                           /*!< trigger input is EXTI6 */
-#define DMAMUX_TRIGGER_EXTI7_IT           RG_CHXCFG_TID(11U)                                                           /*!< trigger input is EXTI7 */
-#define DMAMUX_TRIGGER_EXTI0_EVT          RG_CHXCFG_TID(12U)                                                           /*!< trigger input is EXTI8 */
-#define DMAMUX_TRIGGER_EXTI1_EVT          RG_CHXCFG_TID(13U)                                                           /*!< trigger input is EXTI9 */
-#define DMAMUX_TRIGGER_EXTI2_EVT          RG_CHXCFG_TID(14U)                                                           /*!< trigger input is EXTI10 */
-#define DMAMUX_TRIGGER_EXTI3_EVT          RG_CHXCFG_TID(15U)                                                           /*!< trigger input is EXTI11 */
-#define DMAMUX_TRIGGER_EXTI4_EVT          RG_CHXCFG_TID(16U)                                                           /*!< trigger input is EXTI12 */
-#define DMAMUX_TRIGGER_EXTI5_EVT          RG_CHXCFG_TID(17U)                                                           /*!< trigger input is EXTI13 */
-#define DMAMUX_TRIGGER_EXTI6_EVT          RG_CHXCFG_TID(18U)                                                           /*!< trigger input is EXTI14 */
-#define DMAMUX_TRIGGER_EXTI7_EVT          RG_CHXCFG_TID(19U)                                                           /*!< trigger input is EXTI15 */
+#define DMAMUX_TRIGGER_EXTI0_IT           RG_CHXCFG_TID(4U)                                                            /*!< interrupt trigger input is EXTI0 */
+#define DMAMUX_TRIGGER_EXTI1_IT           RG_CHXCFG_TID(5U)                                                            /*!< interrupt trigger input is EXTI1 */
+#define DMAMUX_TRIGGER_EXTI2_IT           RG_CHXCFG_TID(6U)                                                            /*!< interrupt trigger input is EXTI2 */
+#define DMAMUX_TRIGGER_EXTI3_IT           RG_CHXCFG_TID(7U)                                                            /*!< interrupt trigger input is EXTI3 */
+#define DMAMUX_TRIGGER_EXTI4_IT           RG_CHXCFG_TID(8U)                                                            /*!< interrupt trigger input is EXTI4 */
+#define DMAMUX_TRIGGER_EXTI5_IT           RG_CHXCFG_TID(9U)                                                            /*!< interrupt trigger input is EXTI5 */
+#define DMAMUX_TRIGGER_EXTI6_IT           RG_CHXCFG_TID(10U)                                                           /*!< interrupt trigger input is EXTI6 */
+#define DMAMUX_TRIGGER_EXTI7_IT           RG_CHXCFG_TID(11U)                                                           /*!< interrupt trigger input is EXTI7 */
+#define DMAMUX_TRIGGER_EXTI0_EVT          RG_CHXCFG_TID(12U)                                                           /*!< event trigger input is EXTI0 */
+#define DMAMUX_TRIGGER_EXTI1_EVT          RG_CHXCFG_TID(13U)                                                           /*!< event trigger input is EXTI1 */
+#define DMAMUX_TRIGGER_EXTI2_EVT          RG_CHXCFG_TID(14U)                                                           /*!< event trigger input is EXTI2 */
+#define DMAMUX_TRIGGER_EXTI3_EVT          RG_CHXCFG_TID(15U)                                                           /*!< event trigger input is EXTI3 */
+#define DMAMUX_TRIGGER_EXTI4_EVT          RG_CHXCFG_TID(16U)                                                           /*!< event trigger input is EXTI4 */
+#define DMAMUX_TRIGGER_EXTI5_EVT          RG_CHXCFG_TID(17U)                                                           /*!< event trigger input is EXTI5 */
+#define DMAMUX_TRIGGER_EXTI6_EVT          RG_CHXCFG_TID(18U)                                                           /*!< event trigger input is EXTI6 */
+#define DMAMUX_TRIGGER_EXTI7_EVT          RG_CHXCFG_TID(19U)                                                           /*!< event trigger input is EXTI7 */
 
 /* DMAMUX request generator trigger polarity */
 #define RG_CHXCFG_RGTP(regval)            (BITS(17,18) & ((uint32_t)(regval) << 17U))                                  /*!< DMA request generator trigger polarity */

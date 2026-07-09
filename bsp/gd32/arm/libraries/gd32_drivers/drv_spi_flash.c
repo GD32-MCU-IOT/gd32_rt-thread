@@ -117,13 +117,10 @@ static int spi_flash_init(void)
     {
         const struct spi_flash_config *cfg = &flash_configs[i];
 
-        if (rt_hw_spi_device_attach(cfg->bus_name, cfg->device_name, cfg->cs_pin) != RT_EOK)
+        result = rt_hw_spi_device_attach(cfg->bus_name, cfg->device_name, cfg->cs_pin);
+        if (result != RT_EOK)
         {
             rt_kprintf("Failed to attach device %s on bus %s\n", cfg->device_name, cfg->bus_name);
-            if (result == RT_EOK)
-            {
-                result = -RT_ERROR;
-            }
             continue;
         }
 
@@ -131,10 +128,6 @@ static int spi_flash_init(void)
         if (RT_NULL == rt_sfud_flash_probe(cfg->flash_name, cfg->device_name))
         {
             rt_kprintf("SFUD probe failed: %s\n", cfg->flash_name);
-            if (result == RT_EOK)
-            {
-                result = -RT_ERROR;
-            }
             continue;
         }
 #endif
@@ -153,15 +146,12 @@ static int qspi_flash_init(void)
     {
         const struct qspi_flash_config *cfg = &qspi_flash_configs[i];
 
-        if (rt_hw_qspi_device_attach(cfg->bus_name, cfg->device_name,
-                                     cfg->cs_pin, cfg->data_line_width,
-                                     RT_NULL, RT_NULL) != RT_EOK)
+        result = rt_hw_qspi_device_attach(cfg->bus_name, cfg->device_name,
+                                          cfg->cs_pin, cfg->data_line_width,
+                                          RT_NULL, RT_NULL);
+        if (result != RT_EOK)
         {
             rt_kprintf("Failed to attach QSPI device %s on bus %s\n", cfg->device_name, cfg->bus_name);
-            if (result == RT_EOK)
-            {
-                result = -RT_ERROR;
-            }
             continue;
         }
 
@@ -169,10 +159,6 @@ static int qspi_flash_init(void)
         if (RT_NULL == rt_sfud_flash_probe(cfg->flash_name, cfg->device_name))
         {
             rt_kprintf("SFUD probe failed: %s\n", cfg->flash_name);
-            if (result == RT_EOK)
-            {
-                result = -RT_ERROR;
-            }
             continue;
         }
 #endif

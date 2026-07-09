@@ -2,11 +2,11 @@
     \file    gd32f50x_i2c.c
     \brief   I2C driver
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -303,7 +303,6 @@ void i2c_stretch_scl_low_enable(uint32_t i2c_periph)
 /*!
     \brief      disable to stretch SCL low when data is not ready in slave mode (API_ID: 0x0011U)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -419,7 +418,6 @@ uint32_t i2c_received_address_get(uint32_t i2c_periph)
 /*!
     \brief      enable slave byte control (API_ID: 0x0018U)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -431,7 +429,6 @@ void i2c_slave_byte_control_enable(uint32_t i2c_periph)
 /*!
     \brief      disable slave byte control (API_ID: 0x0019U)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -597,7 +594,6 @@ void i2c_pec_transfer(uint32_t i2c_periph)
 /*!
     \brief      enable I2C PEC calculation (API_ID: 0x0027U)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -609,7 +605,6 @@ void i2c_pec_enable(uint32_t i2c_periph)
 /*!
     \brief      disable I2C PEC calculation (API_ID: 0x0028U)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -632,7 +627,6 @@ uint32_t i2c_pec_value_get(uint32_t i2c_periph)
 /*!
     \brief      enable SMBus alert (API_ID: 0x002AU)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -644,7 +638,6 @@ void i2c_smbus_alert_enable(uint32_t i2c_periph)
 /*!
     \brief      disable SMBus alert (API_ID: 0x002BU)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -656,7 +649,6 @@ void i2c_smbus_alert_disable(uint32_t i2c_periph)
 /*!
     \brief      enable SMBus device default address (API_ID: 0x002CU)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -668,7 +660,6 @@ void i2c_smbus_default_addr_enable(uint32_t i2c_periph)
 /*!
     \brief      disable SMBus device default address (API_ID: 0x002DU)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -680,7 +671,6 @@ void i2c_smbus_default_addr_disable(uint32_t i2c_periph)
 /*!
     \brief      enable SMBus Host address (API_ID: 0x002EU)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */
@@ -692,7 +682,6 @@ void i2c_smbus_host_addr_enable(uint32_t i2c_periph)
 /*!
     \brief      disable SMBus Host address (API_ID: 0x002FU)
     \param[in]  i2c_periph: I2Cx(x=0,1)
-    \param[in]  none
     \param[out] none
     \retval     none
 */

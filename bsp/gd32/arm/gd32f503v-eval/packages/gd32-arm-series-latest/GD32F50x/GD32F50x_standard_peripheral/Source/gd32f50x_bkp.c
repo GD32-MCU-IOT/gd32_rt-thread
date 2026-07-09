@@ -2,11 +2,11 @@
     \file    gd32f50x_bkp.c
     \brief   BKP driver
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -54,6 +54,7 @@ void bkp_deinit(void)
     \param[in]  register_number: refer to bkp_data_register_enum
                 only one parameter can be selected which is shown as below:
       \arg        BKP_DATA_x(x = 0..41): bkp data register number x
+    \param[in]  data: the data to be write in BKP data register
     \param[out] none
     \retval     none
 */

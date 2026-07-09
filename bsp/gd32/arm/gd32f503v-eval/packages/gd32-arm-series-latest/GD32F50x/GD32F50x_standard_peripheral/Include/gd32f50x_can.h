@@ -2,11 +2,11 @@
     \file    gd32f50x_can.h
     \brief   definitions for the CAN
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -735,6 +735,38 @@ typedef enum {
 #define CAN_BT_BS1_30TQ                    ((uint8_t)0x1DU)             /*!< 30 time quanta */
 #define CAN_BT_BS1_31TQ                    ((uint8_t)0x1EU)             /*!< 31 time quanta */
 #define CAN_BT_BS1_32TQ                    ((uint8_t)0x1FU)             /*!< 32 time quanta */
+#define CAN_BT_BS1_33TQ                    ((uint8_t)0x20U)             /*!< 33 time quanta */
+#define CAN_BT_BS1_34TQ                    ((uint8_t)0x21U)             /*!< 34 time quanta */
+#define CAN_BT_BS1_35TQ                    ((uint8_t)0x22U)             /*!< 35 time quanta */
+#define CAN_BT_BS1_36TQ                    ((uint8_t)0x23U)             /*!< 36 time quanta */
+#define CAN_BT_BS1_37TQ                    ((uint8_t)0x24U)             /*!< 37 time quanta */
+#define CAN_BT_BS1_38TQ                    ((uint8_t)0x25U)             /*!< 38 time quanta */
+#define CAN_BT_BS1_39TQ                    ((uint8_t)0x26U)             /*!< 39 time quanta */
+#define CAN_BT_BS1_40TQ                    ((uint8_t)0x27U)             /*!< 40 time quanta */
+#define CAN_BT_BS1_41TQ                    ((uint8_t)0x28U)             /*!< 41 time quanta */
+#define CAN_BT_BS1_42TQ                    ((uint8_t)0x29U)             /*!< 42 time quanta */
+#define CAN_BT_BS1_43TQ                    ((uint8_t)0x2AU)             /*!< 43 time quanta */
+#define CAN_BT_BS1_44TQ                    ((uint8_t)0x2BU)             /*!< 44 time quanta */
+#define CAN_BT_BS1_45TQ                    ((uint8_t)0x2CU)             /*!< 45 time quanta */
+#define CAN_BT_BS1_46TQ                    ((uint8_t)0x2DU)             /*!< 46 time quanta */
+#define CAN_BT_BS1_47TQ                    ((uint8_t)0x2EU)             /*!< 47 time quanta */
+#define CAN_BT_BS1_48TQ                    ((uint8_t)0x2FU)             /*!< 48 time quanta */
+#define CAN_BT_BS1_49TQ                    ((uint8_t)0x30U)             /*!< 49 time quanta */
+#define CAN_BT_BS1_50TQ                    ((uint8_t)0x31U)             /*!< 50 time quanta */
+#define CAN_BT_BS1_51TQ                    ((uint8_t)0x32U)             /*!< 51 time quanta */
+#define CAN_BT_BS1_52TQ                    ((uint8_t)0x33U)             /*!< 52 time quanta */
+#define CAN_BT_BS1_53TQ                    ((uint8_t)0x34U)             /*!< 53 time quanta */
+#define CAN_BT_BS1_54TQ                    ((uint8_t)0x35U)             /*!< 54 time quanta */
+#define CAN_BT_BS1_55TQ                    ((uint8_t)0x36U)             /*!< 55 time quanta */
+#define CAN_BT_BS1_56TQ                    ((uint8_t)0x37U)             /*!< 56 time quanta */
+#define CAN_BT_BS1_57TQ                    ((uint8_t)0x38U)             /*!< 57 time quanta */
+#define CAN_BT_BS1_58TQ                    ((uint8_t)0x39U)             /*!< 58 time quanta */
+#define CAN_BT_BS1_59TQ                    ((uint8_t)0x3AU)             /*!< 59 time quanta */
+#define CAN_BT_BS1_60TQ                    ((uint8_t)0x3BU)             /*!< 60 time quanta */
+#define CAN_BT_BS1_61TQ                    ((uint8_t)0x3CU)             /*!< 61 time quanta */
+#define CAN_BT_BS1_62TQ                    ((uint8_t)0x3DU)             /*!< 62 time quanta */
+#define CAN_BT_BS1_63TQ                    ((uint8_t)0x3EU)             /*!< 63 time quanta */
+#define CAN_BT_BS1_64TQ                    ((uint8_t)0x3FU)             /*!< 64 time quanta */
 
 /* CAN time segment 2 */
 #define CAN_BT_BS2_1TQ                     ((uint8_t)0x00U)             /*!< 1 time quanta */
@@ -847,6 +879,9 @@ typedef enum {
 /* CAN timeout */
 #define CAN_TIMEOUT                        ((uint32_t)0x0000FFFFU)      /*!< timeout value */
 
+/* CAN maibox empty status mask */
+#define CAN_ALL_MAILBOX_EMPTY              ((uint32_t)0x1C000000U)      /*!< CAN maibox empty status mask */
+
 /* interrupt enable bits */
 #define CAN_INT_TME                        CAN_INTEN_TMEIE              /*!< transmit mailbox empty interrupt enable */
 #define CAN_INT_RFNE0                      CAN_INTEN_RFNEIE0            /*!< receive FIFO0 not empty interrupt enable */
@@ -902,7 +937,7 @@ uint8_t can_message_transmit(uint32_t can_periph, can_transmit_message_struct *t
 /* get CAN transmit state */
 can_transmit_state_enum can_transmit_states(uint32_t can_periph, uint8_t mailbox_number);
 /* stop CAN transmission */
-void can_transmission_stop(uint32_t can_periph, uint8_t mailbox_number);
+ErrStatus can_transmission_stop(uint32_t can_periph, uint8_t mailbox_number);
 /* CAN receive message */
 void can_message_receive(uint32_t can_periph, uint8_t fifo_number, can_receive_message_struct *receive_message);
 /* CAN release FIFO */

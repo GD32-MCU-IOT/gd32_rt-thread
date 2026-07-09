@@ -2,11 +2,11 @@
     \file    gd32f50x_can.c
     \brief   CAN driver
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -876,7 +876,7 @@ uint8_t can_message_transmit(uint32_t can_periph, can_transmit_message_struct *t
     \param[in]  can_periph
     \param[in]  mailbox_number
                 only one parameter can be selected which is shown as below:
-      \arg        CAN_MAILBOX(x=0,1,2)
+      \arg        CAN_MAILBOXx(x=0,1,2)
     \param[out] none
     \retval     can_transmit_state_enum
 */
@@ -936,31 +936,63 @@ can_transmit_state_enum can_transmit_states(uint32_t can_periph, uint8_t mailbox
                 only one parameter can be selected which is shown as below:
       \arg        CAN_MAILBOXx(x=0,1,2)
     \param[out] none
-    \retval     none
+    \retval     ErrStatus: ERROR or SUCCESS
 */
-void can_transmission_stop(uint32_t can_periph, uint8_t mailbox_number)
+ErrStatus can_transmission_stop(uint32_t can_periph, uint8_t mailbox_number)
 {
+    ErrStatus reval = SUCCESS;
     /* timeout for CAN_TSTAT_MSTx bits */
     uint32_t timeout = CAN_TIMEOUT;
+    uint32_t reg_value0 = 0U;
+    uint32_t reg_value1 = 0U;
+
+    /* get the status of transmit FIFO order */
+    reg_value0 = CAN_CTL(can_periph) & CAN_CTL_TFO;
 
     if(CAN_MAILBOX0 == mailbox_number) {
-        CAN_TSTAT(can_periph) |= CAN_TSTAT_MST0;
-        while((CAN_TSTAT_MST0 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST0)) && (0U != timeout)) {
-            timeout--;
+        reg_value1 = CAN_TSTAT(can_periph) & (CAN_TSTAT_TMLS0 | CAN_ALL_MAILBOX_EMPTY);
+        if((CAN_CTL_TFO == reg_value0) && (CAN_TSTAT_TMLS0 == reg_value1)){
+            reval = ERROR;
+        } else {
+            CAN_TSTAT(can_periph) |= CAN_TSTAT_MST0;
+            while((CAN_TSTAT_MST0 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST0)) && (0U != timeout)) {
+                timeout--;
+            }
+            if(CAN_TSTAT_MST0 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST0)){
+                reval = ERROR;
+            }
         }
     } else if(CAN_MAILBOX1 == mailbox_number) {
-        CAN_TSTAT(can_periph) |= CAN_TSTAT_MST1;
-        while((CAN_TSTAT_MST1 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST1)) && (0U != timeout)) {
-            timeout--;
+        reg_value1 = CAN_TSTAT(can_periph) & (CAN_TSTAT_TMLS1 | CAN_ALL_MAILBOX_EMPTY);
+        if((CAN_CTL_TFO == reg_value0) && (CAN_TSTAT_TMLS1 == reg_value1)){
+            reval = ERROR;
+        }else{
+            CAN_TSTAT(can_periph) |= CAN_TSTAT_MST1;
+            while((CAN_TSTAT_MST1 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST1)) && (0U != timeout)) {
+                timeout--;
+            }
+            if(CAN_TSTAT_MST1 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST1)){
+                reval = ERROR;
+            }
         }
+        
     } else if(CAN_MAILBOX2 == mailbox_number) {
-        CAN_TSTAT(can_periph) |= CAN_TSTAT_MST2;
-        while((CAN_TSTAT_MST2 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST2)) && (0U != timeout)) {
-            timeout--;
+        reg_value1 = CAN_TSTAT(can_periph) & (CAN_TSTAT_TMLS2 | CAN_ALL_MAILBOX_EMPTY);
+        if((CAN_CTL_TFO == reg_value0) && (CAN_TSTAT_TMLS2 == reg_value1)){
+            reval = ERROR;
+        }else{
+            CAN_TSTAT(can_periph) |= CAN_TSTAT_MST2;
+            while((CAN_TSTAT_MST2 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST2)) && (0U != timeout)) {
+                timeout--;
+            }
+            if(CAN_TSTAT_MST2 == (CAN_TSTAT(can_periph) & CAN_TSTAT_MST2)){
+                reval = ERROR;
+            }
         }
     } else {
         /* illegal parameters */
     }
+    return reval;
 }
 
 /*!
@@ -1120,7 +1152,7 @@ uint8_t can_receive_message_length_get(uint32_t can_periph, uint8_t fifo_number)
 /*!
     \brief      set CAN working mode (API_ID(0x0015U))
     \param[in]  can_periph
-    \param[in]  can_working_mode
+    \param[in]  working_mode
                 only one parameter can be selected which is shown as below:
       \arg        CAN_MODE_INITIALIZE
       \arg        CAN_MODE_NORMAL
@@ -1305,7 +1337,7 @@ void can_interrupt_enable(uint32_t can_periph, uint32_t interrupt)
       \arg        CAN_INT_BO: bus-off interrupt enable
       \arg        CAN_INT_ERRN: error number interrupt enable
       \arg        CAN_INT_ERR: error interrupt enable
-      \arg        CAN_INT_WU: wakeup interrupt enable
+      \arg        CAN_INT_WAKEUP: wakeup interrupt enable
       \arg        CAN_INT_SLPW: sleep working interrupt enable
     \param[out] none
     \retval     none

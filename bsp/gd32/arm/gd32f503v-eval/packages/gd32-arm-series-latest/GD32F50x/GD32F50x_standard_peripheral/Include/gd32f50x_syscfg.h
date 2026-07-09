@@ -2,7 +2,7 @@
     \file    gd32f50x_syscfg.h
     \brief   definitions for the SYSCFG
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
@@ -293,10 +293,10 @@ typedef enum {
 #define TIMER_SLAVE_MODE_PAUSE              ((uint8_t)0x04U)                                       /*!< pause mode */
 #define TIMER_SLAVE_MODE_EVENT              ((uint8_t)0x05U)                                       /*!< event mode */
 #define TIMER_SLAVE_MODE_EXTERNAL0          ((uint8_t)0x06U)                                       /*!< external clock mode 0 */
-#define TIMER_DECODER_MODE0                 ((uint8_t)0x09U)                                       /*!< decoder mode 0 */
-#define TIMER_DECODER_MODE1                 ((uint8_t)0x0AU)                                       /*!< decoder mode 1 */
-#define TIMER_DECODER_MODE2                 ((uint8_t)0x0BU)                                       /*!< decoder mode 2 */
-#define TIMER_DECODER_MODE3                 ((uint8_t)0x0CU)                                       /*!< decoder mode 3 */
+#define TIMER_NONQUAD_DECODER_MODE0         ((uint8_t)0x09U)                                       /*!< non-quadrature decoder mode 0 */
+#define TIMER_NONQUAD_DECODER_MODE1         ((uint8_t)0x0AU)                                       /*!< non-quadrature decoder mode 1 */
+#define TIMER_NONQUAD_DECODER_MODE2         ((uint8_t)0x0BU)                                       /*!< non-quadrature decoder mode 2 */
+#define TIMER_NONQUAD_DECODER_MODE3         ((uint8_t)0x0CU)                                       /*!< non-quadrature decoder mode 3 */
 #define TIMER_QUAD_DECODER_MODE3            ((uint8_t)0x0DU)                                       /*!< quadrature decoder mode 3 */
 #define TIMER_QUAD_DECODER_MODE4            ((uint8_t)0x0EU)                                       /*!< quadrature decoder mode 4 */
 #define TIMER_SLAVE_MODE_DISABLE            ((uint8_t)0x0FU)                                       /*!< slave mode disable */

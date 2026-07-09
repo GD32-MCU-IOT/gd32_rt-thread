@@ -337,7 +337,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls>-fno-strict-aliasing</MiscControls>
-              <Define>GD32F50X, GD32F503</Define>
+              <Define>USE_STDPERIPH_DRIVER, RT_USING_LIBC, RT_USING_ARMLIBC, GD32F503, GD32F50X, __RTTHREAD__, __STDC_LIMIT_MACROS, __CLK_TCK=RT_TICK_PER_SECOND</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>

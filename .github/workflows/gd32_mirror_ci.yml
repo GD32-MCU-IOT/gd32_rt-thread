@@ -25,7 +25,7 @@ on:
       - '!bsp/gd32/**/docs/**'
       - '.github/workflows/gd32_mirror_ci.yml'
       - 'bsp/gd32/scripts/gd32_bsp_config.json'
-      
+
   # Push 到 master - 触发全量测试（可选）
   push:
     branches:
@@ -33,7 +33,7 @@ on:
     paths:
       - 'bsp/gd32/**'
       - '.github/workflows/gd32_mirror_ci.yml'
-      
+
   # 手动触发
   workflow_dispatch:
     inputs:
@@ -45,7 +45,7 @@ on:
         options:
           - all        # 编译所有 GD32 BSP
           - changed    # 仅编译变更的 BSP
-      
+
 # 并发控制
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -68,7 +68,7 @@ jobs:
     outputs:
       filtered_matrix: ${{ steps.filter.outputs.filtered_matrix }}
       test_count: ${{ steps.filter.outputs.test_count }}
-      
+
     steps:
       - name: 检出代码
         uses: actions/checkout@main
@@ -77,7 +77,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           persist-credentials: false
           fetch-depth: 0
-      
+
       - name: 🔍 调试：验证 checkout 状态
         shell: bash
         run: |
@@ -96,12 +96,12 @@ jobs:
           echo ""
           echo "=== GD32 BSP 目录检查 ==="
           ls -la bsp/gd32/arm/ | head -15
-      
+
       - name: 设置 Python 环境
         uses: actions/setup-python@main
         with:
           python-version: '3.11'
-      
+
       - name: 检测变更并生成矩阵
         id: filter
         run: |
@@ -109,16 +109,16 @@ jobs:
           git config --global http.postBuffer 524288000
           git remote -v
           git fetch origin
-          
+
           # 确定基准分支
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             BASE_REF="origin/${{ github.base_ref }}"
           else
             BASE_REF="origin/master"
           fi
-          
+
           echo "=== 基准分支: $BASE_REF ==="
-          
+
           # 判断测试模式
           TEST_MODE="${{ github.event.inputs.test_mode }}"
           if [ -z "$TEST_MODE" ]; then
@@ -128,21 +128,21 @@ jobs:
               TEST_MODE="changed"
             fi
           fi
-          
+
           echo "=== 测试模式: $TEST_MODE ==="
-          
+
           # ⚠️ 重要：git_diff_show.py 会读取 ALL_BSP_COMPILE.json
           # 所以需要先替换这个文件为 GD32 配置
           cp bsp/gd32/scripts/gd32_bsp_config.json .github/ALL_BSP_COMPILE.json
-          
+
           if [ "$TEST_MODE" = "changed" ]; then
             echo "=== 使用智能变更检测 ==="
-            
+
             # 方式 1: 复用 RT-Thread git_diff_show.py（推荐）
             if [ -f "tools/ci/git_diff_show.py" ]; then
               # git_diff_show.py 会读取 ALL_BSP_COMPILE.json 并生成 ALL_BSP_COMPILE_TEMP.json
               python tools/ci/git_diff_show.py $BASE_REF
-              
+
               # 检查是否生成了文件
               if [ ! -f ".github/ALL_BSP_COMPILE_TEMP.json" ]; then
                 echo "⚠️ git_diff_show.py 未生成配置文件，使用 GD32 完整配置"
@@ -151,9 +151,9 @@ jobs:
             else
               # 方式 2: 简单的 git diff 检测
               echo "⚠️ git_diff_show.py 不存在，使用简单检测"
-              
+
               CHANGED_FILES=$(git diff --name-only $BASE_REF HEAD | grep "^bsp/gd32/" || true)
-              
+
               if [ -z "$CHANGED_FILES" ]; then
                 echo "ℹ️ 未检测到 GD32 变更，跳过编译"
                 echo '{"legs": []}' > .github/ALL_BSP_COMPILE_TEMP.json
@@ -167,21 +167,21 @@ jobs:
             # all 模式直接使用 GD32 配置
             cp bsp/gd32/scripts/gd32_bsp_config.json .github/ALL_BSP_COMPILE_TEMP.json
           fi
-          
+
           # 读取最终配置
           raw_matrix=$(cat .github/ALL_BSP_COMPILE_TEMP.json)
           filtered_matrix=$(jq -c "{legs: [.legs[]]}" <<< "$raw_matrix")
-          
+
           # 统计测试数量
           test_count=$(echo "$filtered_matrix" | jq '[.legs[].SUB_RTT_BSP[]] | length')
-          
+
           echo "filtered_matrix=${filtered_matrix}" >> $GITHUB_OUTPUT
           echo "test_count=${test_count}" >> $GITHUB_OUTPUT
-          
+
           echo "=== 生成的编译矩阵 ==="
           echo "$filtered_matrix" | jq .
           echo "=== 总测试数量: $test_count ==="
-      
+
       - name: 显示测试计划
         run: |
           echo "### 📋 GD32 BSP 编译计划" >> $GITHUB_STEP_SUMMARY
@@ -199,12 +199,12 @@ jobs:
     needs: generate-matrix
     name: 🔨 编译 ${{ matrix.legs.RTT_BSP }}
     if: needs.generate-matrix.outputs.test_count > 0
-    
+
     strategy:
       fail-fast: false
       max-parallel: 5  # GD32 BSP 并发编译数
       matrix: ${{ fromJson(needs.generate-matrix.outputs.filtered_matrix) }}
-    
+
     steps:
       - name: 检出代码
         uses: actions/checkout@main
@@ -213,7 +213,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
           persist-credentials: false
           fetch-depth: 0
-      
+
       - name: 🔍 调试：验证代码目录结构
         shell: bash
         run: |
@@ -245,12 +245,12 @@ jobs:
             fi
             echo ""
           done
-      
+
       - name: 设置 Python 环境
         uses: actions/setup-python@main
         with:
           python-version: '3.11'
-      
+
       - name: 安装 RT-Thread Env 工具
         shell: bash
         env:
@@ -259,34 +259,67 @@ jobs:
           # 更新（例如引入的 hal-sdk 包共享 libraries 特性）在没有任何本仓库
           # 改动的情况下，悄悄改变 CI 的包安装行为。留空则不锁定。
           ENV_PIN_SHA: 65f6991045d3d0c030080ba5b9489cc91f63e893
+          # 官方源安装/锁定失败时的兜底：个人镜像仓库的 env_gd_ci 分支，已经
+          # 自带指向同一个锁定 commit 的 install_ubuntu.sh/touch_env.sh。
+          ENV_MIRROR_INSTALL_URL: https://raw.githubusercontent.com/jianpingwu1/rtt_env_mirror/env_gd_ci/install_ubuntu.sh
         run: |
           sudo apt-get update -qq
-          wget https://raw.githubusercontent.com/RT-Thread/env/master/install_ubuntu.sh
-          chmod 777 install_ubuntu.sh
-          ./install_ubuntu.sh
+
+          # 官方优先：下载官方 install_ubuntu.sh，跑完后把实际 clone 出来的
+          # ~/.env/tools/scripts 锁定到已验证可用的 commit。任意一步失败都
+          # 视为整体失败，交给下面的镜像仓库兜底。
+          install_official_env() {
+            wget -q https://raw.githubusercontent.com/RT-Thread/env/master/install_ubuntu.sh -O install_ubuntu.sh || return 1
+            chmod 777 install_ubuntu.sh
+            ./install_ubuntu.sh || return 1
+            rm -f install_ubuntu.sh
+
+            if [ -n "$ENV_PIN_SHA" ]; then
+              echo "Pinning RT-Thread/env (~/.env/tools/scripts) to $ENV_PIN_SHA ..."
+              git -C ~/.env/tools/scripts fetch --depth=1 origin "$ENV_PIN_SHA" \
+                || git -C ~/.env/tools/scripts fetch --unshallow \
+                || return 1
+              git -C ~/.env/tools/scripts checkout "$ENV_PIN_SHA" || return 1
+            fi
+            return 0
+          }
+
+          # 兜底：官方源不可用/锁定失败时，改用个人镜像仓库的 env_gd_ci 分支，
+          # 该分支的 install_ubuntu.sh/touch_env.sh 已经自带正确的锁定逻辑。
+          install_mirror_env_fallback() {
+            echo "⚠️ 官方 RT-Thread/env 安装或锁定失败，回退到个人镜像仓库 (env_gd_ci 分支) ..."
+            rm -rf ~/.env
+            wget -q "$ENV_MIRROR_INSTALL_URL" -O install_ubuntu.sh || return 1
+            chmod 777 install_ubuntu.sh
+            ./install_ubuntu.sh || return 1
+            rm -f install_ubuntu.sh
+            return 0
+          }
+
+          if install_official_env; then
+            echo "✅ 使用官方 RT-Thread/env，已锁定 commit $ENV_PIN_SHA"
+          elif install_mirror_env_fallback; then
+            echo "✅ 官方源失败，已使用个人镜像仓库 env_gd_ci 分支完成安装"
+          else
+            echo "❌ 官方源和个人镜像仓库均安装失败"
+            exit 1
+          fi
+
           pip install -r tools/requirements.txt
 
-          # install_ubuntu.sh/touch_env.sh 内部的 git clone 都不带 ref，锁定
-          # 它们本身的版本号没有意义，必须在它们跑完之后直接锁定实际 clone
-          # 出来的仓库
-          if [ -n "$ENV_PIN_SHA" ]; then
-            echo "Pinning RT-Thread/env (~/.env/tools/scripts) to $ENV_PIN_SHA ..."
-            git -C ~/.env/tools/scripts fetch --depth=1 origin "$ENV_PIN_SHA" \
-              || git -C ~/.env/tools/scripts fetch --unshallow
-            git -C ~/.env/tools/scripts checkout "$ENV_PIN_SHA"
-            echo "当前 env 工具 commit: $(git -C ~/.env/tools/scripts rev-parse HEAD)"
-          fi
-          
+          echo "当前 env 工具 commit: $(git -C ~/.env/tools/scripts rev-parse HEAD)"
+          echo "当前 env 工具来源: $(git -C ~/.env/tools/scripts remote get-url origin)"
+
           # 🔥 配置 Git 参数
           git config --global advice.detachedHead false
           git config --global pull.rebase false
           git config --global core.fileMode false
           git config --global --add safe.directory '*'
           git config --global http.postBuffer 524288000
-          
+
           echo "当前分支: $(git rev-parse --abbrev-ref HEAD)"
           echo "当前 commit: $(git rev-parse HEAD)"
-          
+
           echo "RTT_ROOT=${{ github.workspace }}" >> $GITHUB_ENV
           echo "RTT_CC=gcc" >> $GITHUB_ENV
           echo "export PATH=~/.env/tools/scripts:$PATH" > ~/.env/env.sh
@@ -301,14 +334,14 @@ jobs:
         with:
           path: /opt/arm-gnu-toolchain-13.2.Rel1-x86_64-arm-none-eabi
           key: ${{ runner.os }}-gcc-arm-13.2-rel1
-          
+
       - name: 下载 ARM 工具链
         if: ${{ matrix.legs.RTT_TOOL_CHAIN == 'sourcery-arm' && steps.cache-gcc-arm.outputs.cache-hit != 'true' }}
         shell: bash
         run: |
           wget -q https://github.com/RT-Thread/toolchains-ci/releases/download/v1.8/arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz
           sudo tar -xf arm-gnu-toolchain-13.2.rel1-x86_64-arm-none-eabi.tar.xz -C /opt
-          
+
       - name: 配置 ARM 工具链
         if: ${{ matrix.legs.RTT_TOOL_CHAIN == 'sourcery-arm' }}
         shell: bash
@@ -328,7 +361,7 @@ jobs:
           SRTT_BSP: ${{ join(matrix.legs.SUB_RTT_BSP, ',') }}
         run: |
           source ~/.env/env.sh
-          
+
           echo "=== 编译环境变量 ==="
           echo "RTT_ROOT=$RTT_ROOT"
           echo "RTT_CC=$RTT_CC"
@@ -336,7 +369,7 @@ jobs:
           echo "RTT_BSP=$RTT_BSP"
           echo "SRTT_BSP=$SRTT_BSP"
           echo ""
-          
+
           python tools/ci/bsp_buildings.py
 
       #========================================================================
@@ -378,25 +411,25 @@ jobs:
     runs-on: ubuntu-22.04
     if: success() && github.event_name != 'pull_request'
     name: 📦 收集编译产物
-    
+
     steps:
       - name: 下载所有编译产物
         uses: actions/download-artifact@main
         with:
           path: gd32-output/
           merge-multiple: true
-      
+
       - name: 列出产物
         run: |
           echo "=== 编译产物列表 ==="
           ls -lhR gd32-output/
-          
+
           echo "### 📦 编译产物汇总" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           ls -lhR gd32-output/ >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-      
+
       - name: 上传合并产物
         uses: actions/upload-artifact@main
         with:
@@ -412,7 +445,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: always() && github.event_name == 'pull_request'
     name: 📊 发布编译报告
-    
+
     steps:
       - name: 生成编译报告
         uses: actions/github-script@main
@@ -420,7 +453,7 @@ jobs:
           script: |
             const testCount = '${{ needs.generate-matrix.outputs.test_count }}';
             const buildResult = '${{ needs.build-gd32.result }}';
-            
+
             let emoji = '✅';
             let status = '成功';
             if (buildResult === 'failure') {
@@ -430,17 +463,17 @@ jobs:
               emoji = '⚠️';
               status = '已取消';
             }
-            
+
             const body = `## ${emoji} GD32 BSP CI 编译报告
-            
+
             - **测试数量**: ${testCount} 个 BSP
             - **编译状态**: ${status}
             - **触发**: ${context.eventName}
             - **提交**: ${context.sha.substring(0, 7)}
-            
+
             ${buildResult === 'success' ? '🎉 所有 GD32 BSP 编译通过！' : '⚠️ 部分编译失败，请检查日志。'}
             `;
-            
+
             github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,

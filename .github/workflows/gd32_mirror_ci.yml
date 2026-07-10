@@ -253,12 +253,29 @@ jobs:
       
       - name: 安装 RT-Thread Env 工具
         shell: bash
+        env:
+          # 锁定 RT-Thread/env（pkgs/menuconfig 等命令的实际实现代码，安装到
+          # ~/.env/tools/scripts）到已验证可用的 commit，避免上游 master 浮动
+          # 更新（例如引入的 hal-sdk 包共享 libraries 特性）在没有任何本仓库
+          # 改动的情况下，悄悄改变 CI 的包安装行为。留空则不锁定。
+          ENV_PIN_SHA: 65f6991045d3d0c030080ba5b9489cc91f63e893
         run: |
           sudo apt-get update -qq
           wget https://raw.githubusercontent.com/RT-Thread/env/master/install_ubuntu.sh
           chmod 777 install_ubuntu.sh
           ./install_ubuntu.sh
           pip install -r tools/requirements.txt
+
+          # install_ubuntu.sh/touch_env.sh 内部的 git clone 都不带 ref，锁定
+          # 它们本身的版本号没有意义，必须在它们跑完之后直接锁定实际 clone
+          # 出来的仓库
+          if [ -n "$ENV_PIN_SHA" ]; then
+            echo "Pinning RT-Thread/env (~/.env/tools/scripts) to $ENV_PIN_SHA ..."
+            git -C ~/.env/tools/scripts fetch --depth=1 origin "$ENV_PIN_SHA" \
+              || git -C ~/.env/tools/scripts fetch --unshallow
+            git -C ~/.env/tools/scripts checkout "$ENV_PIN_SHA"
+            echo "当前 env 工具 commit: $(git -C ~/.env/tools/scripts rev-parse HEAD)"
+          fi
           
           # 🔥 配置 Git 参数
           git config --global advice.detachedHead false

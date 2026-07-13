@@ -53,6 +53,27 @@
 /* TRCD: 2x10ns */
 #define RCDDELAY                        3
 
+#ifdef SOC_SERIES_GD32F5xx
+/* Timing values match the official lvgl_f527 demo (exmc_sdram.c V1.2.0).
+ * These are the verified working values for GD32F527I-EVAL board. */
+#undef  SDRAM_RPIPE_DELAY
+#define SDRAM_RPIPE_DELAY               EXMC_PIPELINE_DELAY_1_HCLK
+#undef  SDCLOCK_PERIOD
+#define SDCLOCK_PERIOD                  EXMC_SDCLK_PERIODS_2_HCLK
+#undef  SDRAM_REFRESH_COUNT
+#define SDRAM_REFRESH_COUNT             ((uint32_t)761)
+#undef  EXITSELFREFRESHDELAY
+#define EXITSELFREFRESHDELAY            7
+#undef  SELFREFRESHTIME
+#define SELFREFRESHTIME                 6
+#undef  ROWCYCLEDELAY
+#define ROWCYCLEDELAY                   5
+#undef  RPDELAY
+#define RPDELAY                         2
+#undef  RCDDELAY
+#define RCDDELAY                        2
+#endif
+
 /* memory mode register */
 #define SDRAM_MODEREG_BURST_LENGTH_1             ((uint16_t)0x0000)
 #define SDRAM_MODEREG_BURST_LENGTH_2             ((uint16_t)0x0001)

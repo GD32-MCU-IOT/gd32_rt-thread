@@ -500,6 +500,36 @@ menu "On-chip Peripheral Drivers"
         select RT_USING_SDRAM
         default n
 
+    config BSP_USING_LCD
+        bool "Enable LCD (TLI RGB565)"
+        default n
+        select BSP_USING_SDRAM
+        help
+            On-board 4.3 inch 480x272 RGB LCD driven by TLI.
+            Requires SDRAM for the framebuffer.
+
+    config BSP_USING_TOUCH
+        bool "Enable Touch Panel"
+        default n
+        depends on BSP_USING_LCD
+        help
+            Resistive touch panel (XPT2046-compatible) via bit-banged SPI.
+
+    config BSP_USING_LVGL
+        bool "Enable LVGL"
+        default n
+        depends on BSP_USING_LCD
+        select PKG_USING_LVGL
+        help
+            LVGL v8.3 GUI library with RT-Thread integration.
+
+    config BSP_USING_LVGL_DEMO
+        bool "Enable LVGL demo UI"
+        default y
+        depends on BSP_USING_LVGL
+        help
+            Built-in demo: a title label and a touch-counter button.
+
     menuconfig BSP_USING_CAN
         bool "Enable CAN BUS"
         default n

@@ -21,4 +21,8 @@ path =  [cwd]
 CPPDEFINES = ['GD32F527']
 group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
 
+# build the extended board ports (LCD / touch / LVGL porting layer)
+objs = SConscript(os.path.join('ports', 'SConscript'))
+group = group + objs
+
 Return('group')

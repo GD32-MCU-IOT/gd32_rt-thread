@@ -109,9 +109,16 @@
 #include <rtdevice.h>
 
 #ifdef RT_SERIAL_USING_DMA
+#if !defined(BSP_USING_UART_RX_DMA) && !defined(BSP_USING_UART_TX_DMA)
+#warning "RT_SERIAL_USING_DMA is enabled but neither BSP_USING_UART_RX_DMA nor BSP_USING_UART_TX_DMA is defined"
+#endif
+#ifdef BSP_USING_UART_RX_DMA
 static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag);
-static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag);
 static void dma_rx_done_isr(struct rt_serial_device *serial);
+#endif
+#ifdef BSP_USING_UART_TX_DMA
+static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag);
+#endif
 
 /* DMA TX threshold: transfers smaller than this use polling instead of DMA */
 #ifdef BSP_UART_DMA_TX_THRESHOLD
@@ -599,6 +606,7 @@ static struct gd32_uart uart_obj[] = {
  * DMA helper functions
  ******************************************************************************/
 #ifdef RT_SERIAL_USING_DMA
+#ifdef BSP_USING_UART_TX_DMA
 static void dma_tx_done_isr(uint32_t dma_periph, dma_channel_enum dma_ch)
 {
     dma_channel_disable(dma_periph, dma_ch);
@@ -607,6 +615,7 @@ static void dma_tx_done_isr(uint32_t dma_periph, dma_channel_enum dma_ch)
     dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_FEE);
     dma_flag_clear(dma_periph, dma_ch, DMA_FLAG_TAE);
 }
+#endif /* BSP_USING_UART_TX_DMA */
 
 static void Error_Handler(void)
 {
@@ -1042,6 +1051,7 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 
 #ifdef RT_SERIAL_USING_DMA
         /* disable DMA */
+#ifdef BSP_USING_UART_RX_DMA
         if (ctrl_arg == RT_DEVICE_FLAG_DMA_RX) {
             nvic_irq_disable(uart->dma_rx->irq);
 
@@ -1070,8 +1080,9 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 
             uart->last_recv_index = 0;
         }
+#endif /* BSP_USING_UART_RX_DMA */
 #ifdef BSP_USING_UART_TX_DMA
-        else if (ctrl_arg == RT_DEVICE_FLAG_DMA_TX) {
+        if (ctrl_arg == RT_DEVICE_FLAG_DMA_TX) {
             nvic_irq_disable(uart->dma_tx->irq);
 
             dma_channel_disable(uart->dma_tx->periph, uart->dma_tx->channel);
@@ -1102,11 +1113,13 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 
 #ifdef RT_SERIAL_USING_DMA
     case RT_DEVICE_CTRL_CONFIG:
+#ifdef BSP_USING_UART_RX_DMA
         if (ctrl_arg == RT_DEVICE_FLAG_DMA_RX) {
             gd32_dma_config(serial, ctrl_arg);
         }
+#endif
 #ifdef BSP_USING_UART_TX_DMA
-        else if (ctrl_arg == RT_DEVICE_FLAG_DMA_TX) {
+        if (ctrl_arg == RT_DEVICE_FLAG_DMA_TX) {
             gd32_dma_tx_config(serial, ctrl_arg);
         }
 #endif
@@ -1194,6 +1207,7 @@ static int gd32_uart_getc(struct rt_serial_device *serial)
 
 #ifdef RT_SERIAL_USING_DMA
 
+#ifdef BSP_USING_UART_RX_DMA
 static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_recv_len,
                             void *mem_base_addr)
 {
@@ -1305,6 +1319,7 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
     /* rx dma interrupt config */
     nvic_irq_enable(uart->dma_rx->irq, 1, 0);
 }
+#endif /* BSP_USING_UART_RX_DMA */
 
 #ifdef BSP_USING_UART_TX_DMA
 static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
@@ -1454,6 +1469,7 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
 }
 #endif
 
+#ifdef BSP_USING_UART_RX_DMA
 /**
  * Unified DMA receive ISR handler for circular mode.
  * Handles IDLE, Half-Transfer and Full-Transfer interrupt events.
@@ -1569,6 +1585,7 @@ static void dma_rx_done_isr(struct rt_serial_device *serial)
         dma_recv_isr(serial, UART_RX_DMA_IT_TC_FLAG);
     }
 }
+#endif /* BSP_USING_UART_RX_DMA */
 
 #endif /* RT_SERIAL_USING_DMA */
 
@@ -1594,7 +1611,7 @@ static void GD32_UART_IRQHandler(struct rt_serial_device *serial)
             /* Clear RXNE interrupt flag */
             usart5_flag_clear(USART5, USART5_FLAG_RBNE);
         }
-#ifdef RT_SERIAL_USING_DMA
+#if defined(BSP_USING_UART_RX_DMA)
         if(usart5_interrupt_flag_get(USART5, USART5_INT_FLAG_IDLE) != RESET)
         {
             dma_uart_rx_idle_isr(serial);
@@ -1623,7 +1640,7 @@ static void GD32_UART_IRQHandler(struct rt_serial_device *serial)
             /* Clear RXNE interrupt flag */
             usart_flag_clear(uart->uart_periph, USART_FLAG_RBNE);
         }
-#ifdef RT_SERIAL_USING_DMA
+#if defined(BSP_USING_UART_RX_DMA)
         if(usart_interrupt_flag_get(uart->uart_periph, USART_INT_FLAG_IDLE) != RESET)
         {
             dma_uart_rx_idle_isr(serial);
@@ -1675,7 +1692,9 @@ int rt_hw_usart_init(void)
 
         flag = RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX;
 #if defined(RT_SERIAL_USING_DMA)
+#if defined(BSP_USING_UART_RX_DMA)
         flag |= RT_DEVICE_FLAG_DMA_RX;
+#endif
 #if defined(BSP_USING_UART_TX_DMA)
         flag |= RT_DEVICE_FLAG_DMA_TX;
 #endif

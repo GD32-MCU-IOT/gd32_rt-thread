@@ -249,7 +249,7 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart0_rxdma,
-#ifdef BSP_SERIAL_USING_TX_DMA
+#ifdef BSP_USING_UART_TX_DMA
         &uart0_txdma,
 #endif
 #endif
@@ -310,7 +310,7 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart2_rxdma,
-#ifdef BSP_SERIAL_USING_TX_DMA
+#ifdef BSP_USING_UART_TX_DMA
         &uart2_txdma,
 #endif
 #endif
@@ -388,7 +388,7 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart5_rxdma,
-#ifdef BSP_SERIAL_USING_TX_DMA
+#ifdef BSP_USING_UART_TX_DMA
         &uart5_txdma,
 #endif
 #endif
@@ -414,7 +414,7 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart6_rxdma,
-#ifdef BSP_SERIAL_USING_TX_DMA
+#ifdef BSP_USING_UART_TX_DMA
         &uart6_txdma,
 #endif
 #endif
@@ -437,7 +437,7 @@ static const struct gd32_uart uart_obj[] = {
 #endif
 #ifdef RT_SERIAL_USING_DMA
         &uart7_rxdma,
-#ifdef BSP_SERIAL_USING_TX_DMA
+#ifdef BSP_USING_UART_TX_DMA
         &uart7_txdma,
 #endif
 #endif
@@ -1070,7 +1070,7 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
 
             uart->last_recv_index = 0;
         }
-#ifdef BSP_SERIAL_USING_TX_DMA
+#ifdef BSP_USING_UART_TX_DMA
         else if (ctrl_arg == RT_DEVICE_FLAG_DMA_TX) {
             nvic_irq_disable(uart->dma_tx->irq);
 
@@ -1105,7 +1105,7 @@ static rt_err_t gd32_uart_control(struct rt_serial_device *serial, int cmd, void
         if (ctrl_arg == RT_DEVICE_FLAG_DMA_RX) {
             gd32_dma_config(serial, ctrl_arg);
         }
-#ifdef BSP_SERIAL_USING_TX_DMA
+#ifdef BSP_USING_UART_TX_DMA
         else if (ctrl_arg == RT_DEVICE_FLAG_DMA_TX) {
             gd32_dma_tx_config(serial, ctrl_arg);
         }
@@ -1306,7 +1306,7 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
     nvic_irq_enable(uart->dma_rx->irq, 1, 0);
 }
 
-#ifdef BSP_SERIAL_USING_TX_DMA
+#ifdef BSP_USING_UART_TX_DMA
 static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
 {
     dma_single_data_parameter_struct dma_init_struct;
@@ -1648,7 +1648,7 @@ static const struct rt_uart_ops gd32_uart_ops =
     .control = gd32_uart_control,
     .putc = gd32_uart_putc,
     .getc = gd32_uart_getc,
-#ifndef BSP_SERIAL_USING_TX_DMA
+#ifndef BSP_USING_UART_TX_DMA
     NULL,
 #else
     .dma_transmit = gd32_dma_transmit,
@@ -1676,7 +1676,7 @@ int rt_hw_usart_init(void)
         flag = RT_DEVICE_FLAG_RDWR | RT_DEVICE_FLAG_INT_RX;
 #if defined(RT_SERIAL_USING_DMA)
         flag |= RT_DEVICE_FLAG_DMA_RX;
-#if defined(BSP_SERIAL_USING_TX_DMA)
+#if defined(BSP_USING_UART_TX_DMA)
         flag |= RT_DEVICE_FLAG_DMA_TX;
 #endif
 #endif

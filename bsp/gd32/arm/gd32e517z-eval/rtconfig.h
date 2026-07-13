@@ -80,10 +80,6 @@
 /* kservice options */
 
 /* end of kservice options */
-#define RT_USING_DEBUG
-#define RT_DEBUGING_ASSERT
-#define RT_DEBUGING_COLOR
-#define RT_DEBUGING_CONTEXT
 
 /* Inter-Thread communication */
 
@@ -153,7 +149,7 @@
 #define RT_UNAMED_PIPE_NUMBER 64
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
-#define RT_SERIAL_RB_BUFSZ 64
+#define RT_SERIAL_RB_BUFSZ 512
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
 #define RT_USING_SPI
@@ -336,6 +332,14 @@
 /* HPMicro SDK */
 
 /* end of HPMicro SDK */
+
+/* FT32 HAL & SDK Drivers */
+
+/* end of FT32 HAL & SDK Drivers */
+
+/* NOVOSNS Drivers */
+
+/* end of NOVOSNS Drivers */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -346,6 +350,12 @@
 
 /* end of touch drivers */
 #define PKG_USING_AT24CXX
+
+/* Select the Type of AT24CXX EEPROM */
+
+#define PKG_AT24CXX_EE_TYPE_AT24C02
+#define PKG_AT24CXX_EE_TYPE 1
+/* end of Select the Type of AT24CXX EEPROM */
 #define PKG_USING_AT24CXX_LATEST_VERSION
 /* end of peripheral libraries and drivers */
 
@@ -426,8 +436,6 @@
 
 /* Onboard Peripheral Drivers */
 
-#define BSP_USING_EEPROM
-#define BSP_EEPROM_ON_I2C0
 /* end of Onboard Peripheral Drivers */
 
 /* On-chip Peripheral Drivers */
@@ -435,8 +443,8 @@
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART0
-#define BSP_USING_UART1
 #define BSP_USING_SPI
+#define BSP_SPI_XFER_TIMEOUT 1000
 #define BSP_USING_SPI1
 #define BSP_USING_I2C
 #define BSP_USING_HARD_I2C0

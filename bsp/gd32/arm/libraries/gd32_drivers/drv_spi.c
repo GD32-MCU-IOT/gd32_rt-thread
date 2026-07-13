@@ -35,7 +35,7 @@
 #define SPI_TXDATA_REG(periph)                      SPI_TDATA(periph)
 #define gd32_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
 #define gd32_dma_subperiph_config(periph, ch, cfg)
-#elif defined(SOC_SERIES_GD32F30x)
+#elif defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
 /* F30x/F10x/F20x: fixed DMA channel mapping, no subperiph */
 #define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
 #define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)

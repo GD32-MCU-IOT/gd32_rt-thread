@@ -2,11 +2,11 @@
 ;    \file    startup_gd32f50x.s
 ;    \brief   start up file
 ;
-;    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+;    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 ;*/
 ;
 ;/*
-;    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+;    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 ;
 ;    Redistribution and use in source and binary forms, with or without modification, 
 ;are permitted provided that the following conditions are met:
@@ -57,7 +57,7 @@ __heap_limit
                 PRESERVE8
                 THUMB
 
-;               /* vector table section must match linker KEEP(*(.isr_vector)) */
+;               /* reset Vector Mapped to at Address 0 */
                 AREA    RESET, DATA, READONLY
                 EXPORT  __Vectors
                 EXPORT  __Vectors_End
@@ -176,7 +176,7 @@ Reset_Handler    PROC
 
                  LDR     R4, =0x1FFFF802
                  LDR     R5, [R4]
-                 LSR     R5, R5, #2
+                 LSR     R5, R5, #3
                  ANDS    R5, R5, #0x3
                  CMP     R5, #0x3
                  BNE     SYSTEM_INIT

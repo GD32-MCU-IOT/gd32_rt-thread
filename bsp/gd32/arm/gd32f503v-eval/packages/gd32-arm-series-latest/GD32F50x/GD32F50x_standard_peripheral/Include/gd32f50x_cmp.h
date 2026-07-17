@@ -2,11 +2,11 @@
     \file    gd32f50x_cmp.h
     \brief   definitions for the CMP
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -62,8 +62,8 @@ OF SUCH DAMAGE.
 #define CMP0_CS_CMP0HST                          BITS(8,9)                      /*!< CMP0 hysteresis */
 #define CMP0_CS_CMP0MSEL                         BITS(16,19)                    /*!< CMP_IM input selection */
 #define CMP0_CS_CMP0BLK                          BITS(24,27)                    /*!< CMP0 output blanking source */
-#define CMP0_CS_CMP0DNSSEL                       BITS(28,29)                    /*!< CMP0 digital noise sampling select */
-#define CMP0_CS_CMP0NFM                          BIT(30)                        /*!< CMP0 noise filter mode select */
+#define CMP0_CS_CMP0DFSCDIV                      BITS(28,29)                    /*!< CMP0 digital filter sampling clock division */
+#define CMP0_CS_CMP0DFSNUM                       BIT(30)                        /*!< CMP0 digital filter sampling number */
 #define CMP0_CS_CMP0LK                           BIT(31)                        /*!< CMP0 lock */
 
 /* constants definitions */

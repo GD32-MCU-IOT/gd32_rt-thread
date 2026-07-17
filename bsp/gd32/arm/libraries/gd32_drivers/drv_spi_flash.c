@@ -17,6 +17,10 @@
 #include "dev_spi_flash_sfud.h"
 #endif
 
+#if defined(BSP_USING_QSPI)
+#include "drv_qspi.h"
+#endif
+
 #include <rthw.h>
 #include <finsh.h>
 
@@ -34,57 +38,75 @@ struct spi_flash_config
 
 static const struct spi_flash_config flash_configs[] =
 {
-#ifdef BSP_USING_SPI0
+#if defined(BSP_USING_SPI0) && defined(BSP_SPI0_FLASH_CS_PIN)
     {
         .bus_name    = "spi0",
         .device_name = "spi00",
         .flash_name  = "gd25q_spi0",
-#if defined(SOC_SERIES_GD32M53x)
-        .cs_pin      = GET_PIN(D, 8),
-#elif defined(SOC_SERIES_GD32L23x)
-        .cs_pin      = GET_PIN(D, 2),
-#else
-        .cs_pin      = GET_PIN(A, 4),
-#endif
+        .cs_pin      = BSP_SPI0_FLASH_CS_PIN,
     },
 #endif
 
-#ifdef BSP_USING_SPI1
+#if defined(BSP_USING_SPI1) && defined(BSP_SPI1_FLASH_CS_PIN)
     {
         .bus_name    = "spi1",
         .device_name = "spi10",
         .flash_name  = "gd25q_spi1",
-        .cs_pin      = GET_PIN(B, 9),
+        .cs_pin      = BSP_SPI1_FLASH_CS_PIN,
     },
 #endif
 
-#ifdef BSP_USING_SPI2
+#if defined(BSP_USING_SPI2) && defined(BSP_SPI2_FLASH_CS_PIN)
     {
         .bus_name    = "spi2",
         .device_name = "spi20",
         .flash_name  = "gd25q_spi2",
-        .cs_pin      = GET_PIN(B, 12),
+        .cs_pin      = BSP_SPI2_FLASH_CS_PIN,
     },
 #endif
 
-#ifdef BSP_USING_SPI3
+#if defined(BSP_USING_SPI3) && defined(BSP_SPI3_FLASH_CS_PIN)
     {
         .bus_name    = "spi3",
         .device_name = "spi30",
         .flash_name  = "gd25q_spi3",
-        .cs_pin      = GET_PIN(E, 4),
+        .cs_pin      = BSP_SPI3_FLASH_CS_PIN,
     },
 #endif
 
-#ifdef BSP_USING_SPI4
+#if defined(BSP_USING_SPI4) && defined(BSP_SPI4_FLASH_CS_PIN)
     {
         .bus_name    = "spi4",
         .device_name = "spi40",
         .flash_name  = "gd25q_spi4",
-        .cs_pin      = GET_PIN(F, 6),
+        .cs_pin      = BSP_SPI4_FLASH_CS_PIN,
     },
 #endif
 };
+
+#if defined(BSP_USING_QSPI) && defined(RT_USING_SFUD)
+struct qspi_flash_config
+{
+    const char *bus_name;
+    const char *device_name;
+    const char *flash_name;
+    rt_base_t   cs_pin;
+    rt_uint8_t  data_line_width;
+};
+
+static const struct qspi_flash_config qspi_flash_configs[] =
+{
+#if defined(BSP_USING_QSPI0) && defined(BSP_QSPI0_FLASH_CS_PIN)
+    {
+        .bus_name        = "qspi0",
+        .device_name     = "qspi00",
+        .flash_name      = "gd25q_qspi0",
+        .cs_pin          = BSP_QSPI0_FLASH_CS_PIN,
+        .data_line_width = 4,
+    },
+#endif
+};
+#endif
 
 
 static int spi_flash_init(void)
@@ -114,3 +136,35 @@ static int spi_flash_init(void)
     return result;
 }
 INIT_COMPONENT_EXPORT(spi_flash_init);
+
+#if defined(BSP_USING_QSPI) && defined(RT_USING_SFUD)
+static int qspi_flash_init(void)
+{
+    int result = RT_EOK;
+
+    for (size_t i = 0; i < sizeof(qspi_flash_configs) / sizeof(qspi_flash_configs[0]); i++)
+    {
+        const struct qspi_flash_config *cfg = &qspi_flash_configs[i];
+
+        result = rt_hw_qspi_device_attach(cfg->bus_name, cfg->device_name,
+                                          cfg->cs_pin, cfg->data_line_width,
+                                          RT_NULL, RT_NULL);
+        if (result != RT_EOK)
+        {
+            rt_kprintf("Failed to attach QSPI device %s on bus %s\n", cfg->device_name, cfg->bus_name);
+            continue;
+        }
+
+#ifdef RT_USING_SFUD
+        if (RT_NULL == rt_sfud_flash_probe(cfg->flash_name, cfg->device_name))
+        {
+            rt_kprintf("SFUD probe failed: %s\n", cfg->flash_name);
+            continue;
+        }
+#endif
+    }
+
+    return result;
+}
+INIT_COMPONENT_EXPORT(qspi_flash_init);
+#endif

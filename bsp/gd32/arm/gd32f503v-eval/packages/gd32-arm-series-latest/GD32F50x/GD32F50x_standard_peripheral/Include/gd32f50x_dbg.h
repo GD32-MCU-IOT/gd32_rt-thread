@@ -2,11 +2,11 @@
     \file    gd32f50x_dbg.h
     \brief   definitions for the DBG
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -53,7 +53,6 @@ OF SUCH DAMAGE.
 #define DBG_CTL_DSLP_HOLD       BIT(1)                     /*!< keep debugger connection during deepsleep mode */
 #define DBG_CTL_STB_HOLD        BIT(2)                     /*!< keep debugger connection during standby mode */
 #define DBG_CTL_TRACE_IOEN      BIT(5)                     /*!< enable trace pin assignment */
-#define DBG_CTL_TRACE_MODE      BITS(6,7)                  /*!< trace pin allocation mode */
 #define DBG_CTL_FWDGT_HOLD      BIT(8)                     /*!< debug FWDGT kept when core is halted */
 #define DBG_CTL_WWDGT_HOLD      BIT(9)                     /*!< debug WWDGT kept when core is halted */
 #define DBG_CTL_TIMER0_HOLD     BIT(10)                    /*!< hold TIMER0 counter when core is halted */
@@ -76,13 +75,6 @@ OF SUCH DAMAGE.
 #define DBG_LOW_POWER_SLEEP      DBG_CTL_SLP_HOLD          /*!< keep debugger connection during sleep mode */
 #define DBG_LOW_POWER_DEEPSLEEP  DBG_CTL_DSLP_HOLD         /*!< keep debugger connection during deepsleep mode */
 #define DBG_LOW_POWER_STANDBY    DBG_CTL_STB_HOLD          /*!< keep debugger connection during standby mode */
-
-/* trace pin allocation mode */
-#define CTL0_TRACE_MODE(regval)       (BITS(6,7) & ((uint32_t)(regval) << 6U))
-#define TRACE_MODE_ASYNC              CTL0_TRACE_MODE(0)                                 /*!< trace pin used for async mode */
-#define TRACE_MODE_SYNC_DATASIZE_1    CTL0_TRACE_MODE(1)                                 /*!< trace pin used for sync mode and data size is 1 */
-#define TRACE_MODE_SYNC_DATASIZE_2    CTL0_TRACE_MODE(2)                                 /*!< trace pin used for sync mode and data size is 2 */
-#define TRACE_MODE_SYNC_DATASIZE_4    CTL0_TRACE_MODE(3)                                 /*!< trace pin used for sync mode and data size is 4 */
 
 /* define the peripheral debug hold bit position and its register index offset */
 #define DBG_REGIDX_BIT(regidx, bitpos)      (((regidx) << 6) | (bitpos))
@@ -136,8 +128,5 @@ void dbg_periph_disable(dbg_periph_enum dbg_periph);
 void dbg_trace_pin_enable(void);
 /* disable trace pin assignment */
 void dbg_trace_pin_disable(void);
-
-/* set trace pin mode */
-void dbg_trace_pin_mode_set(uint32_t trace_mode);
 
 #endif /* GD32F50X_DBG_H */

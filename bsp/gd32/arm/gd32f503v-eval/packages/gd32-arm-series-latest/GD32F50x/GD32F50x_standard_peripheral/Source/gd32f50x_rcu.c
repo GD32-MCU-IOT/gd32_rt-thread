@@ -2,11 +2,11 @@
     \file    gd32f50x_rcu.c
     \brief   RCU driver
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -478,7 +478,7 @@ void rcu_pll0_config(uint32_t pll0_src, uint32_t pll0_mul, uint32_t pll0_div)
                 only one parameter can be selected which is shown as below:
       \arg        RCU_PLL1SRC_HXTAL: HXTAL  selected as source clock of PLL1
       \arg        RCU_PPLL1SRC_IRC48M: IRC48M selected as source clock of PLL1
-    \param[in]  pll11_mul: PLL1 clock multiplication factor
+    \param[in]  pll1_mul: PLL1 clock multiplication factor
                 only one parameter can be selected which is shown as below:
       \arg        RCU_PLL1_MULx (x = 4,5,6..63): PLL1 clock multiplication factor
     \param[out] none
@@ -1241,7 +1241,7 @@ void rcu_pll_bandwidth_config(uint32_t pll0_bw, uint32_t pll1_bw)
     uint32_t reg;
 
     reg = RCU_PLLBWCFG;
-    /* reset the IRC8MADJ bits and set according to irc8m_adjval */
+    /* reset the PLL0_BW_CFG/PLL1_BW_CFG bits and set according to pll0_bw/pll1_bw */
     reg &= ~(RCU_PLLBWCFG_PLL0_BW_CFG | RCU_PLLBWCFG_PLL1_BW_CFG);
     RCU_PLLBWCFG = (reg | PLL0_BW_CFG(pll0_bw) | PLL1_BW_CFG(pll1_bw));
 }

@@ -16,11 +16,15 @@
 
 //#define GD32_SPI_TEST
 
-//#define GD32_UART_TEST
+#define GD32_UART_TEST
 
 #define GD32_GPIO_EXTI_TEST
 
-#define GD32_QSPI_TEST
+//#define GD32_QSPI_TEST
+
+#if defined(BSP_USING_QSPI) && defined(RT_USING_SFUD)
+#define GD32_SFUD_QSPI_TEST
+#endif
 
 /* defined the LED pins: LED2 and LED4 */
 #define LED2_PIN    GET_PIN(C, 7)   /* LED2 on PC7 */
@@ -87,6 +91,12 @@ uint8_t qspi_buf_single[QSPI_TEST_SIZE];
 
 static void qspi_sample(void);
 #endif
+
+#ifdef GD32_SFUD_QSPI_TEST
+#include "dev_spi_flash_sfud.h"
+#include "sfud.h"
+static void sfud_qspi_test(void);
+#endif
 int main(void)
 {
     int count = 1;
@@ -122,6 +132,10 @@ int main(void)
 
 #ifdef GD32_QSPI_TEST
     qspi_sample();
+#endif
+
+#ifdef GD32_SFUD_QSPI_TEST
+    sfud_qspi_test();
 #endif
 
     while (count++)
@@ -312,12 +326,15 @@ static int uart_sample(int argc, char *argv[])
 
     if (thread != RT_NULL) {
         rt_thread_startup(thread);
+        rt_kprintf("UART %s echo test started.\n", uart_name);
     } else {
         ret = RT_ERROR;
     }
 
     return ret;
 }
+
+MSH_CMD_EXPORT(uart_sample, UART echo test sample);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
@@ -483,4 +500,53 @@ static void qspi_sample(void)
 }
 
 MSH_CMD_EXPORT(qspi_sample, qspi sample);
+#endif
+
+#ifdef GD32_SFUD_QSPI_TEST
+static void sfud_qspi_test(void)
+{
+    sfud_flash_t flash = rt_sfud_flash_find_by_dev_name("gd25q_qspi0");
+    if (flash == RT_NULL)
+    {
+        rt_kprintf("SFUD flash device not found!\n");
+        return;
+    }
+
+    rt_kprintf("Flash: %s, ID: 0x%02X 0x%02X 0x%02X, capacity: %lu bytes\n",
+               flash->chip.name ? flash->chip.name : "GD25Q16B",
+               flash->chip.mf_id, flash->chip.type_id, flash->chip.capacity_id,
+               flash->chip.capacity);
+
+    /* Erase sector 0 (4KB) */
+    if (sfud_erase(flash, 0, 4096) != SFUD_SUCCESS)
+    {
+        rt_kprintf("SFUD erase failed!\n");
+        return;
+    }
+    rt_kprintf("Erase sector 0 done.\n");
+
+    /* Write test data */
+    uint8_t write_buf[256], read_buf[256];
+    for (int i = 0; i < 256; i++) write_buf[i] = i;
+
+    if (sfud_write(flash, 0, 256, write_buf) != SFUD_SUCCESS)
+    {
+        rt_kprintf("SFUD write failed!\n");
+        return;
+    }
+    rt_kprintf("Write 256 bytes done.\n");
+
+    /* Read back and verify */
+    if (sfud_read(flash, 0, 256, read_buf) != SFUD_SUCCESS)
+    {
+        rt_kprintf("SFUD read failed!\n");
+        return;
+    }
+
+    if (memcmp(write_buf, read_buf, 256) == 0)
+        rt_kprintf("SFUD QSPI read/write test PASSED!\n");
+    else
+        rt_kprintf("SFUD QSPI read/write test FAILED!\n");
+}
+MSH_CMD_EXPORT(sfud_qspi_test, SFUD over QSPI read write test);
 #endif

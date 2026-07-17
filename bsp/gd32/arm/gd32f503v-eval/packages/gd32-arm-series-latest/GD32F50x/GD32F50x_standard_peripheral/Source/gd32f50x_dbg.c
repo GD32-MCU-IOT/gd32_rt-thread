@@ -2,11 +2,11 @@
     \file    gd32f50x_dbg.c
     \brief   DBG driver
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -145,21 +145,4 @@ void dbg_trace_pin_enable(void)
 void dbg_trace_pin_disable(void)
 {
     DBG_CTL &= ~DBG_CTL_TRACE_IOEN;
-}
-
-/*!
-    \brief      set trace pin mode (API_ID: 0x0009U)
-    \param[in]  trace_mode: trace pin mode
-                only one parameter can be selected which is shown as below:
-      \arg        TRACE_MODE_ASYNC: trace pin used for async mode 
-      \arg        TRACE_MODE_SYNC_DATASIZE_1: trace pin used for sync mode and data size is 1
-      \arg        TRACE_MODE_SYNC_DATASIZE_2: trace pin used for sync mode and data size is 2
-      \arg        TRACE_MODE_SYNC_DATASIZE_4: trace pin used for sync mode and data size is 4
-    \param[out] none
-    \retval     none
-*/
-void dbg_trace_pin_mode_set(uint32_t trace_mode)
-{
-    DBG_CTL &= ~DBG_CTL_TRACE_MODE;
-    DBG_CTL |= (trace_mode & DBG_CTL_TRACE_MODE);
 }

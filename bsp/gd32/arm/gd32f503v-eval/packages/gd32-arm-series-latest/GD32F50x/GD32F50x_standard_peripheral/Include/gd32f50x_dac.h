@@ -2,11 +2,11 @@
     \file    gd32f50x_dac.h
     \brief   definitions for the DAC
     
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -149,6 +149,15 @@ OF SUCH DAMAGE.
 /* DAC output channel definitions */
 #define DAC_OUT0                          ((uint8_t)0x00U)                        /*!< DACx_OUT0 channel */
 
+/* DAC flags */
+#define DAC_FLAG_DDUDR0                   DAC_STAT0_DDUDR0                        /*!< DACx_OUT0 DMA underrun flag */
+
+/* DAC interrupt */
+#define DAC_INT_DDUDRIE0                  DAC_CTL0_DDUDRIE0                       /*!< DACx_OUT0 DMA underrun interrupt */
+
+/* DAC interrupt flags */
+#define DAC_INT_FLAG_DDUDR0               DAC_CTL0_DDUDRIE0                       /*!< DACx_OUT0 DMA underrun interrupt flag */
+
 /* function declarations */
 /* DAC initialization functions */
 /* deinitialize DAC */
@@ -202,17 +211,17 @@ void dac_output_connect_to_pin_disable(uint32_t dac_periph, uint8_t dac_out);
 
 /* interrupt and flag functions */
 /* enable DAC interrupt */
-void dac_interrupt_enable(uint32_t dac_periph, uint8_t dac_out);
+void dac_interrupt_enable(uint32_t dac_periph, uint32_t interrupt);
 /* disable DAC interrupt */
-void dac_interrupt_disable(uint32_t dac_periph, uint8_t dac_out);
-/* get the DAC flag */
-FlagStatus dac_flag_get(uint32_t dac_periph, uint8_t dac_out);
-/* clear the DAC flag */
-void dac_flag_clear(uint32_t dac_periph, uint8_t dac_out);
-/* get the DAC interrupt flag */
-FlagStatus dac_interrupt_flag_get(uint32_t dac_periph, uint8_t dac_out);
-/* clear the DAC interrupt flag */
-void dac_interrupt_flag_clear(uint32_t dac_periph, uint8_t dac_out);
+void dac_interrupt_disable(uint32_t dac_periph, uint32_t interrupt);
+/* get DAC flag */
+FlagStatus dac_flag_get(uint32_t dac_periph, uint32_t flag);
+/* clear DAC flag */
+void dac_flag_clear(uint32_t dac_periph, uint32_t flag);
+/* get DAC interrupt flag */
+FlagStatus dac_interrupt_flag_get(uint32_t dac_periph, uint32_t int_flag);
+/* clear DAC interrupt flag */
+void dac_interrupt_flag_clear(uint32_t dac_periph, uint32_t int_flag);
 
 
 

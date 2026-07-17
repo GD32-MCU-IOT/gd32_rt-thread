@@ -2,11 +2,11 @@
     \file    gd32f50x_dac.c
     \brief   DAC driver
     
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -38,6 +38,10 @@ OF SUCH DAMAGE.
 #define OUT1_REG_OFFSET             ((uint32_t)0x00000010U)
 #define DH_12BIT_OFFSET             ((uint32_t)0x00000010U)
 #define DH_8BIT_OFFSET              ((uint32_t)0x00000008U)
+
+#define DAC_STAT_FLAG_MASK0         (DAC_FLAG_DDUDR0)
+#define DAC_INT_EN_MASK0            (DAC_INT_DDUDRIE0)
+#define DAC_INT_FLAG_MASK0          (DAC_INT_FLAG_DDUDR0)
 
 /*!
     \brief      deinitialize DAC (API_ID(0x0001U))
@@ -136,8 +140,9 @@ void dac_dma_disable(uint32_t dac_periph, uint8_t dac_out)
 void dac_pin_select(uint32_t dac_periph, uint8_t dac_out, uint32_t pin_sel)
 {
     if(DAC_OUT0 == dac_out){
+        /* configure DACx_OUT0 output pin */
         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_OUTSEL0);
-        DAC_CTL0(dac_periph) |= (uint32_t)pin_sel & DAC_CTL0_OUTSEL0;
+        DAC_CTL0(dac_periph) |= pin_sel;
     }else{
         /* illegal parameters */
     }
@@ -281,8 +286,8 @@ void dac_trigger_source_config(uint32_t dac_periph, uint8_t dac_out, uint32_t tr
 {
     if(DAC_OUT0 == dac_out){
         /* configure DACx_OUT0 trigger source */
-        DAC_CTL0(dac_periph) &= (uint32_t)(~(DAC_CTL0_DTSEL0));
-        DAC_CTL0(dac_periph) |= triggersource & DAC_CTL0_DTSEL0;
+        DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DTSEL0);
+        DAC_CTL0(dac_periph) |= triggersource;
     }else{
         /* illegal parameters */
     }
@@ -292,6 +297,7 @@ void dac_trigger_source_config(uint32_t dac_periph, uint8_t dac_out, uint32_t tr
     \brief      enable DAC software trigger (API_ID(0x000EU))
     \param[in]  dac_periph: DACx(x=0)
     \param[in]  dac_out: DAC_OUTx(x=0)
+    \param[out] none
     \retval     none
 */
 void dac_software_trigger_enable(uint32_t dac_periph, uint8_t dac_out)
@@ -320,7 +326,7 @@ void dac_wave_mode_config(uint32_t dac_periph, uint8_t dac_out, uint32_t wave_mo
     if(DAC_OUT0 == dac_out){
         /* configure DACx_OUT0 wave mode */
         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWM0);
-        DAC_CTL0(dac_periph) |= wave_mode & DAC_CTL0_DWM0;
+        DAC_CTL0(dac_periph) |= wave_mode;
     }else{
         /* illegal parameters */
     }
@@ -352,7 +358,7 @@ void dac_lfsr_noise_config(uint32_t dac_periph, uint8_t dac_out, uint32_t unmask
     if(DAC_OUT0 == dac_out){
         /* configure DACx_OUT0 LFSR noise mode */
         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWBW0);
-        DAC_CTL0(dac_periph) |= unmask_bits & DAC_CTL0_DWBW0;
+        DAC_CTL0(dac_periph) |= unmask_bits;
     }else{
         /* illegal parameters */
     }
@@ -384,7 +390,7 @@ void dac_triangle_noise_config(uint32_t dac_periph, uint8_t dac_out, uint32_t am
     if(DAC_OUT0 == dac_out){
         /* configure DACx_OUT0 triangle noise mode */
         DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DWBW0);
-        DAC_CTL0(dac_periph) |= amplitude & DAC_CTL0_DWBW0;
+        DAC_CTL0(dac_periph) |= amplitude;
     }else{
         /* illegal parameters */
     }
@@ -399,12 +405,12 @@ void dac_triangle_noise_config(uint32_t dac_periph, uint8_t dac_out, uint32_t am
 */
 void dac_output_connect_to_pin_enable(uint32_t dac_periph, uint8_t dac_out)
 {
-  if(DAC_OUT0 == dac_out){
-        DAC_CTL0(dac_periph) &= ~DAC_CTL0_DCSEL0;
-        DAC_CTL0(dac_periph) |= DAC_CTL0_DCSEL0;
-  }else{
+    if(DAC_OUT0 == dac_out){
+        /* enable DACx_OUT0 output connect to pin */
+        DAC_CTL0(dac_periph) |= (uint32_t)DAC_CTL0_DCSEL0;
+    }else{
         /* illegal parameters */
-  }
+    }
 }
 
 /*!
@@ -416,25 +422,28 @@ void dac_output_connect_to_pin_enable(uint32_t dac_periph, uint8_t dac_out)
 */
 void dac_output_connect_to_pin_disable(uint32_t dac_periph, uint8_t dac_out)
 {
-  if(DAC_OUT0 == dac_out){
-        DAC_CTL0(dac_periph) &= ~DAC_CTL0_DCSEL0;
-  }else{
+    if(DAC_OUT0 == dac_out){
+        /* disable DACx_OUT0 output connect to pin */
+        DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DCSEL0);
+    }else{
         /* illegal parameters */
-  }
+    }
 }
 
 /*!
     \brief      enable DAC interrupt (API_ID(0x0014U))
     \param[in]  dac_periph: DACx(x=0)
-    \param[in]  dac_out: DAC_OUTx(x=0)
+    \param[in]  interrupt: the DAC interrupt
+                only one parameter can be selected which is shown as below:
+      \arg        DAC_INT_DDUDRIE0: DACx_OUT0 DMA underrun interrupt
     \param[out] none
     \retval     none
 */
-void dac_interrupt_enable(uint32_t dac_periph, uint8_t dac_out)
+void dac_interrupt_enable(uint32_t dac_periph, uint32_t interrupt)
 {
-    if(DAC_OUT0 == dac_out){
-        DAC_CTL0(dac_periph) &= (uint32_t)(~DAC_CTL0_DDUDRIE0);
-        DAC_CTL0(dac_periph) |= DAC_CTL0_DDUDRIE0;
+    if(interrupt & DAC_INT_EN_MASK0){
+        /* enable underrun interrupt */
+        DAC_CTL0(dac_periph) |= (uint32_t)(interrupt & DAC_INT_EN_MASK0);
     }else{
         /* illegal parameters */
     }
@@ -443,96 +452,113 @@ void dac_interrupt_enable(uint32_t dac_periph, uint8_t dac_out)
 /*!
     \brief      disable DAC interrupt (API_ID(0x0015U))
     \param[in]  dac_periph: DACx(x=0)
-    \param[in]  dac_out: DAC_OUTx(x=0)
+    \param[in]  interrupt: the DAC interrupt
+                only one parameter can be selected which is shown as below:
+      \arg        DAC_INT_DDUDRIE0: DACx_OUT0 DMA underrun interrupt
     \param[out] none
     \retval     none
 */
-void dac_interrupt_disable(uint32_t dac_periph, uint8_t dac_out)
+void dac_interrupt_disable(uint32_t dac_periph, uint32_t interrupt)
 {
-    if(DAC_OUT0 == dac_out){
-        DAC_CTL0(dac_periph) &= ~DAC_CTL0_DDUDRIE0;
+    if(interrupt & DAC_INT_EN_MASK0){
+        /* disable underrun interrupt */
+        DAC_CTL0(dac_periph) &= (uint32_t)(~(interrupt & DAC_INT_EN_MASK0));
     }else{
         /* illegal parameters */
     }
 }
 
 /*!
-    \brief      get the DAC flag (API_ID(0x0016U))
+    \brief      get DAC flag (API_ID(0x0016U))
     \param[in]  dac_periph: DACx(x=0)
-    \param[in]  dac_out: DAC_OUTx(x=0)
+    \param[in]  flag: the DAC status flags
+                only one parameter can be selected which is shown as below:
+      \arg        DAC_FLAG_DDUDR0: DACx_OUT0 DMA underrun flag
     \param[out] none
-    \retval     the state of dac bit(SET or RESET)
+    \retval     the state of DAC bit(SET or RESET)
 */
-FlagStatus dac_flag_get(uint32_t dac_periph, uint8_t dac_out)
+FlagStatus dac_flag_get(uint32_t dac_periph, uint32_t flag)
 {
     FlagStatus status = RESET;
-    
-    if(DAC_OUT0 == dac_out){
-       /* check the DMA underrun flag */
-       if((uint8_t)RESET != (DAC_STAT0(dac_periph) & DAC_STAT0_DDUDR0)){
-           status = SET;
-       }else{
-           status = RESET;
-       }
+
+    if(flag & DAC_STAT_FLAG_MASK0){
+        /* check DAC_STAT0 flag */
+        if(RESET != (DAC_STAT0(dac_periph) & flag)){
+            status = SET;
+        }else{
+            status = RESET;
+        }
     }else{
         /* illegal parameters */
     }
-    
+
     return status;
 }
 
 /*!
-    \brief      clear the DAC flag (API_ID(0x0017U))
+    \brief      clear DAC flag (API_ID(0x0017U))
     \param[in]  dac_periph: DACx(x=0)
-    \param[in]  dac_out: DAC_OUTx(x=0)
+    \param[in]  flag: DAC flag
+                only one parameter can be selected which is shown as below:
+      \arg        DAC_FLAG_DDUDR0: DACx_OUT0 DMA underrun flag
     \param[out] none
     \retval     none
 */
-void dac_flag_clear(uint32_t dac_periph, uint8_t dac_out)
+void dac_flag_clear(uint32_t dac_periph, uint32_t flag)
 {
-    if(DAC_OUT0 == dac_out){
-        DAC_STAT0(dac_periph) |= DAC_STAT0_DDUDR0;
+    if(flag & DAC_STAT_FLAG_MASK0){
+        /* clear DAC_STAT0 flag */
+        DAC_STAT0(dac_periph) = (uint32_t)(flag & DAC_STAT_FLAG_MASK0);
     }else{
         /* illegal parameters */
     }
 }
 
 /*!
-    \brief      get the DAC interrupt flag (API_ID(0x0018U))
+    \brief      get DAC interrupt flag (API_ID(0x0018U))
     \param[in]  dac_periph: DACx(x=0)
-    \param[in]  dac_out: DAC_OUTx(x=0)
+    \param[in]  int_flag: DAC interrupt flag
+                only one parameter can be selected which is shown as below:
+      \arg        DAC_INT_FLAG_DDUDR0: DACx_OUT0 DMA underrun interrupt flag
     \param[out] none
     \retval     the state of DAC interrupt flag(SET or RESET)
 */
-FlagStatus dac_interrupt_flag_get(uint32_t dac_periph, uint8_t dac_out)
+FlagStatus dac_interrupt_flag_get(uint32_t dac_periph, uint32_t int_flag)
 {
     FlagStatus temp_flag = RESET;
-    uint32_t ddudr_flag = 0U, ddudrie_flag = 0U;
-    /* check the DMA underrun flag and DAC DMA underrun interrupt enable flag */
-    if(DAC_OUT0 == dac_out){
-        ddudr_flag = DAC_STAT0(dac_periph) & DAC_STAT0_DDUDR0;
-        ddudrie_flag = DAC_CTL0(dac_periph) & DAC_CTL0_DDUDRIE0;
+    uint32_t reg1 = 0U, reg2 = 0U;
+
+    if(int_flag & DAC_INT_FLAG_MASK0){
+        /* check underrun interrupt int_flag */
+        reg1 = DAC_STAT0(dac_periph) & int_flag;
+        reg2 = DAC_CTL0(dac_periph) & int_flag;
     }else{
         /* illegal parameters */
     }
-    if((RESET != ddudr_flag) && (RESET != ddudrie_flag)){
+
+    /* get DAC interrupt flag status */
+    if((RESET != reg1) && (RESET != reg2)){
         temp_flag = SET;
     }
+
     return temp_flag;
 }
 
 /*!
-    \brief      clear the DAC interrupt flag (API_ID(0x0019U))
+    \brief      clear DAC interrupt flag (API_ID(0x0019U))
     \param[in]  dac_periph: DACx(x=0)
-    \param[in]  dac_out: DAC_OUTx(x=0)
+    \param[in]  int_flag: DAC interrupt flag
+                only one parameter can be selected which is shown as below:
+      \arg        DAC_INT_FLAG_DDUDR0: DACx_OUT0 DMA underrun interrupt flag
     \param[out] none
     \retval     none
 */
-void dac_interrupt_flag_clear(uint32_t dac_periph, uint8_t dac_out)
+void dac_interrupt_flag_clear(uint32_t dac_periph, uint32_t int_flag)
 {
-  if(DAC_OUT0 == dac_out){
-        DAC_STAT0(dac_periph) |= DAC_STAT0_DDUDR0;
-  }else{
+    if(int_flag & DAC_INT_FLAG_MASK0){
+        /* clear underrun interrupt int_flag */
+        DAC_STAT0(dac_periph) = (uint32_t)(int_flag & DAC_INT_FLAG_MASK0);
+    }else{
         /* illegal parameters */
-  }
+    }
 }

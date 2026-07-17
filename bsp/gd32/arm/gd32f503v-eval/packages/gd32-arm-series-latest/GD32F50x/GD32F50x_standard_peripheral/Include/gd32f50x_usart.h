@@ -2,11 +2,11 @@
     \file    gd32f50x_usart.h
     \brief   definitions for the USART
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -320,8 +320,8 @@ typedef enum {
 
 /* USART one sample bit method configure */
 #define CTL2_OSB(regval)              (BIT(11) & ((uint32_t)(regval) << 11))
-#define USART_OSB_1bit                CTL2_OSB(1)                      /*!< 1 bit */
-#define USART_OSB_3bit                CTL2_OSB(0)                      /*!< 3 bits */
+#define USART_OSB_1BIT                CTL2_OSB(1)                      /*!< 1 bit */
+#define USART_OSB_3BIT                CTL2_OSB(0)                      /*!< 3 bits */
 
 /* USART IrDA low-power enable */
 #define CTL2_IRLP(regval)             (BIT(2) & ((uint32_t)(regval) << 2))

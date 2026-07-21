@@ -108,7 +108,7 @@ static struct rt_spi_bus spi_bus5;
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
  && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x) \
- && !defined(SOC_SERIES_GD32F30x)
+ && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -417,7 +417,7 @@ static struct rt_spi_ops gd32_spi_ops =
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
  && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) \
- && !defined(SOC_SERIES_GD32F30x)
+ && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -626,7 +626,7 @@ static rt_err_t spi_configure(struct rt_spi_device* device,
         LOG_D("max   freq: %d\n", max_hz);
 
         #if defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32L23x || defined SOC_SERIES_GD32F3x0 \
-         || defined SOC_SERIES_GD32M53x
+         || defined SOC_SERIES_GD32M53x || defined SOC_SERIES_GD32W51x_F5HC
         spi_src = spi_periph == SPI0? CK_APB2:CK_APB1;
         #elif defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32H75E || defined SOC_SERIES_GD32H77x
         /* SPI default clock source */

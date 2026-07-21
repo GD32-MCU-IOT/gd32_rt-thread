@@ -58,8 +58,8 @@ static void disp_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_
     /* Set a line mark at the last line — TLI will fire an interrupt when
      * it finishes scanning this frame, then we tell LVGL it's done. */
     tli_line_mark_set(DISP_VER_RES - 1);
-    tli_interrupt_enable(TLI_INT_LM);
     g_disp_drv = disp_drv;
+    tli_interrupt_enable(TLI_INT_LM);
 }
 
 /* TLI line-mark interrupt — fires when TLI finishes scanning one frame */

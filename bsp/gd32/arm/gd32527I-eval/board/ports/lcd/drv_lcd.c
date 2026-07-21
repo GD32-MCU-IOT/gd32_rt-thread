@@ -250,7 +250,7 @@ static void _lcd_blit_line(const char *pixel, int x, int y, rt_size_t size)
     const rt_uint16_t *p = (const rt_uint16_t *)pixel;
     rt_size_t i;
 
-    if ((x < 0) || (y < 0) || (y >= LCD_HEIGHT))
+    if ((x < 0) || (x >= LCD_WIDTH) || (y < 0) || (y >= LCD_HEIGHT))
     {
         return;
     }

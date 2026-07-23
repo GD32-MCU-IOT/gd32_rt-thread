@@ -41,6 +41,12 @@
 #define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
 #define gd32_dma_request_config(init_s, dma_cfg)
 #define gd32_dma_subperiph_config(periph, ch, cfg)
+#elif defined(SOC_SERIES_GD32L23x)
+/* L23x: single DMA + DMAMUX, single SPI_DATA register, request routed via DMAMUX */
+#define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
+#define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
+#define gd32_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
+#define gd32_dma_subperiph_config(periph, ch, cfg)
 #else
 #define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
 #define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
@@ -476,22 +482,15 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     dma_single_data_parameter_struct dma_init_struct;
     uint32_t spi_periph = spi_device->spi_periph;
     
-    /* Enable DMA clock */
-    if (spi_device->dma_tx != RT_NULL && spi_device->dma_tx->periph == DMA0)
+    /* Enable DMA clock (the controller is described by the .rcu field of the */
+
+    if (spi_device->dma_tx != RT_NULL)
     {
-        rcu_periph_clock_enable(RCU_DMA0);
+        rcu_periph_clock_enable(spi_device->dma_tx->rcu);
     }
-    if (spi_device->dma_tx != RT_NULL && spi_device->dma_tx->periph == DMA1)
+    if (spi_device->dma_rx != RT_NULL)
     {
-        rcu_periph_clock_enable(RCU_DMA1);
-    }
-    if (spi_device->dma_rx != RT_NULL && spi_device->dma_rx->periph == DMA0)
-    {
-        rcu_periph_clock_enable(RCU_DMA0);
-    }
-    if (spi_device->dma_rx != RT_NULL && spi_device->dma_rx->periph == DMA1)
-    {
-        rcu_periph_clock_enable(RCU_DMA1);
+        rcu_periph_clock_enable(spi_device->dma_rx->rcu);
     }
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)

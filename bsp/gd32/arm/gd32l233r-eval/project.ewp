@@ -15,15 +15,15 @@
         <debug>1</debug>
         <option>
           <name>ExePath</name>
-          <state>Debug\Exe</state>
+          <state>build\Exe</state>
         </option>
         <option>
           <name>ObjPath</name>
-          <state>Debug\Obj</state>
+          <state>build\Obj</state>
         </option>
         <option>
           <name>ListPath</name>
-          <state>Debug\List</state>
+          <state>build\List</state>
         </option>
         <option>
           <name>GEndianMode</name>
@@ -48,20 +48,20 @@
         <option>
           <name>GRuntimeLibSelect</name>
           <version>0</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>GRuntimeLibSelectSlave</name>
           <version>0</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>RTDescription</name>
-          <state>Use the normal configuration of the C/C++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
+          <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
         </option>
         <option>
           <name>OGProductVersion</name>
-          <state>8.32.1.18618</state>
+          <state>7.40.2.8567</state>
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
@@ -111,7 +111,7 @@
         </option>
         <option>
           <name>RTConfigPath2</name>
-          <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</state>
+          <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Full.h</state>
         </option>
         <option>
           <name>GBECoreSlave</name>
@@ -241,7 +241,7 @@
         </option>
         <option>
           <name>CCPreprocLine</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCListCFile</name>
@@ -355,32 +355,32 @@
         <option>
           <name>CCIncludePath2</name>
           <state />
-          <state>$PROJ_DIR$\packages\gd32-arm-series-latest\Include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
-          <state>$PROJ_DIR$\board</state>
-          <state>$PROJ_DIR$\.</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\include</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
+          <state>$PROJ_DIR$\.</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\filesystems\devfs</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\net\utest</state>
           <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m23</state>
+          <state>$PROJ_DIR$\..\libraries\gd32_drivers</state>
           <state>$PROJ_DIR$\applications</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi</state>
+          <state>$PROJ_DIR$\..\..\..\..\include</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD\GD32L23x\Include</state>
           <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi\sfud\inc</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\eventfd</state>
-          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD\GD32L23x\Include</state>
-          <state>$PROJ_DIR$\packages\at24cxx-latest</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\epoll</state>
-          <state>$PROJ_DIR$\..\libraries\gd32_drivers</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\finsh</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\net\utest</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\filesystems\devfs</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-series-latest\Include</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\include</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\include</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\finsh</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\epoll</state>
+          <state>$PROJ_DIR$\packages\at24cxx-latest</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
+          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
+          <state>$PROJ_DIR$\board</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -684,7 +684,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state />
+          <state>template.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -739,7 +739,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>template.out</state>
+          <state>rtthread.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -779,23 +779,23 @@
         </option>
         <option>
           <name>IlinkLogFile</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogInitialization</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogModule</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogSection</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogVeneer</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkIcfOverride</name>
@@ -803,7 +803,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$PROJ_DIR$/board/linker_scripts/link.icf</state>
+          <state>$PROJ_DIR$\board\linker_scripts\link.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -934,15 +934,15 @@
         </option>
         <option>
           <name>IlinkLogAutoLibSelect</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogRedirSymbols</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogUnusedFragments</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkCrcReverseByteOrder</name>
@@ -1132,11 +1132,11 @@
         </option>
         <option>
           <name>OGProductVersion</name>
-          <state>8.32.1.18618</state>
+          <state>7.40.2.8567</state>
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state />
+          <state>8.32.1.18618</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -1148,7 +1148,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state />
+          <state>Default	None</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -1187,7 +1187,7 @@
         <option>
           <name>GBECoreSlave</name>
           <version>26</version>
-          <state>38</state>
+          <state>1</state>
         </option>
         <option>
           <name>OGUseCmsis</name>
@@ -1204,11 +1204,11 @@
         <option>
           <name>CoreVariant</name>
           <version>26</version>
-          <state>38</state>
+          <state>0</state>
         </option>
         <option>
           <name>GFPUDeviceSlave</name>
-          <state>-</state>
+          <state>Default	None</state>
         </option>
         <option>
           <name>FPU2</name>
@@ -1227,7 +1227,7 @@
         <option>
           <name>GFPUCoreSlave2</name>
           <version>26</version>
-          <state>38</state>
+          <state>0</state>
         </option>
         <option>
           <name>OGCMSISPackSelectDevice</name>
@@ -1312,7 +1312,7 @@
         </option>
         <option>
           <name>CCPreprocLine</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCListCFile</name>
@@ -1426,32 +1426,32 @@
         <option>
           <name>CCIncludePath2</name>
           <state />
-          <state>$PROJ_DIR$\packages\gd32-arm-series-latest\Include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
-          <state>$PROJ_DIR$\board</state>
-          <state>$PROJ_DIR$\.</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\include</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
+          <state>$PROJ_DIR$\.</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\filesystems\devfs</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\net\utest</state>
           <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m23</state>
+          <state>$PROJ_DIR$\..\libraries\gd32_drivers</state>
           <state>$PROJ_DIR$\applications</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi</state>
+          <state>$PROJ_DIR$\..\..\..\..\include</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD\GD32L23x\Include</state>
           <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi\sfud\inc</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\eventfd</state>
-          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD\GD32L23x\Include</state>
-          <state>$PROJ_DIR$\packages\at24cxx-latest</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\epoll</state>
-          <state>$PROJ_DIR$\..\libraries\gd32_drivers</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\finsh</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\net\utest</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\filesystems\devfs</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-series-latest\Include</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\include</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\include</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\finsh</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\epoll</state>
+          <state>$PROJ_DIR$\packages\at24cxx-latest</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
+          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
+          <state>$PROJ_DIR$\board</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1846,7 +1846,7 @@
         </option>
         <option>
           <name>IlinkMapFile</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>IlinkLogFile</name>
@@ -2157,6 +2157,9 @@
   <group>
     <name>CPU</name>
     <file>
+      <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\common\atomic_arm.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\..\libcpu\arm\common\div0.c</name>
     </file>
     <file>
@@ -2277,12 +2280,6 @@
   <group>
     <name>Finsh</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\components\finsh\shell.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_parse.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh.c</name>
     </file>
     <file>
@@ -2291,86 +2288,92 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_file.c</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\..\components\finsh\shell.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_parse.c</name>
+    </file>
   </group>
   <group>
     <name>GD32L23x_StdPeriph</name>
     <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_adc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_pmu.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_slcd.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_exti.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_vref.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_misc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_dac.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_fwdgt.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_lptimer.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_usart.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_ctc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_dma.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_lpuart.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_wwdgt.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_trng.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_timer.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_i2c.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_crc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_cmp.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_spi.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_rcu.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_gpio.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_syscfg.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_slcd.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_misc.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_ctc.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_pmu.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_adc.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_dac.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_rtc.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_cmp.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_timer.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_lpuart.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_rcu.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_fwdgt.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_crc.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_wwdgt.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_exti.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_dbg.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_dma.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_gpio.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_i2c.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_fmc.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_spi.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_usart.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\Source\gd32l23x_lptimer.c</name>
     </file>
   </group>
   <group>
@@ -2487,10 +2490,10 @@
   <group>
     <name>Libraries</name>
     <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD\GD32L23x\Source\IAR\startup_gd32l233.s</name>
+      <name>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD\GD32L23x\Source\system_gd32l23x.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD\GD32L23x\Source\system_gd32l23x.c</name>
+      <name>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD\GD32L23x\Source\IAR\startup_gd32l233.s</name>
     </file>
   </group>
   <group>

@@ -16,15 +16,15 @@
                 <debug>1</debug>
                 <option>
                     <name>ExePath</name>
-                    <state>Debug\Exe</state>
+                    <state>build\Exe</state>
                 </option>
                 <option>
                     <name>ObjPath</name>
-                    <state>Debug\Obj</state>
+                    <state>build\Obj</state>
                 </option>
                 <option>
                     <name>ListPath</name>
-                    <state>Debug\List</state>
+                    <state>build\List</state>
                 </option>
                 <option>
                     <name>GEndianMode</name>
@@ -49,20 +49,20 @@
                 <option>
                     <name>GRuntimeLibSelect</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>GRuntimeLibSelectSlave</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>2</state>
                 </option>
                 <option>
                     <name>RTDescription</name>
-                    <state>Use the normal configuration of the C/C++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
+                    <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
                 </option>
                 <option>
                     <name>OGProductVersion</name>
-                    <state>8.32.1.18618</state>
+                    <state>7.40.2.8567</state>
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
@@ -112,7 +112,7 @@
                 </option>
                 <option>
                     <name>RTConfigPath2</name>
-                    <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</state>
+                    <state>$TOOLKIT_DIR$\inc\c\DLib_Config_Full.h</state>
                 </option>
                 <option>
                     <name>GBECoreSlave</name>
@@ -232,7 +232,7 @@
                 </option>
                 <option>
                     <name>CCPreprocLine</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CCListCFile</name>
@@ -649,7 +649,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state></state>
+                    <state>template.srec</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -704,7 +704,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>template.out</state>
+                    <state>rtthread.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>
@@ -744,23 +744,23 @@
                 </option>
                 <option>
                     <name>IlinkLogFile</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkLogInitialization</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkLogModule</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkLogSection</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkLogVeneer</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkIcfOverride</name>
@@ -768,7 +768,7 @@
                 </option>
                 <option>
                     <name>IlinkIcfFile</name>
-                    <state>$PROJ_DIR$/board/linker_scripts/link.icf</state>
+                    <state>$PROJ_DIR$\board\linker_scripts\link.icf</state>
                 </option>
                 <option>
                     <name>IlinkIcfFileSlave</name>
@@ -899,15 +899,15 @@
                 </option>
                 <option>
                     <name>IlinkLogAutoLibSelect</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkLogRedirSymbols</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkLogUnusedFragments</name>
-                    <state>0</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>IlinkCrcReverseByteOrder</name>
@@ -1097,11 +1097,11 @@
                 </option>
                 <option>
                     <name>OGProductVersion</name>
-                    <state>8.32.1.18618</state>
+                    <state>7.40.2.8567</state>
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state></state>
+                    <state>8.32.1.18618</state>
                 </option>
                 <option>
                     <name>GeneralEnableMisra</name>
@@ -1113,7 +1113,7 @@
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
-                    <state></state>
+                    <state>Default	None</state>
                 </option>
                 <option>
                     <name>GenLowLevelInterface</name>
@@ -1152,7 +1152,7 @@
                 <option>
                     <name>GBECoreSlave</name>
                     <version>26</version>
-                    <state>38</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>OGUseCmsis</name>
@@ -1169,11 +1169,11 @@
                 <option>
                     <name>CoreVariant</name>
                     <version>26</version>
-                    <state>38</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GFPUDeviceSlave</name>
-                    <state>-</state>
+                    <state>Default	None</state>
                 </option>
                 <option>
                     <name>FPU2</name>
@@ -1192,7 +1192,7 @@
                 <option>
                     <name>GFPUCoreSlave2</name>
                     <version>26</version>
-                    <state>38</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OGCMSISPackSelectDevice</name>
@@ -1267,7 +1267,7 @@
                 </option>
                 <option>
                     <name>CCPreprocLine</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CCListCFile</name>
@@ -1775,7 +1775,7 @@
                 </option>
                 <option>
                     <name>IlinkMapFile</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkLogFile</name>

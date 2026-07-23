@@ -38,7 +38,8 @@
 
 /* USART data register address macros for DMA configuration */
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
- || defined(SOC_SERIES_GD32W51x_F5HC)
+ || defined(SOC_SERIES_GD32W51x_F5HC) || defined(SOC_SERIES_GD32L23x)
+/* These series have separate USART transmit/receive data registers */
 #define USART_DATA_TX(usartx) (&USART_TDATA(usartx))
 #define USART_DATA_RX(usartx) (&USART_RDATA(usartx))
 #elif defined(SOC_SERIES_GD32E51x)
@@ -1232,7 +1233,8 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
     dma_init_struct.number       = uart->setting_recv_len;
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E) \
+ || defined(SOC_SERIES_GD32L23x)
     dma_init_struct.request      = uart->dma_rx->request;
 #endif
     dma_init_struct.periph_addr  = (uint32_t)USART_DATA_RX(uart->uart_periph);
@@ -1298,13 +1300,7 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
         usart_interrupt_enable(uart->uart_periph, USART_INT_IDLE);
     }
     /* DMA clock enable */
-    if(DMA0 == uart->dma_rx->periph) {
-        rcu_periph_clock_enable(RCU_DMA0);
-    } else if(DMA1 == uart->dma_rx->periph) {
-        rcu_periph_clock_enable(RCU_DMA1);
-    } else {
-        Error_Handler();
-    }
+    rcu_periph_clock_enable(uart->dma_rx->rcu);
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /* enable DMAMUX clock */
@@ -1321,7 +1317,11 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
     usart_dma_receive_config(uart->uart_periph, USART_RECEIVE_DMA_ENABLE);
     dma_channel_enable(uart->dma_rx->periph, uart->dma_rx->channel);
     /* rx dma interrupt config */
+#if defined(SOC_SERIES_GD32L23x) || defined(SOC_SERIES_GD32E23x)
+    nvic_irq_enable(uart->dma_rx->irq, 1);
+#else
     nvic_irq_enable(uart->dma_rx->irq, 1, 0);
+#endif
 }
 #endif /* BSP_USING_UART_RX_DMA */
 
@@ -1333,13 +1333,7 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     struct gd32_uart *uart = (struct gd32_uart *) serial->parent.user_data;
 
     /* DMA clock enable */
-    if(DMA0 == uart->dma_tx->periph) {
-        rcu_periph_clock_enable(RCU_DMA0);
-    } else if(DMA1 == uart->dma_tx->periph) {
-        rcu_periph_clock_enable(RCU_DMA1);
-    } else {
-        Error_Handler();
-    }
+    rcu_periph_clock_enable(uart->dma_tx->rcu);
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /* enable DMAMUX clock */
@@ -1355,7 +1349,8 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     GD32_DMA_SET_DATAWIDTH(&dma_init_struct, DMA_PERIPH_WIDTH_8BIT);
     dma_init_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.priority     = DMA_PRIORITY_HIGH;
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E) \
+ || defined(SOC_SERIES_GD32L23x)
     dma_init_struct.request      = uart->dma_tx->request;
 #endif
     dma_init_struct.number       = 0;   /* will be set in transmit function */
@@ -1463,7 +1458,11 @@ static rt_ssize_t gd32_dma_transmit(struct rt_serial_device *serial, rt_uint8_t 
 
         usart_dma_transmit_config(uart->uart_periph, USART_TRANSMIT_DMA_ENABLE);
         /* tx dma interrupt config */
+#if defined(SOC_SERIES_GD32L23x) || defined(SOC_SERIES_GD32E23x)
+        nvic_irq_enable(uart->dma_tx->irq, 1);
+#else
         nvic_irq_enable(uart->dma_tx->irq, 1, 0);
+#endif
 
         dma_channel_enable(uart->dma_tx->periph, uart->dma_tx->channel);
 

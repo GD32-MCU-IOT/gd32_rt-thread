@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>GD32L233RC</Device>
           <Vendor>GigaDevice</Vendor>
-          <PackID>GigaDevice.GD32L23x_DFP.2.1.0</PackID>
+          <PackID>GigaDevice.GD32L23x_DFP.2.3.0</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x0008000) IROM(0x08000000,0x0040000) CPUTYPE("Cortex-M23") CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -48,8 +48,8 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>template</OutputName>
+          <OutputDirectory>.\build\</OutputDirectory>
+          <OutputName>rtthread</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -337,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>__RTTHREAD__, USE_STDPERIPH_DRIVER, RT_USING_LIBC, __CLK_TCK=RT_TICK_PER_SECOND, __STDC_LIMIT_MACROS, RT_USING_ARMLIBC, GD32L233</Define>
+              <Define>__RTTHREAD__, __CLK_TCK=RT_TICK_PER_SECOND, GD32L233, USE_STDPERIPH_DRIVER, RT_USING_ARMLIBC, RT_USING_LIBC, __STDC_LIMIT_MACROS</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\..\components\finsh;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\drivers\smp_call;applications;..\..\..\..\components\net\utest;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;.;..\..\..\..\components\dfs\dfs_v1\include;..\libraries\gd32_drivers;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\phy;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\include;..\..\..\..\libcpu\arm\common;..\..\..\..\components\drivers\spi\sfud\inc;board;..\..\..\..\components\drivers\include;packages\gd32-arm-series-latest\Include;packages\at24cxx-latest;packages\gd32-arm-cmsis-latest\GD\GD32L23x\Include;..\..\..\..\components\drivers\include;..\..\..\..\libcpu\arm\cortex-m23;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\drivers\spi;..\..\..\..\components\drivers\include</IncludePath>
+              <IncludePath>..\..\..\..\libcpu\arm\cortex-m23;..\..\..\..\components\dfs\dfs_v1\include;packages\gd32-arm-series-latest\Include;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\eventfd;.;..\..\..\..\components\drivers\spi;..\..\..\..\components\libc\compilers\common\extension;packages\gd32-arm-cmsis-latest\GD\GD32L23x\Include;..\..\..\..\components\drivers\spi\sfud\inc;..\..\..\..\components\drivers\include;packages\at24cxx-latest;..\libraries\gd32_drivers;board;..\..\..\..\include;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\drivers\smp_call;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\finsh;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\net\utest;..\..\..\..\components\dfs\dfs_v1\filesystems\devfs;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\phy;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\drivers\include;applications;..\..\..\..\libcpu\arm\common</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -403,6 +403,11 @@
         <Group>
           <GroupName>CPU</GroupName>
           <Files>
+            <File>
+              <FileName>atomic_arm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\libcpu\arm\common\atomic_arm.c</FilePath>
+            </File>
             <File>
               <FileName>div0.c</FileName>
               <FileType>1</FileType>
@@ -1879,24 +1884,24 @@
           <GroupName>Finsh</GroupName>
           <Files>
             <File>
-              <FileName>msh_parse.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
-            </File>
-            <File>
-              <FileName>msh.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
-            </File>
-            <File>
               <FileName>cmd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
             </File>
             <File>
+              <FileName>msh_parse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
+            </File>
+            <File>
               <FileName>msh_file.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
+            </File>
+            <File>
+              <FileName>msh.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
             </File>
             <File>
               <FileName>shell.c</FileName>
@@ -1909,9 +1914,29 @@
           <GroupName>GD32L23x_StdPeriph</GroupName>
           <Files>
             <File>
-              <FileName>gd32l23x_cmp.c</FileName>
+              <FileName>gd32l23x_exti.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_cmp.c</FilePath>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_exti.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_lpuart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_lpuart.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_gpio.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_usart.c</FilePath>
             </File>
             <File>
               <FileName>gd32l23x_wwdgt.c</FileName>
@@ -1919,9 +1944,24 @@
               <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_wwdgt.c</FilePath>
             </File>
             <File>
+              <FileName>gd32l23x_cmp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_cmp.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_pmu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_pmu.c</FilePath>
+            </File>
+            <File>
               <FileName>gd32l23x_fmc.c</FileName>
               <FileType>1</FileType>
               <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_fmc.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_dac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_dac.c</FilePath>
             </File>
             <File>
               <FileName>gd32l23x_trng.c</FileName>
@@ -1934,14 +1974,39 @@
               <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_crc.c</FilePath>
             </File>
             <File>
-              <FileName>gd32l23x_ctc.c</FileName>
+              <FileName>gd32l23x_adc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_ctc.c</FilePath>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_adc.c</FilePath>
             </File>
             <File>
-              <FileName>gd32l23x_timer.c</FileName>
+              <FileName>gd32l23x_vref.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_timer.c</FilePath>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_vref.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_dma.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_misc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_misc.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_rtc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_rtc.c</FilePath>
+            </File>
+            <File>
+              <FileName>gd32l23x_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_i2c.c</FilePath>
             </File>
             <File>
               <FileName>gd32l23x_rcu.c</FileName>
@@ -1949,14 +2014,9 @@
               <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_rcu.c</FilePath>
             </File>
             <File>
-              <FileName>gd32l23x_dbg.c</FileName>
+              <FileName>gd32l23x_syscfg.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_dbg.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_slcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_slcd.c</FilePath>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_syscfg.c</FilePath>
             </File>
             <File>
               <FileName>gd32l23x_lptimer.c</FileName>
@@ -1969,74 +2029,19 @@
               <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_fwdgt.c</FilePath>
             </File>
             <File>
-              <FileName>gd32l23x_misc.c</FileName>
+              <FileName>gd32l23x_ctc.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_misc.c</FilePath>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_ctc.c</FilePath>
             </File>
             <File>
-              <FileName>gd32l23x_syscfg.c</FileName>
+              <FileName>gd32l23x_dbg.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_syscfg.c</FilePath>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_dbg.c</FilePath>
             </File>
             <File>
-              <FileName>gd32l23x_i2c.c</FileName>
+              <FileName>gd32l23x_slcd.c</FileName>
               <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_i2c.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_gpio.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_vref.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_vref.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_rtc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_rtc.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_dac.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_dac.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_lpuart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_lpuart.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_adc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_adc.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_pmu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_pmu.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_spi.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_spi.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_exti.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_exti.c</FilePath>
-            </File>
-            <File>
-              <FileName>gd32l23x_dma.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_dma.c</FilePath>
+              <FilePath>packages\gd32-arm-series-latest\Source\gd32l23x_slcd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2995,5 +3000,15 @@
     </components>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>&lt;Project Info&gt;</LayName>
+        <LayTarg>0</LayTarg>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

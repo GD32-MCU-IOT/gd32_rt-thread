@@ -93,7 +93,7 @@ Zerobss:
 /* Call static constructors */
   bl __libc_init_array
 /*Call the main function */
-  bl  main
+  bl  entry
   bx lr
 .size  Reset_Handler, .-Reset_Handler
 
@@ -103,10 +103,10 @@ Infinite_Loop:
   b Infinite_Loop
   .size Default_Handler, .-Default_Handler
 
-  .section  .vectors,"a",%progbits
+  .section  .isr_vector,"a",%progbits
   .global __gVectors
 __gVectors:
-                    .word _sp                                     /* Top of Stack */
+                    .word _estack                                 /* Top of Stack */
                     .word Reset_Handler                           /* Reset Handler */
                     .word NMI_Handler                             /* NMI Handler */
                     .word HardFault_Handler                       /* Hard Fault Handler */

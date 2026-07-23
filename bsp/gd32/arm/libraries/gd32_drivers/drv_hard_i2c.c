@@ -212,7 +212,7 @@ struct rt_i2c_bus_device i2c5;
 #define I2C_DMA_RECEIVE_GD                   I2C2_DMA_RECEIVE
 #endif
 #elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
-   || defined(SOC_SERIES_GD32W51x_F5HC) || defined(SOC_SERIES_GD32L23x)
+   || defined(SOC_SERIES_GD32W51x_F5HC) || defined(SOC_SERIES_GD32L23x) || defined(SOC_SERIES_GD32F50x)
 #define I2C_CTL1_REG(periph)                 I2C_CTL1(periph)
 #define I2C_CTL1_BYTENUM_GD                  I2C_CTL1_BYTENUM
 #define I2C_CTL1_RELOAD_GD                   I2C_CTL1_RELOAD
@@ -678,7 +678,8 @@ static void gd32_i2c_dma_config_channel(struct dma_config *dma, uint32_t periph_
     gd32_dma_single_data_parameter_struct dma_init_struct;
 
     rcu_periph_clock_enable(dma->rcu);
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
+ || defined(SOC_SERIES_GD32F50x)
     /* This DMA request path requires the DMAMUX clock. */
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif

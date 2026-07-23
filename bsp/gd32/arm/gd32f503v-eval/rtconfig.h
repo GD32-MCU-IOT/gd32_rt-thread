@@ -156,6 +156,7 @@
 #define RT_SYSTEM_WORKQUEUE_PRIORITY 23
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
+#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
@@ -434,8 +435,6 @@
 
 /* Onboard Peripheral Drivers */
 
-#define BSP_USING_EEPROM
-#define BSP_EEPROM_ON_I2C0
 /* end of Onboard Peripheral Drivers */
 
 /* On-chip Peripheral Drivers */
@@ -443,15 +442,12 @@
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART0
-#define BSP_USING_UART1
+#define BSP_UART_POLL_TX_TIMEOUT_MS 1000
 #define BSP_USING_SPI
-#define BSP_USING_SPI1
-#define BSP_USING_QSPI
-#define BSP_USING_QSPI0
-#define BSP_QSPI_XFER_TIMEOUT 1000
+#define BSP_SPI_XFER_TIMEOUT 1000
+#define BSP_USING_SPI0
 #define BSP_USING_I2C
 #define BSP_USING_HARD_I2C0
-#define BSP_USING_HARD_I2C1
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

@@ -1298,9 +1298,13 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
     /* DMA clock enable */
     rcu_periph_clock_enable(uart->dma_rx->rcu);
 
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E) \
+ || defined(SOC_SERIES_GD32F50x)
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
+#endif
+
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
     /* clean d-cache */
     rt_hw_cpu_dcache_ops(RT_HW_CACHE_FLUSH, uart->dma_rx_buffer, serial->config.bufsz);
     /* rx dma config */
@@ -1331,7 +1335,8 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     /* DMA clock enable */
     rcu_periph_clock_enable(uart->dma_tx->rcu);
 
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E)
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E) \
+ || defined(SOC_SERIES_GD32F50x)
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif

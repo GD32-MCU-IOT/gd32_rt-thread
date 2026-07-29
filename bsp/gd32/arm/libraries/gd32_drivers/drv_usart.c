@@ -36,6 +36,11 @@
 #define RT_DMA_CACHE_LINE_SIZE  32
 #endif
 
+#if defined(SOC_SERIES_GD32F4xx)
+#define DMA_INT_FTF                 DMA_CHXCTL_FTFIE
+#define DMA_INT_HTF                 DMA_CHXCTL_HTFIE
+#endif
+
 /* USART data register address macros for DMA configuration */
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
  || defined(SOC_SERIES_GD32W51x_F5HC)
@@ -233,7 +238,8 @@ struct dma_config uart7_txdma = UART7_DMA_TX_CONFIG;
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) \
+ && !defined(SOC_SERIES_GD32F4xx)
 static const struct gd32_uart uart_obj[] = {
     #ifdef BSP_USING_UART0
     {
@@ -874,7 +880,8 @@ void UART7_IRQHandler(void)
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
  && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
+ && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) \
+ && !defined(SOC_SERIES_GD32F4xx)
 /**
 * @brief UART MSP Initialization
 *        This function configures the hardware resources used in this example:
@@ -1237,7 +1244,7 @@ static void dma_uart_config(struct rt_serial_device *serial, uint32_t setting_re
 #endif
     dma_init_struct.periph_addr  = (uint32_t)USART_DATA_RX(uart->uart_periph);
     dma_single_data_mode_init(uart->dma_rx->periph, uart->dma_rx->channel, &dma_init_struct);
-#if defined(SOC_SERIES_GD32F5xx) || defined(SOC_SERIES_GD32W51x_F5HC)
+#if defined(SOC_SERIES_GD32F5xx) || defined(SOC_SERIES_GD32W51x_F5HC) || defined(SOC_SERIES_GD32F4xx)
     dma_channel_subperipheral_select(uart->dma_rx->periph, uart->dma_rx->channel, uart->dma_rx->subperiph);
 #endif
     /* configure DMA mode - circular mode for continuous reception */
@@ -1363,7 +1370,7 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     GD32_DMA_SET_CIRCULAR(&dma_init_struct, DMA_CIRCULAR_MODE_DISABLE);
     dma_init_struct.periph_addr  = (uint32_t)USART_DATA_TX(uart->uart_periph);
     dma_single_data_mode_init(uart->dma_tx->periph, uart->dma_tx->channel, &dma_init_struct);
-#if defined(SOC_SERIES_GD32F5xx) || defined(SOC_SERIES_GD32W51x_F5HC)
+#if defined(SOC_SERIES_GD32F5xx) || defined(SOC_SERIES_GD32W51x_F5HC) || defined(SOC_SERIES_GD32F4xx)
     dma_channel_subperipheral_select(uart->dma_tx->periph, uart->dma_tx->channel, uart->dma_tx->subperiph);
 #endif
     /* configure DMA mode */

@@ -44,7 +44,7 @@ if PLATFORM == 'gcc':
     OBJDUMP = PREFIX + 'objdump'
     OBJCPY = PREFIX + 'objcopy'
 
-    DEVICE = ' -mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -DGD32F50X -DGD32F503VG'
+    DEVICE = ' -mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -DGD32F50X -DGD32F503'
     CFLAGS = DEVICE + ' -Dgcc'
     AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb '
     LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread.map,-cref,-u,Reset_Handler -T board/linker_scripts/link.ld'
@@ -78,7 +78,7 @@ elif PLATFORM == 'armclang':
     CFLAGS += ' -I' + EXEC_PATH + '/ARM/ARMCLANG/include'
     LFLAGS += ' --libpath=' + EXEC_PATH + '/ARM/ARMCLANG/lib'
 
-    CFLAGS += ' -D__MICROLIB -DGD32F50X -DGD32F503VG '
+    CFLAGS += ' -D__MICROLIB -DGD32F50X -DGD32F503 '
     AFLAGS += ' --pd "__MICROLIB SETA 1" '
     LFLAGS += ' --library_type=microlib '
     EXEC_PATH += '/ARM/ARMCLANG/bin/'
@@ -119,6 +119,7 @@ elif PLATFORM == 'iccarm':
     CFLAGS += ' -e'
     CFLAGS += ' --dlib_config "' + EXEC_PATH + '/arm/INC/c/DLib_Config_Normal.h"'
     CFLAGS += ' --silent'
+    CFLAGS += ' -DGD32F50X -DGD32F503'
 
     AFLAGS = DEVICE
     AFLAGS += ' -s+'

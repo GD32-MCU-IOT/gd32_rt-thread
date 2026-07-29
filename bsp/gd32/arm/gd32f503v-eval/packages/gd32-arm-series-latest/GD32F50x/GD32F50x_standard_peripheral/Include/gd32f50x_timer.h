@@ -2,11 +2,11 @@
     \file    gd32f50x_timer.h
     \brief   definitions for the TIMER
     
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -419,6 +419,8 @@ typedef struct {
     uint32_t breakstate;                                                        /*!< BREAK input enable */
     uint32_t breakfilter;                                                       /*!< BREAK input filter */
     uint32_t breakpolarity;                                                     /*!< BREAK input polarity */
+    uint32_t channelbreakstate;                                                 /*!< channel break input enable */
+    uint32_t channelbreakpolarity;                                              /*!< channel break input polarity */
 }timer_break_parameter_struct;
 
 /* channel output parameter struct definitions */
@@ -805,6 +807,7 @@ typedef struct {
 #define TIMER_IC_SELECTION_DIRECTTI         ((uint16_t)0x0001U)                     /*!< channel y is configured as input and icy is mapped on CIy */
 #define TIMER_IC_SELECTION_INDIRECTTI       ((uint16_t)0x0002U)                     /*!< channel y is configured as input and icy is mapped on opposite input */
 #define TIMER_IC_SELECTION_ITS              ((uint16_t)0x0003U)                     /*!< channel y is configured as input and icy is mapped on ITS */
+#define TIMER_IC_SELECTION_PAIR             ((uint16_t)0x0004U)                     /*!< channel y is configured as input and icy is mapped on the other channel of same pair */
 
 /* channel input capture prescaler */
 #define TIMER_IC_PSC_DIV1                   ((uint16_t)0x0000U)                     /*!< no prescaler */
@@ -1059,8 +1062,8 @@ void timer_master_slave_mode_config(uint32_t timer_periph, uint32_t masterslave)
 void timer_external_trigger_config(uint32_t timer_periph, uint32_t extprescaler, uint32_t extpolarity, uint32_t extfilter);
 /* configure TIMER quadrature decoder mode */
 void timer_quadrature_decoder_mode_config(uint32_t timer_periph, uint32_t decomode, uint16_t ic0polarity, uint16_t ic1polarity);
-/* configure TIMER decoder mode */
-void timer_decoder_mode_config(uint32_t timer_periph, uint32_t decomode, uint16_t ic0polarity, uint16_t ic1polarity);
+/* configure TIMER non-quadrature decoder mode */
+void timer_non_quadrature_decoder_mode_config(uint32_t timer_periph, uint32_t decomode, uint16_t ic0polarity, uint16_t ic1polarity);
 /* configure TIMER internal clock mode */
 void timer_internal_clock_config(uint32_t timer_periph);
 /* configure TIMER the internal trigger as external clock input */

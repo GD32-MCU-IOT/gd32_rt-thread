@@ -2,11 +2,11 @@
     \file    gd32f50x_usart.c
     \brief   USART driver
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -325,8 +325,8 @@ void usart_oversample_config(uint32_t usart_periph, uint32_t oversamp)
     \param[in]   usart_periph: USARTx(x=0,1,2)/UARTx(x=3,4)
     \param[in]  obsm: sample bit
                 only one parameter can be selected which is shown as below:
-      \arg        USART_OSB_1bit: 1 bit
-      \arg        USART_OSB_3bit: 3 bits
+      \arg        USART_OSB_1BIT: 1 bit
+      \arg        USART_OSB_3BIT: 3 bits
     \param[out] none
     \retval     none
 */

@@ -2,11 +2,11 @@
     \file    gd32f50x_dma.c
     \brief   DMA driver
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -507,7 +507,7 @@ void dma_transfer_direction_config(uint32_t dma_periph, dma_channel_enum channel
       \arg        DMA0: DMA_CHx(x=0..6), DMA1: DMA_CHx(x=0..4)
     \param[in]  flag: specify get which flag
                 only one parameter can be selected which is shown as below:
-      \arg        DMA_FLAG_G: global interrupt flag of channel
+      \arg        DMA_FLAG_GIF: global interrupt flag of channel
       \arg        DMA_FLAG_FTF: full transfer finish flag of channel
       \arg        DMA_FLAG_HTF: half transfer finish flag of channel
       \arg        DMA_FLAG_ERR: error flag of channel
@@ -536,7 +536,7 @@ FlagStatus dma_flag_get(uint32_t dma_periph, dma_channel_enum channelx, uint32_t
       \arg        DMA0: DMA_CHx(x=0..6), DMA1: DMA_CHx(x=0..4)
     \param[in]  flag: specify get which flag
                 only one parameter can be selected which is shown as below:
-      \arg        DMA_FLAG_G: global interrupt flag of channel
+      \arg        DMA_FLAG_GIF: global interrupt flag of channel
       \arg        DMA_FLAG_FTF: full transfer finish flag of channel
       \arg        DMA_FLAG_HTF: half transfer finish flag of channel
       \arg        DMA_FLAG_ERR: error flag of channel
@@ -602,7 +602,7 @@ FlagStatus dma_interrupt_flag_get(uint32_t dma_periph, dma_channel_enum channelx
       \arg        DMA0: DMA_CHx(x=0..6), DMA1: DMA_CHx(x=0..4)
     \param[in]  flag: specify get which flag
                 only one parameter can be selected which is shown as below:
-      \arg        DMA_INT_FLAG_G: global interrupt flag of channel
+      \arg        DMA_INT_FLAG_GIF: global interrupt flag of channel
       \arg        DMA_INT_FLAG_FTF: full transfer finish interrupt flag of channel
       \arg        DMA_INT_FLAG_HTF: half transfer finish interrupt flag of channel
       \arg        DMA_INT_FLAG_ERR: error interrupt flag of channel
@@ -1074,26 +1074,26 @@ void dmamux_request_generate_number_config(dmamux_generator_channel_enum channel
       \arg        DMAMUX_GENCHx(x=0..3)
     \param[in]  id: trigger input identification
                 only one parameter can be selected which is shown as below:
-      \arg        DMAMUX_TRIGGER_EXTI0: trigger input is EXTI0
-      \arg        DMAMUX_TRIGGER_EXTI1: trigger input is EXTI1
-      \arg        DMAMUX_TRIGGER_EXTI2: trigger input is EXTI2
-      \arg        DMAMUX_TRIGGER_EXTI3: trigger input is EXTI3
-      \arg        DMAMUX_TRIGGER_EXTI4: trigger input is EXTI4
-      \arg        DMAMUX_TRIGGER_EXTI5: trigger input is EXTI5
-      \arg        DMAMUX_TRIGGER_EXTI6: trigger input is EXTI6
-      \arg        DMAMUX_TRIGGER_EXTI7: trigger input is EXTI7
-      \arg        DMAMUX_TRIGGER_EXTI8: trigger input is EXTI8
-      \arg        DMAMUX_TRIGGER_EXTI9: trigger input is EXTI9
-      \arg        DMAMUX_TRIGGER_EXTI10: trigger input is EXTI10
-      \arg        DMAMUX_TRIGGER_EXTI11: trigger input is EXTI11
-      \arg        DMAMUX_TRIGGER_EXTI12: trigger input is EXTI12
-      \arg        DMAMUX_TRIGGER_EXTI13: trigger input is EXTI13
-      \arg        DMAMUX_TRIGGER_EXTI14: trigger input is EXTI14
-      \arg        DMAMUX_TRIGGER_EXTI15: trigger input is EXTI15
       \arg        DMAMUX_TRIGGER_EVT0_OUT: trigger input is Evt0_out
       \arg        DMAMUX_TRIGGER_EVT1_OUT: trigger input is Evt1_out
       \arg        DMAMUX_TRIGGER_EVT2_OUT: trigger input is Evt2_out
       \arg        DMAMUX_TRIGGER_EVT3_OUT: trigger input is Evt3_out
+      \arg        DMAMUX_TRIGGER_EXTI0_IT: interrupt trigger input is EXTI0
+      \arg        DMAMUX_TRIGGER_EXTI1_IT: interrupt trigger input is EXTI1
+      \arg        DMAMUX_TRIGGER_EXTI2_IT: interrupt trigger input is EXTI2
+      \arg        DMAMUX_TRIGGER_EXTI3_IT: interrupt trigger input is EXTI3
+      \arg        DMAMUX_TRIGGER_EXTI4_IT: interrupt trigger input is EXTI4
+      \arg        DMAMUX_TRIGGER_EXTI5_IT: interrupt trigger input is EXTI5
+      \arg        DMAMUX_TRIGGER_EXTI6_IT: interrupt trigger input is EXTI6
+      \arg        DMAMUX_TRIGGER_EXTI7_IT: interrupt trigger input is EXTI7
+      \arg        DMAMUX_TRIGGER_EXTI0_EVT: event trigger input is EXTI0
+      \arg        DMAMUX_TRIGGER_EXTI1_EVT: event trigger input is EXTI1
+      \arg        DMAMUX_TRIGGER_EXTI2_EVT: event trigger input is EXTI2
+      \arg        DMAMUX_TRIGGER_EXTI3_EVT: event trigger input is EXTI3
+      \arg        DMAMUX_TRIGGER_EXTI4_EVT: event trigger input is EXTI4
+      \arg        DMAMUX_TRIGGER_EXTI5_EVT: event trigger input is EXTI5
+      \arg        DMAMUX_TRIGGER_EXTI6_EVT: event trigger input is EXTI6
+      \arg        DMAMUX_TRIGGER_EXTI7_EVT: event trigger input is EXTI7
     \param[out] none
     \retval     none
 */

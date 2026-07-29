@@ -2,11 +2,11 @@
     \file    gd32f50x_timer.c
     \brief   TIMER driver
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification, 
 are permitted provided that the following conditions are met:
@@ -598,9 +598,11 @@ void timer_break_struct_para_init(timer_break_parameter_struct* breakpara)
         breakpara->deadtime              = 0U;
         breakpara->outputautostate       = TIMER_OUTAUTO_DISABLE;
         breakpara->protectmode           = TIMER_CCHP0_PROT_OFF;
-        breakpara->breakstate           = TIMER_BREAK_DISABLE;
-        breakpara->breakfilter          = 0U;
-        breakpara->breakpolarity        = TIMER_BREAK_POLARITY_LOW;
+        breakpara->breakstate            = TIMER_BREAK_DISABLE;
+        breakpara->breakfilter           = 0U;
+        breakpara->breakpolarity         = TIMER_BREAK_POLARITY_LOW;
+        breakpara->channelbreakstate     = TIMER_CH_BREAK_DISABLE;
+        breakpara->channelbreakpolarity  = TIMER_CH_BREAK_POLARITY_LOW;
     }
 }
 
@@ -616,6 +618,8 @@ void timer_break_struct_para_init(timer_break_parameter_struct* breakpara)
                   breakstate: TIMER_BREAK_ENABLE, TIMER_BREAK_DISABLE
                   breakfilter: 0~15
                   breakpolarity: TIMER_BREAK_POLARITY_LOW, TIMER_BREAK_POLARITY_HIGH
+                  channelbreakstate: TIMER_CH_BREAK_DISABLE, TIMER_CH_BREAK_ENABLE
+                  channelbreakpolarity: TIMER_CH_BREAK_POLARITY_LOW, TIMER_CH_BREAK_POLARITY_HIGH
     \param[out] none
     \retval     none
 */
@@ -635,7 +639,9 @@ void timer_break_config(uint32_t timer_periph, timer_break_parameter_struct* bre
                                                 ((uint32_t)(breakpara->protectmode & TIMER_CCHP0_PROT)) |
                                                 ((uint32_t)(breakpara->breakstate & TIMER_CCHP0_BRKEN)) |
                                                 (((uint32_t)(breakpara->breakfilter) << 16U) & TIMER_CCHP0_BRKF) |
-                                                ((uint32_t)(breakpara->breakpolarity & TIMER_CCHP0_BRKP)));
+                                                ((uint32_t)(breakpara->breakpolarity & TIMER_CCHP0_BRKP)) |
+                                                ((uint32_t)(breakpara->channelbreakstate & TIMER_CCHP0_CHBRKEN)) |
+                                                ((uint32_t)(breakpara->channelbreakpolarity & TIMER_CCHP0_CHBRKP)));
         } else {
             /* illegal parameters */
         }
@@ -1522,7 +1528,7 @@ void timer_channel_input_struct_para_init(timer_ic_parameter_struct* icpara)
       \arg        TIMER_MCH_0: TIMER multi mode channel 0(TIMERx(x=15,16))
     \param[in]  icpara: TIMER channel input parameter struct
                   icpolarity: TIMER_IC_POLARITY_RISING, TIMER_IC_POLARITY_FALLING, TIMER_IC_POLARITY_BOTH_EDGE
-                  icselection: TIMER_IC_SELECTION_DIRECTTI, TIMER_IC_SELECTION_INDIRECTTI, TIMER_IC_SELECTION_ITS
+                  icselection: TIMER_IC_SELECTION_DIRECTTI, TIMER_IC_SELECTION_INDIRECTTI, TIMER_IC_SELECTION_ITS, TIMER_IC_SELECTION_PAIR
                   icprescaler: TIMER_IC_PSC_DIV1, TIMER_IC_PSC_DIV2, TIMER_IC_PSC_DIV4, TIMER_IC_PSC_DIV8
                   icfilter: 0~15
     \param[out] none
@@ -1548,7 +1554,11 @@ void timer_input_capture_config(uint32_t timer_periph, uint16_t channel, timer_i
     
             /* reset the CH0MS bit */
             TIMER_CHCTL0(timer_periph) &= (~(uint32_t)TIMER_CHCTL0_CH0MS);
-            TIMER_CHCTL0(timer_periph) |= ((uint32_t)(icpara->icselection) & TIMER_CHCTL0_CH0MS);
+            if(TIMER_IC_SELECTION_PAIR == icpara->icselection) {
+                TIMER_CHCTL0(timer_periph) |= (uint32_t)(((uint32_t)(icpara->icselection) << 28U) & TIMER_CHCTL0_CH0MS);
+            } else {
+                TIMER_CHCTL0(timer_periph) |= ((uint32_t)(icpara->icselection) & TIMER_CHCTL0_CH0MS);
+            }
     
             /* reset the CH0CAPFLT bit */
             TIMER_CHCTL0(timer_periph) &= (~(uint32_t)TIMER_CHCTL0_CH0CAPFLT);
@@ -1644,7 +1654,11 @@ void timer_input_capture_config(uint32_t timer_periph, uint16_t channel, timer_i
     
             /* reset the MCH0MS bit */
             TIMER_MCHCTL0(timer_periph) &= (~(uint32_t)TIMER_MCHCTL0_MCH0MS);
-            TIMER_MCHCTL0(timer_periph) |= ((uint32_t)(icpara->icselection) & TIMER_MCHCTL0_MCH0MS);
+            if(TIMER_IC_SELECTION_PAIR == icpara->icselection) {
+                TIMER_MCHCTL0(timer_periph) |= (((uint32_t)icpara->icselection << 28U) & TIMER_MCHCTL0_MCH0MS);
+            } else {
+                TIMER_MCHCTL0(timer_periph) |= ((uint32_t)(icpara->icselection) & TIMER_MCHCTL0_MCH0MS);
+            }
     
             /* reset the MCH0CAPFLT bit */
             TIMER_MCHCTL0(timer_periph) &= (~(uint32_t)TIMER_MCHCTL0_MCH0CAPFLT);
@@ -2123,10 +2137,10 @@ void timer_master_output_trigger_source_select(uint32_t timer_periph, uint32_t o
       \arg        TIMER_SLAVE_MODE_PAUSE: pause mode(TIMERx(x=0~4,7,15,16))
       \arg        TIMER_SLAVE_MODE_EVENT: event mode(TIMERx(x=0~4,7,15,16))
       \arg        TIMER_SLAVE_MODE_EXTERNAL0: external clock mode 0(TIMERx(x=0~4,7,15,16))
-      \arg        TIMER_DECODER_MODE0: decoder mode 0(TIMERx(x=1~4))
-      \arg        TIMER_DECODER_MODE1: decoder mode 1(TIMERx(x=1~4))
-      \arg        TIMER_DECODER_MODE2: decoder mode 2(TIMERx(x=1~4))
-      \arg        TIMER_DECODER_MODE3: decoder mode 3(TIMERx(x=1~4))
+      \arg        TIMER_NONQUAD_DECODER_MODE0: non-quadrature decoder mode 0(TIMERx(x=1~4))
+      \arg        TIMER_NONQUAD_DECODER_MODE1: non-quadrature decoder mode 1(TIMERx(x=1~4))
+      \arg        TIMER_NONQUAD_DECODER_MODE2: non-quadrature decoder mode 2(TIMERx(x=1~4))
+      \arg        TIMER_NONQUAD_DECODER_MODE3: non-quadrature decoder mode 3(TIMERx(x=1~4))
       \arg        TIMER_QUAD_DECODER_MODE3: quadrature decoder mode 3(TIMERx(x=1~4))
       \arg        TIMER_QUAD_DECODER_MODE4: quadrature decoder mode 4(TIMERx(x=1~4))
     \param[out] none
@@ -2297,14 +2311,14 @@ void timer_quadrature_decoder_mode_config(uint32_t timer_periph, uint32_t decomo
 }
 
 /*!
-    \brief      configure TIMER decoder mode (API_ID(0x0041U))
+    \brief      configure TIMER non-quadrature decoder mode (API_ID(0x0041U))
     \param[in]  timer_periph: TIMERx(x=1~4)
-    \param[in]  decomode: decoder mode
+    \param[in]  decomode: non-quadrature decoder mode
                 only one parameter can be selected which is shown as below:
-      \arg        TIMER_DECODER_MODE0: decoder mode 0
-      \arg        TIMER_DECODER_MODE1: decoder mode 1
-      \arg        TIMER_DECODER_MODE2: decoder mode 2
-      \arg        TIMER_DECODER_MODE3: decoder mode 3
+      \arg        TIMER_NONQUAD_DECODER_MODE0: non-quadrature decoder mode 0
+      \arg        TIMER_NONQUAD_DECODER_MODE1: non-quadrature decoder mode 1
+      \arg        TIMER_NONQUAD_DECODER_MODE2: non-quadrature decoder mode 2
+      \arg        TIMER_NONQUAD_DECODER_MODE3: non-quadrature decoder mode 3
     \param[in]  ic0polarity: input capture polarity
                 only one parameter can be selected which is shown as below:
       \arg        TIMER_IC_POLARITY_RISING: capture rising edge
@@ -2318,9 +2332,9 @@ void timer_quadrature_decoder_mode_config(uint32_t timer_periph, uint32_t decomo
     \param[out] none
     \retval     none
 */
-void timer_decoder_mode_config(uint32_t timer_periph, uint32_t decomode, uint16_t ic0polarity, uint16_t ic1polarity)
+void timer_non_quadrature_decoder_mode_config(uint32_t timer_periph, uint32_t decomode, uint16_t ic0polarity, uint16_t ic1polarity)
 {
-    /* configure the quadrature decoder mode */
+    /* configure the non-quadrature decoder mode */
     timer_slave_mode_select(timer_periph, decomode);
 
     /* configure input capture selection */
@@ -2600,7 +2614,7 @@ void timer_output_value_selection_config(uint32_t timer_periph, uint16_t outsel)
 /*!
     \brief      configure commutation control shadow register update selection (API_ID(0x004AU))
     \param[in]  timer_periph: TIMERx(x=0,7,15,16)
-    \param[in]  cssel: commutation control shadow register selection
+    \param[in]  ccssel: commutation control shadow register selection
                 only one parameter can be selected which is shown as below:
       \arg        TIMER_CCUSEL_DISABLE: the shadow registers update when the counter generates an overflow/ underflow event
       \arg        TIMER_CCUSEL_ENABLE: the shadow registers update when the counter generates an overflow/ underflow event and the repetition counter value is zero

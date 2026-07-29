@@ -27,6 +27,7 @@ menu "Onboard Peripheral Drivers"
 
             config BSP_SPI_FLASH_ON_SPI0
                 bool "SPI0"
+                depends on !BSP_USING_QSPI
                 select BSP_USING_SPI0
 
             config BSP_SPI_FLASH_ON_SPI1
@@ -252,9 +253,12 @@ menu "On-chip Peripheral Drivers"
                 bool "Enable QSPI0"
                 default y
 
-            config BSP_USING_QSPI1
-                bool "Enable QSPI1"
-                default n
+            config BSP_QSPI_XFER_TIMEOUT
+                int "QSPI transfer timeout (ms)"
+                range 1 60000
+                default 1000
+                help
+                    Maximum wait time for a QSPI transfer to complete.
         endif
                 
     menuconfig BSP_USING_I2C

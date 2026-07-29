@@ -2,11 +2,11 @@
     \file    gd32f50x_misc.h
     \brief   definitions for the MISC
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -36,6 +36,28 @@ OF SUCH DAMAGE.
 #define GD32F50X_MISC_H
 
 #include "gd32f50x.h"
+
+#if (__MPU_PRESENT == 1U)
+
+/* MPU region init parameter struct definitions */
+typedef struct {
+    uint8_t  region_number;           /*!< region number */
+    uint32_t region_base_address;     /*!< region base address */
+    uint32_t region_limit_address;    /*!< region limit address */
+    uint8_t  access_permission;       /*!< access permissions(AP) field */
+    uint8_t  instruction_exec;        /*!< execute never */
+    uint8_t  shareability;            /*!< defines the shareability for Normal memory */
+    uint8_t  attribute_index;         /*!< attribute index */
+} mpu_region_init_struct;
+
+typedef struct {
+  uint8_t attribute_number;           /*!< attribute number */
+  uint8_t memory_type;                /*!< memory type */
+  uint8_t outer_attributes;           /*!< outer memory attributes */
+  uint8_t inner_attributes;           /*!< inner memory attributes */
+} mpu_attribute_init_struct;
+
+#endif /* __MPU_PRESENT */
 
 /* constants definitions */
 /* set the RAM and FLASH base address */
@@ -68,6 +90,86 @@ OF SUCH DAMAGE.
 #define SYSTICK_CLKSOURCE_HCLK_DIV8 ((uint32_t)0xFFFFFFFBU) /*!< systick clock source is from HCLK/8 */
 #define SYSTICK_CLKSOURCE_HCLK      ((uint32_t)0x00000004U) /*!< systick clock source is from HCLK */
 
+#if (__MPU_PRESENT == 1U)
+
+#define MPU_REGION_NUMBER0                     ((uint8_t)0x00U)        /*!< MPU region number 0 */
+#define MPU_REGION_NUMBER1                     ((uint8_t)0x01U)        /*!< MPU region number 1 */
+#define MPU_REGION_NUMBER2                     ((uint8_t)0x02U)        /*!< MPU region number 2 */
+#define MPU_REGION_NUMBER3                     ((uint8_t)0x03U)        /*!< MPU region number 3 */
+#define MPU_REGION_NUMBER4                     ((uint8_t)0x04U)        /*!< MPU region number 4 */
+#define MPU_REGION_NUMBER5                     ((uint8_t)0x05U)        /*!< MPU region number 5 */
+#define MPU_REGION_NUMBER6                     ((uint8_t)0x06U)        /*!< MPU region number 6 */
+#define MPU_REGION_NUMBER7                     ((uint8_t)0x07U)        /*!< MPU region number 7 */
+
+#define MPU_REGION_PRIVILEGED_RW               ((uint8_t)0x00U)        /*!< MPU region read/write by privileged code only */
+#define MPU_REGION_ALL_RW                      ((uint8_t)0x01U)        /*!< MPU region read/write by any privilege level  */
+#define MPU_REGION_PRIVILEGED_RO               ((uint8_t)0x02U)        /*!< MPU region read-only by privileged code only  */
+#define MPU_REGION_ALL_RO                      ((uint8_t)0x03U)        /*!< MPU region read-only by any privilege level   */
+
+#define MPU_ACCESS_NOT_SHAREABLE               ((uint8_t)0x00U)        /*!< MPU access shareable */
+#define MPU_ACCESS_OUTER_SHAREABLE             ((uint8_t)0x02U)        /*!< MPU region outer shareable */
+#define MPU_ACCESS_INNER_SHAREABLE             ((uint8_t)0x03U)        /*!< MPU region inner shareable */
+
+#define MPU_INSTRUCTION_EXEC_PERMIT            ((uint8_t)0x00U)        /*!< execution of an instruction fetched from this region permitted */
+#define MPU_INSTRUCTION_EXEC_NOT_PERMIT        ((uint8_t)0x01U)        /*!< execution of an instruction fetched from this region not permitted */
+
+#define MPU_MODE_HFNMI_PRIVDEF_NONE            ((uint32_t)0x00000000U) /*!< HFNMIENA and PRIVDEFENA are 0 */
+#define MPU_MODE_HARDFAULT_NMI                 MPU_CTRL_HFNMIENA_Msk   /*!< use the MPU for memory accesses by HardFault and NMI handlers only */
+#define MPU_MODE_PRIV_DEFAULT                  MPU_CTRL_PRIVDEFENA_Msk /*!< enables the default memory map as a background region for privileged access only */
+#define MPU_MODE_HFNMI_PRIVDEF                 ((uint32_t)MPU_CTRL_HFNMIENA_Msk | MPU_CTRL_PRIVDEFENA_Msk) /*!< HFNMIENA and PRIVDEFENA are 1 */
+
+#define MPU_ATTRIBUTE_NUMBER0                  ((uint8_t)0x00U)        /*!< MPU attribute number 0 */
+#define MPU_ATTRIBUTE_NUMBER1                  ((uint8_t)0x01U)        /*!< MPU attribute number 1 */
+#define MPU_ATTRIBUTE_NUMBER2                  ((uint8_t)0x02U)        /*!< MPU attribute number 2 */
+#define MPU_ATTRIBUTE_NUMBER3                  ((uint8_t)0x03U)        /*!< MPU attribute number 3 */
+#define MPU_ATTRIBUTE_NUMBER4                  ((uint8_t)0x04U)        /*!< MPU attribute number 4 */
+#define MPU_ATTRIBUTE_NUMBER5                  ((uint8_t)0x05U)        /*!< MPU attribute number 5 */
+#define MPU_ATTRIBUTE_NUMBER6                  ((uint8_t)0x06U)        /*!< MPU attribute number 6 */
+#define MPU_ATTRIBUTE_NUMBER7                  ((uint8_t)0x07U)        /*!< MPU attribute number 7 */
+
+#define MPU_MEMORY_DEVICE                      ((uint8_t)0x00U)        /*!< MPU device memory */
+#define MPU_MEMORY_NORMAL                      ((uint8_t)0x01U)        /*!< MPU normal memory */
+
+#define MPU_DEVICE_nGnRnE                      ((uint8_t)0x00U)        /*!< device, nogather, noreorder, noearly acknowledge */
+#define MPU_DEVICE_nGnRE                       ((uint8_t)0x04U)        /*!< device, nogather, noreorder, early acknowledge*/
+#define MPU_DEVICE_nGRE                        ((uint8_t)0x08U)        /*!< device, nogather, reorder, early acknowledge */
+#define MPU_DEVICE_GRE                         ((uint8_t)0x0CU)        /*!< device, gather, reorder, early acknowledge */
+
+#define MPU_OUTER_DEVICE                       ((uint8_t)0x00U)        /*!< device memory */
+#define MPU_NORMAL_OUTER_WT_TRAN_W_ALLOC       ((uint8_t)0x10U)        /*!< normal memory, outer write-through transient, write with allocate */
+#define MPU_NORMAL_OUTER_WT_TRAN_R_ALLOC       ((uint8_t)0x20U)        /*!< normal memory, outer write-through transient, read with allocate */
+#define MPU_NORMAL_OUTER_WT_TRAN_RW_ALLOC      ((uint8_t)0x30U)        /*!< normal memory, outer write-through transient, read and write with allocate */
+#define MPU_NORMAL_OUTER_NON_CACHEABLE         ((uint8_t)0x40U)        /*!< normal memory, outer non-cacheable */
+#define MPU_NORMAL_OUTER_WB_TRAN_W_ALLOC       ((uint8_t)0x50U)        /*!< normal memory, outer write-back transient, write with allocate */
+#define MPU_NORMAL_OUTER_WB_TRAN_R_ALLOC       ((uint8_t)0x60U)        /*!< normal memory, outer write-back transient, read with allocate */
+#define MPU_NORMAL_OUTER_WB_TRAN_RW_ALLOC      ((uint8_t)0x70U)        /*!< normal memory, outer write-back transient, read and write with allocate */
+#define MPU_NORMAL_OUTER_WT_NON_TRAN_NO_ALLOC  ((uint8_t)0x80U)        /*!< normal memory, outer write-through non-transient, no allocate */
+#define MPU_NORMAL_OUTER_WT_NON_TRAN_W_ALLOC   ((uint8_t)0x90U)        /*!< normal memory, outer write-back non-transient, write with allocate */
+#define MPU_NORMAL_OUTER_WT_NON_TRAN_R_ALLOC   ((uint8_t)0xA0U)        /*!< normal memory, outer write-back non-transient, read with allocate */
+#define MPU_NORMAL_OUTER_WT_NON_TRAN_RW_ALLOC  ((uint8_t)0xB0U)        /*!< normal memory, outer write-back non-transient, read and write with allocate */
+#define MPU_NORMAL_OUTER_WB_NON_TRAN_NO_ALLOC  ((uint8_t)0xC0U)        /*!< normal memory, outer write-back non-transient, no allocate */
+#define MPU_NORMAL_OUTER_WB_NON_TRAN_W_ALLOC   ((uint8_t)0xD0U)        /*!< normal memory, outer write-back non-transient, write with allocate */
+#define MPU_NORMAL_OUTER_WB_NON_TRAN_R_ALLOC   ((uint8_t)0xE0U)        /*!< normal memory, outer write-back non-transient, read with allocate */
+#define MPU_NORMAL_OUTER_WB_NON_TRAN_RW_ALLOC  ((uint8_t)0xF0U)        /*!< normal memory, outer write-back non-transient, read and write with allocate */
+
+#define MPU_NORMAL_INNER_WT_TRAN_W_ALLOC       ((uint8_t)0x01U)        /*!< normal memory, inner write-through transient, write with allocate */
+#define MPU_NORMAL_INNER_WT_TRAN_R_ALLOC       ((uint8_t)0x02U)        /*!< normal memory, inner write-through transient, read with allocate */
+#define MPU_NORMAL_INNER_WT_TRAN_RW_ALLOC      ((uint8_t)0x03U)        /*!< normal memory, inner write-through transient, read and write with allocate */
+#define MPU_NORMAL_INNER_NON_CACHEABLE         ((uint8_t)0x04U)        /*!< normal memory, inner non-cacheable */
+#define MPU_NORMAL_INNER_WB_TRAN_W_ALLOC       ((uint8_t)0x05U)        /*!< normal memory, inner write-back transient, write with allocate */
+#define MPU_NORMAL_INNER_WB_TRAN_R_ALLOC       ((uint8_t)0x06U)        /*!< normal memory, inner write-back transient, read with allocate */
+#define MPU_NORMAL_INNER_WB_TRAN_RW_ALLOC      ((uint8_t)0x07U)        /*!< normal memory, inner write-back transient, read and write with allocate */
+#define MPU_NORMAL_INNER_WT_NON_TRAN_NO_ALLOC  ((uint8_t)0x08U)        /*!< normal memory, inner write-through non-transient */
+#define MPU_NORMAL_INNER_WT_NON_TRAN_W_ALLOC   ((uint8_t)0x09U)        /*!< normal memory, inner write-back non-transient, write with allocate */
+#define MPU_NORMAL_INNER_WT_NON_TRAN_R_ALLOC   ((uint8_t)0x0AU)        /*!< normal memory, inner write-back non-transient, read with allocate */
+#define MPU_NORMAL_INNER_WT_NON_TRAN_RW_ALLOC  ((uint8_t)0x0BU)        /*!< normal memory, inner write-back non-transient, read and write with allocate */
+#define MPU_NORMAL_INNER_WB_NON_TRAN_NO_ALLOC  ((uint8_t)0x0CU)        /*!< normal memory, inner write-back non-transient, no allocate */
+#define MPU_NORMAL_INNER_WB_NON_TRAN_W_ALLOC   ((uint8_t)0x0DU)        /*!< normal memory, inner write-back non-transient, write with allocate */
+#define MPU_NORMAL_INNER_WB_NON_TRAN_R_ALLOC   ((uint8_t)0x0EU)        /*!< normal memory, inner write-back non-transient, read with allocate */
+#define MPU_NORMAL_INNER_WB_NON_TRAN_RW_ALLOC  ((uint8_t)0x0FU)        /*!< normal memory, inner write-back non-transient, read and write with allocate */
+
+#endif /* __MPU_PRESENT */
+
 /* function declarations */
 /* set the priority group */
 void nvic_priority_group_set(uint32_t nvic_prigroup);
@@ -88,5 +190,22 @@ void system_lowpower_reset(uint8_t lowpower_mode);
 
 /* set the systick clock source */
 void systick_clksource_set(uint32_t systick_clksource);
+
+#if (__MPU_PRESENT == 1U)
+/* enable the MPU */
+void mpu_enable(uint32_t MPU_Control);
+/* disable the MPU */
+void mpu_disable(void);
+/* initialize mpu_region_init_struct with the default values */
+void mpu_region_struct_para_init(mpu_region_init_struct *region_init_struct);
+/* initialize mpu_attribute_init_struct with the default values */
+void mpu_attribute_struct_para_init(mpu_attribute_init_struct *attribute_init_struct);
+/* configure the MPU region */
+void mpu_region_config(mpu_region_init_struct *region_init_struct);
+/* configure the MPU attribute */
+void mpu_attribute_config(mpu_attribute_init_struct *attribute_init_struct);
+/* enable the MPU region */
+void mpu_region_enable(void);
+#endif /* __MPU_PRESENT */
 
 #endif /* GD32F50X_MISC_H */

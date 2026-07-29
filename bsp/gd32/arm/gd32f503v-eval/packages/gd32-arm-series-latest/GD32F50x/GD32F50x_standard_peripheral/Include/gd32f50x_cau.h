@@ -2,11 +2,11 @@
     \file    gd32f50x_cau.h
     \brief   definitions for the CAU
 
-    \version 2025-11-03, V1.0.0, firmware for GD32F50x
+    \version 2026-02-25, V1.0.4, firmware for GD32F50x
 */
 
 /*
-    Copyright (c) 2025, GigaDevice Semiconductor Inc.
+    Copyright (c) 2026, GigaDevice Semiconductor Inc.
 
     Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
@@ -129,6 +129,7 @@ typedef struct {
 #define CAU_DECRYPT                 CAU_CTL_CAUDIR                              /*!< decrypt */
 
 #define CTL_ALGM(regval)            (BITS(3,5) & ((uint32_t)(regval) << 3U))    /*!< write value to CAU_CTL_ALGM bit field */
+#define CAU_MODE_DISABLE            CTL_ALGM(0)                                 /*!< All modes are disabled */
 #define CAU_MODE_AES_ECB            CTL_ALGM(4)                                 /*!< AES-ECB (AES Electronic codebook) */
 #define CAU_MODE_AES_KEY            CTL_ALGM(7)                                 /*!< AES decryption key preparation mode */
 

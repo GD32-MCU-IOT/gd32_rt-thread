@@ -1,16 +1,13 @@
-/*
- * linker script for GD32F20x with GNU ld
- * BruceOu 2022-05-02
- */
-
-/* Program Entry, set to mark it as "used" and avoid gc */
+/* Linker script for GD32F20x (GD32F207I-EVAL, GD32F207IK) with GNU LD */
+/* Memory Spaces Definitions */
 MEMORY
 {
-    CODE (rx) : ORIGIN = 0x08000000, LENGTH = 3072k /* 3072KB flash */
-    DATA (rw) : ORIGIN = 0x20000000, LENGTH = 256k /* 256KB sram */
+  FLASH (rx)  : ORIGIN = 0x08000000, LENGTH = 3072K
+  SRAM  (xrw) : ORIGIN = 0x20000000, LENGTH = 256K
 }
+
 ENTRY(Reset_Handler)
-_system_stack_size = 0x200;
+_system_stack_size = 0x400;
 
 SECTIONS
 {
@@ -18,11 +15,11 @@ SECTIONS
     {
         . = ALIGN(4);
         _stext = .;
-        KEEP(*(.isr_vector))            /* Startup code */
-        . = ALIGN(4);
-        *(.text)                        /* remaining code */
-        *(.text.*)                      /* remaining code */
-        *(.rodata)                      /* read-only data (constants) */
+        KEEP(*(.isr_vector))
+        KEEP(*(.vectors))
+        *(.text)
+        *(.text.*)
+        *(.rodata)
         *(.rodata*)
         *(.glue_7)
         *(.glue_7t)
@@ -44,66 +41,62 @@ SECTIONS
         __rt_init_start = .;
         KEEP(*(SORT(.rti_fn*)))
         __rt_init_end = .;
+
+        
+        
         . = ALIGN(4);
+
+        KEEP(*(.init))
+        KEEP(*(.fini))
 
         . = ALIGN(4);
         _etext = .;
-    } > CODE = 0
+    } > FLASH
 
     /* .ARM.exidx is sorted, so has to go in its own output section.  */
     __exidx_start = .;
     .ARM.exidx :
     {
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-
-        /* This is used by the startup in order to initialize the .data secion */
-        _sidata = .;
-    } > CODE
+    } > FLASH
     __exidx_end = .;
 
-    /* .data section which is used for initialized data */
+    /* Used by the startup to initialize data */
+    _sidata = LOADADDR(.data);
 
-    .data : AT (_sidata)
+    .data :
     {
         . = ALIGN(4);
-        /* This is used by the startup in order to initialize the .data secion */
-        _sdata = . ;
-
+        _sdata = .;
         *(.data)
         *(.data.*)
         *(.gnu.linkonce.d*)
 
         . = ALIGN(4);
-        /* This is used by the startup in order to initialize the .data secion */
-        _edata = . ;
-    } >DATA
+        _edata = .;
+    } >SRAM AT>FLASH
 
-    .stack : 
+    .stack :
     {
+        . = ALIGN(4);
+        _sstack = .;
         . = . + _system_stack_size;
         . = ALIGN(4);
         _estack = .;
-    } >DATA
+    } >SRAM
 
     __bss_start = .;
     .bss :
     {
         . = ALIGN(4);
-        /* This is used by the startup in order to initialize the .bss secion */
         _sbss = .;
-
         *(.bss)
         *(.bss.*)
         *(COMMON)
-
         . = ALIGN(4);
-        /* This is used by the startup in order to initialize the .bss secion */
-        _ebss = . ;
-        
-        *(.bss.init)
-    } > DATA
+        _ebss = .;
+    } >SRAM
     __bss_end = .;
-
     _end = .;
 
     /* Stabs debugging sections.  */
@@ -114,29 +107,4 @@ SECTIONS
     .stab.index    0 : { *(.stab.index) }
     .stab.indexstr 0 : { *(.stab.indexstr) }
     .comment       0 : { *(.comment) }
-    /* DWARF debug sections.
-     * Symbols in the DWARF debugging sections are relative to the beginning
-     * of the section so we begin them at 0.  */
-    /* DWARF 1 */
-    .debug          0 : { *(.debug) }
-    .line           0 : { *(.line) }
-    /* GNU DWARF 1 extensions */
-    .debug_srcinfo  0 : { *(.debug_srcinfo) }
-    .debug_sfnames  0 : { *(.debug_sfnames) }
-    /* DWARF 1.1 and DWARF 2 */
-    .debug_aranges  0 : { *(.debug_aranges) }
-    .debug_pubnames 0 : { *(.debug_pubnames) }
-    /* DWARF 2 */
-    .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
-    .debug_abbrev   0 : { *(.debug_abbrev) }
-    .debug_line     0 : { *(.debug_line) }
-    .debug_frame    0 : { *(.debug_frame) }
-    .debug_str      0 : { *(.debug_str) }
-    .debug_loc      0 : { *(.debug_loc) }
-    .debug_macinfo  0 : { *(.debug_macinfo) }
-    /* SGI/MIPS DWARF 2 extensions */
-    .debug_weaknames 0 : { *(.debug_weaknames) }
-    .debug_funcnames 0 : { *(.debug_funcnames) }
-    .debug_typenames 0 : { *(.debug_typenames) }
-    .debug_varnames  0 : { *(.debug_varnames) }
 }

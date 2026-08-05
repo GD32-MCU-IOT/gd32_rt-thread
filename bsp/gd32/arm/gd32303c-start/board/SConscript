@@ -7,11 +7,12 @@ cwd = GetCurrentDir()
 # add general drivers
 src = Split('''
 board.c
+board_msd_init.c
 ''')
 
 path =  [cwd]
 
-CPPDEFINES = ['GD32F30X_XD']
+CPPDEFINES = ['GD32F30X_HD']
 group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
 
 Return('group')

@@ -14,8 +14,6 @@
 #include "gd32f20x.h"
 #include "drv_gpio.h"
 
-#include "gd32f20x_exti.h"
-
 #define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
 

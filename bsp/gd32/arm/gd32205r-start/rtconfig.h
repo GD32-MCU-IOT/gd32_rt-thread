@@ -145,7 +145,6 @@
 #define RT_SYSTEM_WORKQUEUE_PRIORITY 23
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
-#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_PIN
 /* end of Device Drivers */
@@ -321,6 +320,10 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
+
+/* HPMicro SDK */
+
+/* end of HPMicro SDK */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */

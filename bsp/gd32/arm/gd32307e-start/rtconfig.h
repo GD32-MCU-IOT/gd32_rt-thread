@@ -101,7 +101,7 @@
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 128
-#define RT_CONSOLE_DEVICE_NAME "uart1"
+#define RT_CONSOLE_DEVICE_NAME "uart0"
 #define RT_VER_NUM 0x50201
 #define RT_BACKTRACE_LEVEL_MAX_NR 32
 /* end of RT-Thread Kernel */
@@ -293,26 +293,6 @@
 
 /* end of Kendryte SDK */
 
-/* WCH HAL & SDK Drivers */
-
-/* end of WCH HAL & SDK Drivers */
-
-/* AT32 HAL & SDK Drivers */
-
-/* end of AT32 HAL & SDK Drivers */
-
-/* HC32 DDL Drivers */
-
-/* end of HC32 DDL Drivers */
-
-/* NXP HAL & SDK Drivers */
-
-/* end of NXP HAL & SDK Drivers */
-
-/* NUVOTON Drivers */
-
-/* end of NUVOTON Drivers */
-
 /* GD32 Drivers */
 
 #define PKG_USING_GD32_ARM_CMSIS_DRIVER
@@ -410,9 +390,12 @@
 
 /* On-chip Peripheral Drivers */
 
-#define BSP_USING_GPIO
 #define BSP_USING_UART
+#define BSP_USING_UART0
 #define BSP_USING_UART1
+#define BSP_USING_UART2
+#define BSP_USING_UART3
+#define BSP_USING_UART4
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

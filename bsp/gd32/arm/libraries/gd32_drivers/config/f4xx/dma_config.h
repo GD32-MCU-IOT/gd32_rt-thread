@@ -6,7 +6,6 @@
  * Change Logs:
  * Date           Author       Notes
  * 2026-07-13     RT-Thread    first implementation for GD32F4xx
- * 2026-07-14     Copilot      rewrite DMA map: order by channel index
  */
 
 #ifndef __DMA_CONFIG_H__

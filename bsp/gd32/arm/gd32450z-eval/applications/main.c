@@ -18,18 +18,11 @@
 /* Test feature switches - comment out to disable */
 #define GD32_I2C_TEST
 #define GD32_SPI_TEST
-#define GD32_UART_TEST
-#define GD32_GPIO_EXTI_TEST
 
 /* defined the LED pins according to schematic */
 #define LED1_PIN    GET_PIN(D, 4)   /* LED1 on PD4 */
 #define LED2_PIN    GET_PIN(D, 5)   /* LED2 on PD5 */
 #define LED3_PIN    GET_PIN(G, 3)   /* LED3 on PG3 */
-
-#ifdef GD32_GPIO_EXTI_TEST
-#define WAKEUP_PIN_NUM   GET_PIN(A, 0)   /* K1 */
-#define TAMPER_PIN       GET_PIN(C, 13)  /* K2 */
-#endif
 
 #ifdef GD32_I2C_TEST
 #define I2C_BUS_NAME     "hwi2c0"
@@ -46,17 +39,6 @@ static uint8_t send_id = 0x9F;
 static uint8_t recei_id[4] = {0};
 
 static void spi_sample(void);
-#endif
-
-#ifdef GD32_UART_TEST
-#define SAMPLE_UART_NAME    "uart0"
-static struct rt_semaphore rx_sem;
-static rt_device_t serial;
-static int uart_sample(int argc, char *argv[]);
-#endif
-
-#ifdef GD32_GPIO_EXTI_TEST
-static void pin_irq_sample(void);
 #endif
 
 int main(void)
@@ -78,16 +60,6 @@ int main(void)
 #ifdef GD32_SPI_TEST
     rt_kprintf("\n--- SPI5 Test ---\n");
     spi_sample();
-#endif
-
-#ifdef GD32_UART_TEST
-    rt_kprintf("\n--- UART Test ---\n");
-    uart_sample(0, 0);
-#endif
-
-#ifdef GD32_GPIO_EXTI_TEST
-    rt_kprintf("\n--- GPIO EXTI Test ---\n");
-    pin_irq_sample();
 #endif
 
     while (1)
@@ -210,106 +182,4 @@ static void spi_sample(void)
 }
 
 MSH_CMD_EXPORT(spi_sample, SPI5 basic test sample);
-#endif
-
-#ifdef GD32_UART_TEST
-/**
- * @brief UART receive callback
- */
-static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
-{
-    rt_sem_release(&rx_sem);
-    return RT_EOK;
-}
-
-/**
- * @brief UART receive thread entry
- */
-static void serial_thread_entry(void *parameter)
-{
-    char ch;
-
-    while (1) {
-        while (rt_device_read(serial, -1, &ch, 1) != 1) {
-            rt_sem_take(&rx_sem, RT_WAITING_FOREVER);
-        }
-        /* echo the received character */
-        rt_device_write(serial, 0, &ch, 1);
-    }
-}
-
-/**
- * @brief UART echo test sample
- */
-static int uart_sample(int argc, char *argv[])
-{
-    rt_err_t ret = RT_EOK;
-    char uart_name[RT_NAME_MAX];
-    char str[] = "Hello RT-Thread UART Test!\r\n";
-
-    if (argc == 2) {
-        rt_strncpy(uart_name, argv[1], RT_NAME_MAX);
-    } else {
-        rt_strncpy(uart_name, SAMPLE_UART_NAME, RT_NAME_MAX);
-    }
-
-    serial = rt_device_find(uart_name);
-    if (!serial) {
-        rt_kprintf("UART device %s not found!\n", uart_name);
-        return RT_ERROR;
-    }
-
-    rt_sem_init(&rx_sem, "rx_sem", 0, RT_IPC_FLAG_FIFO);
-    rt_device_open(serial, RT_DEVICE_FLAG_INT_RX);
-    rt_device_set_rx_indicate(serial, uart_input);
-    rt_device_write(serial, 0, str, (sizeof(str) - 1));
-
-    rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 1024, 25, 10);
-    if (thread != RT_NULL) {
-        rt_thread_startup(thread);
-        rt_kprintf("UART %s echo test started. Type to see echo.\n", uart_name);
-    } else {
-        ret = RT_ERROR;
-    }
-
-    return ret;
-}
-
-MSH_CMD_EXPORT(uart_sample, UART echo test sample);
-#endif
-
-#ifdef GD32_GPIO_EXTI_TEST
-/**
- * @brief Wakeup key interrupt callback
- */
-void wakeup_key_pin_cb(void *args)
-{
-    rt_kprintf("Wakeup key pin pressed!\n");
-}
-
-/**
- * @brief Tamper key interrupt callback
- */
-void tamper_key_pin_cb(void *args)
-{
-    rt_kprintf("Tamper key pin pressed!\n");
-}
-
-/**
- * @brief GPIO external interrupt sample
- */
-static void pin_irq_sample(void)
-{
-    /* Wakeup key interrupt */
-    rt_pin_mode(WAKEUP_PIN_NUM, PIN_MODE_INPUT_PULLUP);
-    rt_pin_attach_irq(WAKEUP_PIN_NUM, PIN_IRQ_MODE_FALLING, wakeup_key_pin_cb, RT_NULL);
-    rt_pin_irq_enable(WAKEUP_PIN_NUM, PIN_IRQ_ENABLE);
-
-    /* Tamper key interrupt */
-    rt_pin_mode(TAMPER_PIN, PIN_MODE_INPUT_PULLUP);
-    rt_pin_attach_irq(TAMPER_PIN, PIN_IRQ_MODE_FALLING, tamper_key_pin_cb, RT_NULL);
-    rt_pin_irq_enable(TAMPER_PIN, PIN_IRQ_ENABLE);
-
-    rt_kprintf("GPIO EXTI initialized. Press K1(PA0) or K2(PC13) key.\n");
-}
 #endif

@@ -337,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>RT_USING_LIBC, RT_USING_ARMLIBC, USE_STDPERIPH_DRIVER, __RTTHREAD__, __CLK_TCK=RT_TICK_PER_SECOND, GD32F470, __STDC_LIMIT_MACROS</Define>
+              <Define>__RTTHREAD__, __CLK_TCK=RT_TICK_PER_SECOND, GD32F470, __STDC_LIMIT_MACROS, RT_USING_ARMLIBC, RT_USING_LIBC, USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\..\components\drivers\spi;..\..\..\..\components\net\utest;.;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;applications;..\..\..\..\components\drivers\smp_call;..\..\..\..\libcpu\arm\common;board\ports;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\poll;..\libraries\gd32_drivers;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\libc\posix\ipc;packages\gd32-arm-cmsis-latest\GD32F4xx;..\..\..\..\libcpu\arm\cortex-m4;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\drivers\phy;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\finsh;..\..\..\..\components\drivers\include;packages\gd32-arm-series-latest\GD32F4xx\GD32F4xx_standard_peripheral\Include;..\..\..\..\include;..\..\..\..\components\libc\posix\io\eventfd;packages\gd32-arm-cmsis-latest\GD32F4xx\GD\GD32F4xx\Include;packages\at24cxx-latest;..\..\..\..\components\libc\compilers\common\include;board</IncludePath>
+              <IncludePath>..\..\..\..\components\drivers\smp_call;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\libc\posix\io\eventfd;..\libraries\gd32_drivers;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\ipc;board;..\..\..\..\components\net\utest;.;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\libcpu\arm\common;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\spi;..\..\..\..\components\drivers\include;packages\at24cxx-latest;..\..\..\..\libcpu\arm\cortex-m4;..\..\..\..\components\finsh;..\..\..\..\components\libc\compilers\common\include;packages\gd32-arm-cmsis-latest\GD32F4xx;..\..\..\..\components\drivers\include;packages\gd32-arm-cmsis-latest\GD32F4xx\GD\GD32F4xx\Include;board\ports;..\..\..\..\components\drivers\phy;..\..\..\..\components\drivers\include;applications;..\..\..\..\include;..\..\..\..\components\libc\posix\io\poll;packages\gd32-arm-series-latest\GD32F4xx\GD32F4xx_standard_peripheral\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -361,7 +361,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>1</umfTarg>
+            <umfTarg>0</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -370,7 +370,7 @@
             <TextAddressRange>0x08000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile>.\gd32_rom.ld</ScatterFile>
+            <ScatterFile>.\board\linker_scripts\link.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc></Misc>
@@ -1431,6 +1431,11 @@
               <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
             </File>
             <File>
+              <FileName>msh_parse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
+            </File>
+            <File>
               <FileName>shell.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\shell.c</FilePath>
@@ -1439,11 +1444,6 @@
               <FileName>msh.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
-            </File>
-            <File>
-              <FileName>msh_parse.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
             </File>
           </Files>
         </Group>

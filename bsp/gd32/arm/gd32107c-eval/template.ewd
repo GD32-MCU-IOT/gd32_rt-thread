@@ -292,7 +292,7 @@
                 <option>
                     <name>CMSISDAPResetList</name>
                     <version>1</version>
-                    <state>9</state>
+                    <state>10</state>
                 </option>
                 <option>
                     <name>CMSISDAPHWResetDuration</name>
@@ -312,7 +312,7 @@
                 </option>
                 <option>
                     <name>CMSISDAPInterfaceRadio</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CMSISDAPInterfaceCmdLine</name>

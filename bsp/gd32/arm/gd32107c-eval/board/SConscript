@@ -7,7 +7,11 @@ cwd = GetCurrentDir()
 # add general drivers
 src = Split('''
 board.c
+board_msd_init.c
 ''')
+
+# Add DMA peripheral source for GD32F10x (needed by UART/SPI/I2C DMA drivers)
+src += [cwd + '/../packages/gd32-arm-series-latest/GD32F10x/GD32F10x_standard_peripheral/Source/gd32f10x_dma.c']
 
 path =  [cwd]
 

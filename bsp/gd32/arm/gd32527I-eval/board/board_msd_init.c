@@ -237,3 +237,75 @@ void gd32_uart_gpio_init(struct gd32_uart *uart)
     NVIC_EnableIRQ(uart->irqn);
 }
 #endif
+
+#ifdef BSP_USING_SDRAM
+/**
+  * @brief  This function initializes the SDRAM GPIO pins.
+  *         Overrides the weak default in drv_sdram.c because GD32F527I-EVAL
+  *         uses a different pin mapping than GD32F4xx boards:
+  *           SDNWE  -> PH5  (F4xx: PC0)
+  *           SDCKE0 -> PC5  (F4xx: PC3)
+  *           SDNE0  -> PC2  (same)
+  */
+void gd32_sdram_gpio_init(void)
+{
+    /* enable EXMC clock */
+    rcu_periph_clock_enable(RCU_EXMC);
+
+    /* enable GPIO clocks for SDRAM pins */
+    rcu_periph_clock_enable(RCU_GPIOC);
+    rcu_periph_clock_enable(RCU_GPIOD);
+    rcu_periph_clock_enable(RCU_GPIOE);
+    rcu_periph_clock_enable(RCU_GPIOF);
+    rcu_periph_clock_enable(RCU_GPIOG);
+    rcu_periph_clock_enable(RCU_GPIOH);
+
+    /* SDNE0(PC2), SDCKE0(PC5) */
+    gpio_af_set(GPIOC, GPIO_AF_12, GPIO_PIN_2 | GPIO_PIN_5);
+    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_2 | GPIO_PIN_5);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_2 | GPIO_PIN_5);
+
+    /* D2(PD0), D3(PD1), D13(PD8), D14(PD9), D15(PD10), D0(PD14), D1(PD15) */
+    gpio_af_set(GPIOD, GPIO_AF_12, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_8 | GPIO_PIN_9 |
+                                   GPIO_PIN_10 | GPIO_PIN_14 | GPIO_PIN_15);
+    gpio_mode_set(GPIOD, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_8 | GPIO_PIN_9 |
+                                                          GPIO_PIN_10 | GPIO_PIN_14 | GPIO_PIN_15);
+    gpio_output_options_set(GPIOD, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_8 | GPIO_PIN_9 |
+                                                                      GPIO_PIN_10 | GPIO_PIN_14 | GPIO_PIN_15);
+
+    /* NBL0(PE0), NBL1(PE1), D4-D12(PE7-PE15) */
+    gpio_af_set(GPIOE, GPIO_AF_12, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_7  | GPIO_PIN_8 |
+                                   GPIO_PIN_9  | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 |
+                                   GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15);
+    gpio_mode_set(GPIOE, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_7  | GPIO_PIN_8 |
+                                                          GPIO_PIN_9  | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 |
+                                                          GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15);
+    gpio_output_options_set(GPIOE, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_7  | GPIO_PIN_8 |
+                                                                      GPIO_PIN_9  | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 |
+                                                                      GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15);
+
+    /* A0-A5(PF0-PF5), NRAS(PF11), A6-A9(PF12-PF15) */
+    gpio_af_set(GPIOF, GPIO_AF_12, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_2  | GPIO_PIN_3  |
+                                   GPIO_PIN_4  | GPIO_PIN_5  | GPIO_PIN_11 | GPIO_PIN_12 |
+                                   GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15);
+    gpio_mode_set(GPIOF, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_2  | GPIO_PIN_3  |
+                                                          GPIO_PIN_4  | GPIO_PIN_5  | GPIO_PIN_11 | GPIO_PIN_12 |
+                                                          GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15);
+    gpio_output_options_set(GPIOF, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0  | GPIO_PIN_1  | GPIO_PIN_2  | GPIO_PIN_3  |
+                                                                      GPIO_PIN_4  | GPIO_PIN_5  | GPIO_PIN_11 | GPIO_PIN_12 |
+                                                                      GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15);
+
+    /* A10(PG0), A11(PG1), A12(PG2), A14(PG4), A15(PG5), SDCLK(PG8), NCAS(PG15) */
+    gpio_af_set(GPIOG, GPIO_AF_12, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_4 |
+                                   GPIO_PIN_5 | GPIO_PIN_8 | GPIO_PIN_15);
+    gpio_mode_set(GPIOG, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_4 |
+                                                          GPIO_PIN_5 | GPIO_PIN_8 | GPIO_PIN_15);
+    gpio_output_options_set(GPIOG, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_4 |
+                                                                      GPIO_PIN_5 | GPIO_PIN_8 | GPIO_PIN_15);
+
+    /* SDNWE(PH5) */
+    gpio_af_set(GPIOH, GPIO_AF_12, GPIO_PIN_5);
+    gpio_mode_set(GPIOH, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_5);
+    gpio_output_options_set(GPIOH, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5);
+}
+#endif

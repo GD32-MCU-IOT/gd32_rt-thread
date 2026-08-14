@@ -16,9 +16,21 @@ board_msd_init.c
 if GetDepend(['RT_USING_I2C']):
     src += [cwd + '/../packages/gd32-arm-series-latest/GD32F5xx/GD32F5xx_standard_peripheral/Source/gd32f5xx_i2c_add.c']
 
+# Add TLI (and IPA) peripheral source when LCD is enabled.
+# The package SConscript does not include these files, so we add them here.
+_tli_src = cwd + '/../packages/gd32-arm-series-latest/GD32F5xx/GD32F5xx_standard_peripheral/Source/'
+if GetDepend(['BSP_USING_LCD']):
+    src += [_tli_src + 'gd32f5xx_tli.c']
+if GetDepend(['BSP_USING_LVGL']):
+    src += [_tli_src + 'gd32f5xx_ipa.c']
+
 path =  [cwd]
 
 CPPDEFINES = ['GD32F527']
 group = DefineGroup('Drivers', src, depend = [''], CPPPATH = path, CPPDEFINES = CPPDEFINES)
+
+# build the extended board ports (LCD / touch / LVGL porting layer)
+objs = SConscript(os.path.join('ports', 'SConscript'))
+group = group + objs
 
 Return('group')

@@ -404,6 +404,7 @@
 #define BSP_USING_SPI5
 #define BSP_USING_I2C
 #define BSP_USING_HARD_I2C0
+#define BSP_I2C_DMA_TIMEOUT 1000
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

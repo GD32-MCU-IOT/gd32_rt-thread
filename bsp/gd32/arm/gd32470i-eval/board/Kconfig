@@ -462,15 +462,15 @@ menu "On-chip Peripheral Drivers"
                     help
                         Transfers smaller than this will use polling mode.
                         DMA mode is used when buffer length is greater than or equal to this value.
-
-                config BSP_I2C_DMA_TIMEOUT
-                    int "I2C DMA transfer timeout (ms)"
-                    range 1 60000
-                    default 1000
-                    help
-                        Maximum wait time for an I2C DMA transfer to complete.
-                        The driver reports a timeout once this limit is reached.
             endif
+
+            config BSP_I2C_DMA_TIMEOUT
+                int "I2C DMA transfer timeout (ms)"
+                range 1 60000
+                default 1000
+                help
+                    Maximum wait time for an I2C DMA transfer to complete.
+                    The driver reports a timeout once this limit is reached.
 
             menuconfig BSP_USING_SOFT_I2C0
                 bool "Enable Soft I2C0 BUS (bit-bang)"

@@ -108,6 +108,10 @@
 #define RT_VER_NUM 0x50201
 #define RT_BACKTRACE_LEVEL_MAX_NR 32
 /* end of RT-Thread Kernel */
+#define RT_USING_HW_ATOMIC
+#define ARCH_ARM
+#define ARCH_ARM_CORTEX_M
+#define ARCH_ARM_CORTEX_M23
 
 /* RT-Thread Components */
 
@@ -148,6 +152,7 @@
 #define RT_UNAMED_PIPE_NUMBER 64
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
+#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
@@ -326,11 +331,23 @@
 
 /* GD32 Drivers */
 
+#define PKG_USING_GD32_ARM_CMSIS_DRIVER
+#define PKG_USING_GD32_ARM_CMSIS_DRIVER_LATEST_VERSION
+#define PKG_USING_GD32_ARM_SERIES_DRIVER
+#define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
 
 /* HPMicro SDK */
 
 /* end of HPMicro SDK */
+
+/* FT32 HAL & SDK Drivers */
+
+/* end of FT32 HAL & SDK Drivers */
+
+/* NOVOSNS Drivers */
+
+/* end of NOVOSNS Drivers */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -341,6 +358,12 @@
 
 /* end of touch drivers */
 #define PKG_USING_AT24CXX
+
+/* Select the Type of AT24CXX EEPROM */
+
+#define PKG_AT24CXX_EE_TYPE_AT24C02
+#define PKG_AT24CXX_EE_TYPE 1
+/* end of Select the Type of AT24CXX EEPROM */
 #define PKG_USING_AT24CXX_LATEST_VERSION
 /* end of peripheral libraries and drivers */
 
@@ -412,10 +435,11 @@
 
 /* end of Arduino libraries */
 /* end of RT-Thread online packages */
+#define SOC_FAMILY_GD32
+#define SOC_SERIES_GD32L23x
 
 /* Hardware Drivers Config */
 
-#define SOC_SERIES_GD32L23x
 #define SOC_GD32L233
 
 /* Onboard Peripheral Drivers */
@@ -432,7 +456,9 @@
 #define BSP_USING_UART
 #define BSP_USING_UART0
 #define BSP_USING_UART1
+#define BSP_UART_POLL_TX_TIMEOUT_MS 1000
 #define BSP_USING_SPI
+#define BSP_SPI_XFER_TIMEOUT 1000
 #define BSP_USING_SPI0
 #define BSP_USING_I2C
 #define BSP_USING_HARD_I2C1

@@ -177,7 +177,8 @@ struct rt_i2c_bus_device i2c5;
 #endif
 
 /* Compatibility macros: unify DMA request-field vs subperipheral-select differences */
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
+ || defined(SOC_SERIES_GD32L23x)
 #define gd32_i2c_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
 #define gd32_i2c_dma_subperiph_config(periph, ch, cfg)
 #elif defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
@@ -228,7 +229,7 @@ struct rt_i2c_bus_device i2c5;
 #define I2C_DMA_RECEIVE_GD                   I2C2_DMA_RECEIVE
 #endif
 #elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
-   || defined(SOC_SERIES_GD32W51x_F5HC)
+   || defined(SOC_SERIES_GD32W51x_F5HC) || defined(SOC_SERIES_GD32L23x)
 #define I2C_CTL1_REG(periph)                 I2C_CTL1(periph)
 #define I2C_CTL1_BYTENUM_GD                  I2C_CTL1_BYTENUM
 #define I2C_CTL1_RELOAD_GD                   I2C_CTL1_RELOAD

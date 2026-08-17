@@ -7,7 +7,7 @@
 MEMORY
 {
     CODE (rx) : ORIGIN = 0x08000000, LENGTH = 1024k /* 1024KB flash */
-    DATA (rw) : ORIGIN = 0x20000000, LENGTH =  448k /* 448KB sram */
+    DATA (rw) : ORIGIN = 0x20000000, LENGTH =  192k /* 192KB sram */
 }
 ENTRY(Reset_Handler)
 _system_stack_size = 0x200;

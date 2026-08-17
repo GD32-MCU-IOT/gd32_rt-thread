@@ -41,6 +41,12 @@
 #define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
 #define gd32_dma_request_config(init_s, dma_cfg)
 #define gd32_dma_subperiph_config(periph, ch, cfg)
+#elif defined(SOC_SERIES_GD32L23x)
+/* L23x: single DMA + DMAMUX, single SPI_DATA register, request routed via DMAMUX */
+#define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
+#define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
+#define gd32_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
+#define gd32_dma_subperiph_config(periph, ch, cfg)
 #else
 #define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
 #define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
@@ -108,7 +114,7 @@ static struct rt_spi_bus spi_bus5;
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
  && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x) \
- && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
+ && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) && !defined(SOC_SERIES_GD32F4xx)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -417,7 +423,7 @@ static struct rt_spi_ops gd32_spi_ops =
  && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
  && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) \
- && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC)
+ && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) && !defined(SOC_SERIES_GD32F4xx)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS
@@ -476,22 +482,15 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     dma_single_data_parameter_struct dma_init_struct;
     uint32_t spi_periph = spi_device->spi_periph;
     
-    /* Enable DMA clock */
-    if (spi_device->dma_tx != RT_NULL && spi_device->dma_tx->periph == DMA0)
+    /* Enable DMA clock (the controller is described by the .rcu field of the */
+
+    if (spi_device->dma_tx != RT_NULL)
     {
-        rcu_periph_clock_enable(RCU_DMA0);
+        rcu_periph_clock_enable(spi_device->dma_tx->rcu);
     }
-    if (spi_device->dma_tx != RT_NULL && spi_device->dma_tx->periph == DMA1)
+    if (spi_device->dma_rx != RT_NULL)
     {
-        rcu_periph_clock_enable(RCU_DMA1);
-    }
-    if (spi_device->dma_rx != RT_NULL && spi_device->dma_rx->periph == DMA0)
-    {
-        rcu_periph_clock_enable(RCU_DMA0);
-    }
-    if (spi_device->dma_rx != RT_NULL && spi_device->dma_rx->periph == DMA1)
-    {
-        rcu_periph_clock_enable(RCU_DMA1);
+        rcu_periph_clock_enable(spi_device->dma_rx->rcu);
     }
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)

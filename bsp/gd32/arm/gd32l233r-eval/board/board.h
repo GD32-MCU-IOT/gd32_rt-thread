@@ -37,6 +37,19 @@ extern char __ICFEDIT_region_RAM_end__;
 #define GD32_SRAM_END          (0x20000000 + GD32_SRAM_SIZE * 1024)
 #endif
 
+/* SPI Flash CS pin definitions (software-controlled CS via GPIO) */
+/* The CS pin is configured as push-pull output by rt_hw_spi_device_attach(),
+   no extra GPIO setup is needed in board_msd_init.c. */
+/* SPI0 CS: PD2 — shared with UART4 RX, see board_msd_init.c */
+#ifndef BSP_SPI0_FLASH_CS_PIN
+#define BSP_SPI0_FLASH_CS_PIN       GET_PIN(D, 2)
+#endif
+
+/* SPI1 CS: PB12 (SPI1_NSS), used as software CS together with PB13/14/15 */
+#ifndef BSP_SPI1_FLASH_CS_PIN
+#define BSP_SPI1_FLASH_CS_PIN       GET_PIN(B, 12)
+#endif
+
 #ifdef __ARMCC_VERSION
 extern int Image$$RW_IRAM1$$ZI$$Limit;
 #define HEAP_BEGIN    (&Image$$RW_IRAM1$$ZI$$Limit)

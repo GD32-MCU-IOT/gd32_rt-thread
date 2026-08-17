@@ -26,6 +26,11 @@ extern "C" {
 #include "config/w51x_f5hc/uart_config.h"
 #include "config/w51x_f5hc/spi_config.h"
 #include "config/w51x_f5hc/i2c_config.h"
+#elif defined(SOC_SERIES_GD32F4xx)
+#include "config/f4xx/dma_config.h"
+#include "config/f4xx/uart_config.h"
+#include "config/f4xx/spi_config.h"
+#include "config/f4xx/i2c_config.h"
 #elif defined(SOC_SERIES_GD32F5xx)
 #include "config/f527/dma_config.h"
 #include "config/f527/uart_config.h"
@@ -56,6 +61,11 @@ extern "C" {
 #include "config/e51x/uart_config.h"
 #include "config/e51x/i2c_config.h"
 #include "config/e51x/spi_config.h"
+#elif defined(SOC_SERIES_GD32L23x)
+#include "config/l23x/dma_config.h"
+#include "config/l23x/uart_config.h"
+#include "config/l23x/spi_config.h"
+#include "config/l23x/i2c_config.h"
 #endif
 
 #ifdef __cplusplus

@@ -26,7 +26,7 @@ static struct rt_memheap system_heap;
 #endif
 
 
-static void SDRAM_Initialization_GPIO(void)
+rt_weak void gd32_sdram_gpio_init(void)
 {
     /* enable EXMC clock*/
     rcu_periph_clock_enable(RCU_EXMC);
@@ -105,7 +105,8 @@ static rt_err_t SDRAM_Initialization_Sequence(exmc_sdram_parameter_struct *hsdra
     target_bank = EXMC_SDRAM_DEVICE1_SELECT;
 #endif
 
-    SDRAM_Initialization_GPIO();
+    gd32_sdram_gpio_init();
+
     /* EXMC SDRAM device initialization sequence --------------------------------*/
     /* Step 1 : configure SDRAM timing registers --------------------------------*/
     /* LMRD: 2 clock cycles */
@@ -216,7 +217,7 @@ static rt_err_t SDRAM_Initialization_Sequence(exmc_sdram_parameter_struct *hsdra
     /* 64ms, 8192-cycle refresh, 64ms/8192=7.81us */
     /* SDCLK_Freq = SYS_Freq/2 */
     /* (7.81 us * SDCLK_Freq) - 20 */
-    exmc_sdram_refresh_count_set(761);
+    exmc_sdram_refresh_count_set(SDRAM_REFRESH_COUNT);
 
     /* wait until the SDRAM controller is ready */
     timeout = SDRAM_TIMEOUT;

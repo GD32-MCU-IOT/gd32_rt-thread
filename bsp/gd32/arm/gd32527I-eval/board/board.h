@@ -22,6 +22,18 @@
 #define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
 
+/* Timing values match the official lvgl_f527 demo (exmc_sdram.c V1.2.0).
+ * These are the verified working values for GD32F527I-EVAL board,
+ * overriding the default values defined in sdram_port.h. */
+#define SDRAM_RPIPE_DELAY               EXMC_PIPELINE_DELAY_1_HCLK
+#define SDCLOCK_PERIOD                  EXMC_SDCLK_PERIODS_2_HCLK
+#define SDRAM_REFRESH_COUNT             ((uint32_t)761)
+#define EXITSELFREFRESHDELAY            7
+#define SELFREFRESHTIME                 6
+#define ROWCYCLEDELAY                   5
+#define RPDELAY                         2
+#define RCDDELAY                        2
+
 // <o> Internal SRAM memory size[Kbytes] <8-512>
 //  <i>Default: 512
 #ifdef __ICCARM__

@@ -1,0 +1,25 @@
+import os
+from building import *
+
+cwd     = GetCurrentDir()
+src     = []
+path    = []
+
+# LCD (TLI) graphic driver
+if GetDepend('BSP_USING_LCD'):
+    src  += Glob('lcd/*.c')
+    path += [cwd + '/lcd']
+
+# resistive touch panel driver
+if GetDepend('BSP_USING_TOUCH'):
+    src  += Glob('touch/*.c')
+    path += [cwd + '/touch']
+
+# LVGL porting layer (display / input / demo)
+if GetDepend('BSP_USING_LVGL'):
+    src  += Glob('lvgl/*.c')
+    path += [cwd + '/lvgl']
+
+group = DefineGroup('ports', src, depend = [''], CPPPATH = path)
+
+Return('group')

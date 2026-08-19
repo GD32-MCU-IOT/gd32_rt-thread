@@ -265,9 +265,9 @@ static void dma_recv_isr (struct rt_serial_device *serial)
 
     level = rt_hw_interrupt_disable();
     #if defined SOC_SERIES_GD32E23x
-    counter = dma_transfer_number_get(uart->dma.rx.channel);
+    counter = gd32_dma_transfer_number_get(uart->dma.rx.periph, uart->dma.rx.channel);
     #else
-    counter = dma_transfer_number_get(uart->dma.rx.periph, uart->dma.rx.channel);
+    counter = gd32_dma_transfer_number_get(uart->dma.rx.periph, uart->dma.rx.channel);
     #endif
     if (counter <= uart->dma.last_index)
     {
@@ -397,24 +397,24 @@ static void dma_rx_isr (struct rt_serial_device *serial)
     uart = rt_container_of(serial, struct gd32_uart, serial);
 
     #if defined SOC_SERIES_GD32E23x
-    if ((dma_interrupt_flag_get(uart->dma.rx.channel, DMA_INT_FLAG_HTF) != RESET) ||
-        (dma_interrupt_flag_get(uart->dma.rx.channel, DMA_INT_FLAG_FTF) != RESET))
+    if ((gd32_dma_interrupt_flag_get(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_HTF) != RESET) ||
+        (gd32_dma_interrupt_flag_get(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_FTF) != RESET))
     {
         dma_recv_isr(serial);
 
         /* clear dma flag */
-        dma_interrupt_flag_clear(uart->dma.rx.channel, DMA_INT_FLAG_HTF);
-        dma_interrupt_flag_clear(uart->dma.rx.channel, DMA_INT_FLAG_FTF);
+        gd32_dma_interrupt_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_HTF);
+        gd32_dma_interrupt_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_FTF);
     }
     #else
-    if ((dma_interrupt_flag_get(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_HTF) != RESET) ||
-        (dma_interrupt_flag_get(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_FTF) != RESET))
+    if ((gd32_dma_interrupt_flag_get(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_HTF) != RESET) ||
+        (gd32_dma_interrupt_flag_get(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_FTF) != RESET))
     {
         dma_recv_isr(serial);
 
         /* clear dma flag */
-        dma_interrupt_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_HTF);
-        dma_interrupt_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_FTF);
+        gd32_dma_interrupt_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_HTF);
+        gd32_dma_interrupt_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_INT_FLAG_FTF);
     }
     #endif
 }
@@ -441,12 +441,12 @@ static void dma_tx_isr (struct rt_serial_device *serial)
         rt_size_t trans_total_index;
 
         /* clear dma flag */
-        dma_interrupt_flag_clear(uart->dma.tx.channel, DMA_INT_FLAG_FTF);
+        gd32_dma_interrupt_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_INT_FLAG_FTF);
 
         /* disable dma tx channel */
-        dma_channel_disable(uart->dma.tx.channel);
+        gd32_dma_channel_disable(uart->dma.tx.periph, uart->dma.tx.channel);
 
-        trans_total_index = dma_transfer_number_get(uart->dma.tx.channel);
+        trans_total_index = gd32_dma_transfer_number_get(uart->dma.tx.periph, uart->dma.tx.channel);
 
         if (trans_total_index == 0)
         {
@@ -454,17 +454,17 @@ static void dma_tx_isr (struct rt_serial_device *serial)
         }
     }
     #else
-    if (dma_interrupt_flag_get(uart->dma.tx.periph, uart->dma.tx.channel, DMA_INT_FLAG_FTF) != RESET)
+    if (gd32_dma_interrupt_flag_get(uart->dma.tx.periph, uart->dma.tx.channel, DMA_INT_FLAG_FTF) != RESET)
     {
         rt_size_t trans_total_index;
 
         /* clear dma flag */
-        dma_interrupt_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_INT_FLAG_FTF);
+        gd32_dma_interrupt_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_INT_FLAG_FTF);
 
         /* disable dma tx channel */
-        dma_channel_disable(uart->dma.tx.periph, uart->dma.tx.channel);
+        gd32_dma_channel_disable(uart->dma.tx.periph, uart->dma.tx.channel);
 
-        trans_total_index = dma_transfer_number_get(uart->dma.tx.periph, uart->dma.tx.channel);
+        trans_total_index = gd32_dma_transfer_number_get(uart->dma.tx.periph, uart->dma.tx.channel);
 
         if (trans_total_index == 0)
         {
@@ -592,20 +592,20 @@ void DMA_Channel1_2_IRQHandler(void)
     /* enter interrupt */
     rt_interrupt_enter();
 
-    if (dma_interrupt_flag_get(DMA_CH1, DMA_INT_FLAG_FTF) != RESET)
+    if (gd32_dma_interrupt_flag_get(DMA, DMA_CH1, DMA_INT_FLAG_FTF) != RESET)
     {
-        dma_interrupt_flag_clear(DMA_CH1, DMA_INT_FLAG_G);
+        gd32_dma_interrupt_flag_clear(DMA, DMA_CH1, DMA_INT_FLAG_G);
         dma_tx_isr(&uart_obj[UART0_INDEX].serial);
     }
 
-    if (dma_interrupt_flag_get(DMA_CH2, DMA_INT_FLAG_HTF) != RESET)
+    if (gd32_dma_interrupt_flag_get(DMA, DMA_CH2, DMA_INT_FLAG_HTF) != RESET)
     {
-        dma_interrupt_flag_clear(DMA_CH2, DMA_INT_FLAG_HTF);
+        gd32_dma_interrupt_flag_clear(DMA, DMA_CH2, DMA_INT_FLAG_HTF);
         dma_recv_isr(&uart_obj[UART0_INDEX].serial);
     }
-    else if (dma_interrupt_flag_get(DMA_CH2, DMA_INT_FLAG_FTF) != RESET)
+    else if (gd32_dma_interrupt_flag_get(DMA, DMA_CH2, DMA_INT_FLAG_FTF) != RESET)
     {
-        dma_interrupt_flag_clear(DMA_CH2, DMA_INT_FLAG_FTF);
+        gd32_dma_interrupt_flag_clear(DMA, DMA_CH2, DMA_INT_FLAG_FTF);
         dma_recv_isr(&uart_obj[UART0_INDEX].serial);
     }
 
@@ -636,21 +636,21 @@ void DMA_Channel3_4_IRQHandler(void)
 {
     rt_interrupt_enter();
 
-    if (dma_interrupt_flag_get(DMA_CH3, DMA_INT_FLAG_FTF) != RESET)
+    if (gd32_dma_interrupt_flag_get(DMA, DMA_CH3, DMA_INT_FLAG_FTF) != RESET)
     {
-        dma_interrupt_flag_clear(DMA_CH3, DMA_INT_FLAG_G);
+        gd32_dma_interrupt_flag_clear(DMA, DMA_CH3, DMA_INT_FLAG_G);
         dma_tx_isr(&uart_obj[UART1_INDEX].serial);
     }
 
-    if (dma_interrupt_flag_get(DMA_CH4, DMA_INT_FLAG_HTF) != RESET)
+    if (gd32_dma_interrupt_flag_get(DMA, DMA_CH4, DMA_INT_FLAG_HTF) != RESET)
     {
-        dma_interrupt_flag_clear(DMA_CH4, DMA_INT_FLAG_HTF);
+        gd32_dma_interrupt_flag_clear(DMA, DMA_CH4, DMA_INT_FLAG_HTF);
         dma_recv_isr(&uart_obj[UART1_INDEX].serial);
     }
 
-    if (dma_interrupt_flag_get(DMA_CH4, DMA_INT_FLAG_FTF) != RESET)
+    if (gd32_dma_interrupt_flag_get(DMA, DMA_CH4, DMA_INT_FLAG_FTF) != RESET)
     {
-        dma_interrupt_flag_clear(DMA_CH4, DMA_INT_FLAG_FTF);
+        gd32_dma_interrupt_flag_clear(DMA, DMA_CH4, DMA_INT_FLAG_FTF);
         dma_recv_isr(&uart_obj[UART1_INDEX].serial);
     }
 
@@ -868,39 +868,40 @@ static void _uart_dma_receive (struct gd32_uart *uart, rt_uint8_t *buffer, rt_ui
     /* clear all the interrupt flags */
 
     #if defined SOC_SERIES_GD32E23x
-    dma_flag_clear(uart->dma.rx.channel, DMA_FLAG_G);
-    dma_flag_clear(uart->dma.rx.channel, DMA_FLAG_FTF);
-    dma_flag_clear(uart->dma.rx.channel, DMA_FLAG_HTF);
-    dma_flag_clear(uart->dma.rx.channel, DMA_FLAG_ERR);
-    dma_channel_disable(uart->dma.rx.channel);
-    dma_deinit(uart->dma.rx.channel);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_G);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_FTF);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_HTF);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_ERR);
+    gd32_dma_channel_disable(uart->dma.rx.periph, uart->dma.rx.channel);
+    gd32_dma_deinit(uart->dma.rx.periph, uart->dma.rx.channel);
 
     /* configure receive DMA */
     rcu_periph_clock_enable(uart->dma.rx.rcu);
-    dma_deinit(uart->dma.rx.channel);
+    gd32_dma_deinit(uart->dma.rx.periph, uart->dma.rx.channel);
 
-    dma_parameter_struct dma_init_struct = { 0 };
+    gd32_dma_single_data_parameter_struct dma_init_struct;
+
+    gd32_dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.periph_addr = (uint32_t)&USART_RDATA(uart->periph);
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
-    dma_init_struct.memory_addr = (uint32_t)buffer;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-    dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-    dma_init_struct.direction = DMA_PERIPHERAL_TO_MEMORY;
+    dma_init_struct.direction = DMA_PERIPH_TO_MEMORY;
     dma_init_struct.number = size;
     dma_init_struct.priority = DMA_PRIORITY_HIGH;
-    dma_init(uart->dma.rx.channel, &dma_init_struct);
+    GD32_DMA_SET_MEMADDR(&dma_init_struct, (uint32_t)buffer);
+    GD32_DMA_SET_DATAWIDTH(&dma_init_struct, DMA_PERIPH_WIDTH_8BIT);
+    gd32_dma_single_data_mode_init(uart->dma.rx.periph, uart->dma.rx.channel, &dma_init_struct);
 
     /* enable transmit complete interrupt */
     nvic_irq_enable(uart->dma.rx.irq, 2);
-    dma_interrupt_enable(uart->dma.rx.channel, DMA_CHXCTL_HTFIE);
-    dma_interrupt_enable(uart->dma.rx.channel, DMA_CHXCTL_FTFIE);
+    gd32_dma_interrupt_enable(uart->dma.rx.periph, uart->dma.rx.channel, DMA_CHXCTL_HTFIE);
+    gd32_dma_interrupt_enable(uart->dma.rx.periph, uart->dma.rx.channel, DMA_CHXCTL_FTFIE);
 
     /* enable circular mode */
-    dma_circulation_enable(uart->dma.rx.channel);
+    gd32_dma_circulation_enable(uart->dma.rx.periph, uart->dma.rx.channel);
 
     /* enable dma channel */
-    dma_channel_enable(uart->dma.rx.channel);
+    gd32_dma_channel_enable(uart->dma.rx.periph, uart->dma.rx.channel);
 
     /* enable usart idle interrupt */
     usart_interrupt_enable(uart->periph, USART_INT_IDLE);
@@ -908,39 +909,41 @@ static void _uart_dma_receive (struct gd32_uart *uart, rt_uint8_t *buffer, rt_ui
     /* enable dma receive */
     usart_dma_receive_config(uart->periph, USART_DENR_ENABLE);
     #else
-    dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_FEE);
-    dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_SDE);
-    dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_TAE);
-    dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_HTF);
-    dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_FTF);
-    dma_channel_disable(uart->dma.rx.periph, uart->dma.rx.channel);
-    dma_deinit(uart->dma.rx.periph, uart->dma.rx.channel);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_FEE);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_SDE);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_TAE);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_HTF);
+    gd32_dma_flag_clear(uart->dma.rx.periph, uart->dma.rx.channel, DMA_FLAG_FTF);
+    gd32_dma_channel_disable(uart->dma.rx.periph, uart->dma.rx.channel);
+    gd32_dma_deinit(uart->dma.rx.periph, uart->dma.rx.channel);
 
     /* configure receive DMA */
     rcu_periph_clock_enable(uart->dma.rx.rcu);
-    dma_deinit(uart->dma.rx.periph, uart->dma.rx.channel);
+    gd32_dma_deinit(uart->dma.rx.periph, uart->dma.rx.channel);
 
-    dma_single_data_parameter_struct dma_init_struct = { 0 };
+    gd32_dma_single_data_parameter_struct dma_init_struct;
 
+    gd32_dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.number              = size;
-    dma_init_struct.memory0_addr        = (uint32_t)buffer;
     dma_init_struct.periph_addr         = (uint32_t)&USART_DATA(uart->periph);
-    dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
     dma_init_struct.periph_inc          = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.memory_inc          = DMA_MEMORY_INCREASE_ENABLE;
-    dma_init_struct.circular_mode       = DMA_CIRCULAR_MODE_ENABLE;
     dma_init_struct.direction           = DMA_PERIPH_TO_MEMORY;
     dma_init_struct.priority            = DMA_PRIORITY_HIGH;
-    dma_single_data_mode_init(uart->dma.rx.periph, uart->dma.rx.channel, &dma_init_struct);
-    dma_channel_subperipheral_select(uart->dma.rx.periph, uart->dma.rx.channel, uart->dma.rx.subperiph);
+    GD32_DMA_SET_MEMADDR(&dma_init_struct, (uint32_t)buffer);
+    GD32_DMA_SET_DATAWIDTH(&dma_init_struct, DMA_PERIPH_WIDTH_8BIT);
+    gd32_dma_request_config(&dma_init_struct, &uart->dma.rx);
+    gd32_dma_single_data_mode_init(uart->dma.rx.periph, uart->dma.rx.channel, &dma_init_struct);
+    gd32_dma_subperiph_config(uart->dma.rx.periph, uart->dma.rx.channel, &uart->dma.rx);
+    gd32_dma_circulation_enable(uart->dma.rx.periph, uart->dma.rx.channel);
 
     /* enable transmit complete interrupt */
     nvic_irq_enable(uart->dma.rx.irq, 2, 0);
-    dma_interrupt_enable(uart->dma.rx.periph, uart->dma.rx.channel, DMA_CHXCTL_HTFIE);
-    dma_interrupt_enable(uart->dma.rx.periph, uart->dma.rx.channel, DMA_CHXCTL_FTFIE);
+    gd32_dma_interrupt_enable(uart->dma.rx.periph, uart->dma.rx.channel, DMA_CHXCTL_HTFIE);
+    gd32_dma_interrupt_enable(uart->dma.rx.periph, uart->dma.rx.channel, DMA_CHXCTL_FTFIE);
 
     /* enable dma channel */
-    dma_channel_enable(uart->dma.rx.periph, uart->dma.rx.channel);
+    gd32_dma_channel_enable(uart->dma.rx.periph, uart->dma.rx.channel);
 
     /* enable usart idle interrupt */
     usart_interrupt_enable(uart->periph, USART_INT_IDLE);
@@ -962,11 +965,11 @@ static void _uart_dma_transmit (struct gd32_uart *uart, rt_uint8_t *buffer, rt_u
 
     usart_dma_transmit_config(uart->periph, USART_DENT_ENABLE);
 
-    dma_channel_enable(uart->dma.tx.channel);
+    gd32_dma_channel_enable(uart->dma.tx.periph, uart->dma.tx.channel);
     #else
     /* Set the data length and data pointer */
-    DMA_CHM0ADDR(uart->dma.tx.periph, uart->dma.tx.channel) = (uint32_t)buffer;
-    DMA_CHCNT(uart->dma.tx.periph, uart->dma.tx.channel) = size;
+    gd32_dma_memory_address_config(uart->dma.tx.periph, uart->dma.tx.channel, DMA_MEMORY_0, (uint32_t)buffer);
+    gd32_dma_transfer_number_config(uart->dma.tx.periph, uart->dma.tx.channel, size);
 
     /* enable dma transmit */
 #if defined SOC_SERIES_GD32F5xx
@@ -976,7 +979,7 @@ static void _uart_dma_transmit (struct gd32_uart *uart, rt_uint8_t *buffer, rt_u
 #endif
 
     /* enable dma channel */
-    dma_channel_enable(uart->dma.tx.periph, uart->dma.tx.channel);
+    gd32_dma_channel_enable(uart->dma.tx.periph, uart->dma.tx.channel);
     #endif
 }
 
@@ -989,68 +992,70 @@ static void gd32_dma_config (struct rt_serial_device *serial, rt_ubase_t flag)
 
     RT_ASSERT(flag == RT_DEVICE_FLAG_DMA_TX || flag == RT_DEVICE_FLAG_DMA_RX);
 
-    /* enable rx dma */
+    /* enable tx dma */
     if (flag == RT_DEVICE_FLAG_DMA_TX)
     {
         #if defined SOC_SERIES_GD32E23x
-        dma_flag_clear(uart->dma.tx.channel, DMA_FLAG_G);
-        dma_flag_clear(uart->dma.tx.channel, DMA_FLAG_FTF);
-        dma_flag_clear(uart->dma.tx.channel, DMA_FLAG_HTF);
-        dma_flag_clear(uart->dma.tx.channel, DMA_FLAG_ERR);
-        dma_channel_disable(uart->dma.tx.channel);
-        dma_deinit(uart->dma.tx.channel);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_G);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_FTF);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_HTF);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_ERR);
+        gd32_dma_channel_disable(uart->dma.tx.periph, uart->dma.tx.channel);
+        gd32_dma_deinit(uart->dma.tx.periph, uart->dma.tx.channel);
         /* configure receive DMA */
         rcu_periph_clock_enable(uart->dma.tx.rcu);
-        dma_deinit( uart->dma.tx.channel);
+        gd32_dma_deinit(uart->dma.tx.periph, uart->dma.tx.channel);
 
+        gd32_dma_single_data_parameter_struct dma_init_struct;
 
-        dma_parameter_struct dma_init_struct = { 0 };
+        gd32_dma_single_data_para_struct_init(&dma_init_struct);
         dma_init_struct.periph_addr = (uint32_t)&USART_TDATA(uart->periph);
         dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
         dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
-        dma_init_struct.periph_width = DMA_PERIPHERAL_WIDTH_8BIT;
-        dma_init_struct.memory_width = DMA_MEMORY_WIDTH_8BIT;
-        dma_init_struct.direction = DMA_MEMORY_TO_PERIPHERAL;
+        dma_init_struct.direction = DMA_MEMORY_TO_PERIPH;
         dma_init_struct.priority = DMA_PRIORITY_HIGH;
+        GD32_DMA_SET_DATAWIDTH(&dma_init_struct, DMA_PERIPH_WIDTH_8BIT);
 
-        dma_init(uart->dma.tx.channel, &dma_init_struct);
+        gd32_dma_single_data_mode_init(uart->dma.tx.periph, uart->dma.tx.channel, &dma_init_struct);
 
         /* enable tx dma interrupt */
         nvic_irq_enable(uart->dma.tx.irq, 2);
 
         /* enable transmit complete interrupt */
-        dma_interrupt_enable(uart->dma.tx.channel, DMA_INT_FTF);
+        gd32_dma_interrupt_enable(uart->dma.tx.periph, uart->dma.tx.channel, DMA_INT_FTF);
         #else
         /* clear all the interrupt flags */
-        dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_FEE);
-        dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_SDE);
-        dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_TAE);
-        dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_HTF);
-        dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_FTF);
-        dma_channel_disable(uart->dma.tx.periph, uart->dma.tx.channel);
-        dma_deinit(uart->dma.tx.periph, uart->dma.tx.channel);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_FEE);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_SDE);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_TAE);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_HTF);
+        gd32_dma_flag_clear(uart->dma.tx.periph, uart->dma.tx.channel, DMA_FLAG_FTF);
+        gd32_dma_channel_disable(uart->dma.tx.periph, uart->dma.tx.channel);
+        gd32_dma_deinit(uart->dma.tx.periph, uart->dma.tx.channel);
 
         /* configure receive DMA */
         rcu_periph_clock_enable(uart->dma.tx.rcu);
-        dma_deinit(uart->dma.tx.periph, uart->dma.tx.channel);
+        gd32_dma_deinit(uart->dma.tx.periph, uart->dma.tx.channel);
 
-        dma_single_data_parameter_struct dma_init_struct = { 0 };
+        gd32_dma_single_data_parameter_struct dma_init_struct;
 
+        gd32_dma_single_data_para_struct_init(&dma_init_struct);
         dma_init_struct.periph_addr         = (uint32_t)&USART_DATA(uart->periph);
-        dma_init_struct.periph_memory_width = DMA_PERIPH_WIDTH_8BIT;
         dma_init_struct.periph_inc          = DMA_PERIPH_INCREASE_DISABLE;
         dma_init_struct.memory_inc          = DMA_MEMORY_INCREASE_ENABLE;
-        dma_init_struct.circular_mode       = DMA_CIRCULAR_MODE_DISABLE;
         dma_init_struct.direction           = DMA_MEMORY_TO_PERIPH;
         dma_init_struct.priority            = DMA_PRIORITY_HIGH;
-        dma_single_data_mode_init(uart->dma.tx.periph, uart->dma.tx.channel, &dma_init_struct);
-        dma_channel_subperipheral_select(uart->dma.tx.periph, uart->dma.tx.channel, uart->dma.tx.subperiph);
+        GD32_DMA_SET_DATAWIDTH(&dma_init_struct, DMA_PERIPH_WIDTH_8BIT);
+        gd32_dma_request_config(&dma_init_struct, &uart->dma.tx);
+        gd32_dma_single_data_mode_init(uart->dma.tx.periph, uart->dma.tx.channel, &dma_init_struct);
+        gd32_dma_subperiph_config(uart->dma.tx.periph, uart->dma.tx.channel, &uart->dma.tx);
+        gd32_dma_circulation_disable(uart->dma.tx.periph, uart->dma.tx.channel);
 
         /* enable tx dma interrupt */
         nvic_irq_enable(uart->dma.tx.irq, 2, 0);
 
         /* enable transmit complete interrupt */
-        dma_interrupt_enable(uart->dma.tx.periph, uart->dma.tx.channel, DMA_CHXCTL_FTFIE);
+        gd32_dma_interrupt_enable(uart->dma.tx.periph, uart->dma.tx.channel, DMA_CHXCTL_FTFIE);
         #endif
     }
 
@@ -1118,21 +1123,13 @@ static rt_err_t gd32_uart_control (struct rt_serial_device *serial, int cmd, voi
         {
             usart_interrupt_disable(uart->periph, USART_INT_RBNE);
             NVIC_DisableIRQ(uart->dma.rx.irq);
-            #if defined SOC_SERIES_GD32E23x
-            dma_deinit(uart->dma.rx.channel);
-            #else
-            dma_deinit(uart->dma.rx.periph, uart->dma.rx.channel);
-            #endif
+            gd32_dma_deinit(uart->dma.rx.periph, uart->dma.rx.channel);
         }
         else if(ctrl_arg == RT_DEVICE_FLAG_DMA_TX)
         {
             usart_interrupt_disable(uart->periph, USART_INT_TBE);
             NVIC_DisableIRQ(uart->dma.tx.irq);
-            #if defined SOC_SERIES_GD32E23x
-            dma_deinit(uart->dma.tx.channel);
-            #else
-            dma_deinit(uart->dma.tx.periph, uart->dma.tx.channel);
-            #endif
+            gd32_dma_deinit(uart->dma.tx.periph, uart->dma.tx.channel);
         }
 #endif
         break;

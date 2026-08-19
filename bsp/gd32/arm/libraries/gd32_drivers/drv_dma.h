@@ -14,19 +14,100 @@
 #include <rtdef.h>
 #include <board.h>
 
+/* ============================================================================
+ * Section 0: Per-series DMA feature matrix - the only place series names appear.
+ *   USING_DMAMUX / USING_SUBPERIPH : how a request reaches a channel
+ *   USING_FIFO       : newer generation, dma_single_data_parameter_struct
+ *   SINGLE_PERIPH    : one controller, APIs drop the leading periph argument
+ *   MERGED_IRQ       : several channels share one IRQ vector
+ *   DEINIT_IS_GLOBAL : dma_deinit() resets the controller, not a channel
+ *   no flag          : fixed mapping, old generation, dual controller
+ * ============================================================================ */
+#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E)
+#define GD32_DMA_USING_DMAMUX
+#define GD32_DMA_USING_FIFO
 
-#if defined SOC_SERIES_GD32E23x
-#define DRV_DMA_CONFIG(chx)                                                 \
-    (struct dma_config) {                                                   \
-        .periph  = DMA,                                                     \
-        .rcu     = RCU_DMA,                                                 \
-        .channel = DMA_CH##chx,                                             \
-        .irq     = ((chx) == 0 ? DMA_Channel0_IRQn :                         \
-                    (chx) == 1 ? DMA_Channel1_2_IRQn :                         \
-                    (chx) == 2 ? DMA_Channel1_2_IRQn :                         \
-                    (chx) == 3 ? DMA_Channel3_4_IRQn :                         \
-                    (chx) == 4 ? DMA_Channel3_4_IRQn : (IRQn_Type)0)           \
-    }
+#elif defined(SOC_SERIES_GD32H77x)
+#define GD32_DMA_USING_DMAMUX
+#define GD32_DMA_USING_FIFO
+#define GD32_DMA_DEINIT_IS_GLOBAL
+
+#elif defined(SOC_SERIES_GD32F50x) || defined(SOC_SERIES_GD32G5x3) \
+   || defined(SOC_SERIES_GD32M53x)
+#define GD32_DMA_USING_DMAMUX
+
+#elif defined(SOC_SERIES_GD32L23x)
+#define GD32_DMA_USING_DMAMUX
+#define GD32_DMA_SINGLE_PERIPH
+
+#elif defined(SOC_SERIES_GD32F4xx) || defined(SOC_SERIES_GD32F5xx) \
+   || defined(SOC_SERIES_GD32W51x_F5HC)
+#define GD32_DMA_USING_SUBPERIPH
+#define GD32_DMA_USING_FIFO
+
+#elif defined(SOC_SERIES_GD32E23x) || defined(SOC_SERIES_GD32F3x0)
+#define GD32_DMA_SINGLE_PERIPH
+#define GD32_DMA_MERGED_IRQ
+
+#endif  /* F10x F20x F30x C11x E11x E50x E51x need no flag */
+
+/* ============================================================================
+ * Section 1: Aliases for symbols that only part of the firmware libraries ship.
+ * ============================================================================ */
+
+/* DMA transfer direction: families use either DMA_PERIPH_* or DMA_PERIPHERAL_*. */
+#ifndef DMA_PERIPH_TO_MEMORY
+#define DMA_PERIPH_TO_MEMORY                 DMA_PERIPHERAL_TO_MEMORY
+#endif
+#ifndef DMA_MEMORY_TO_PERIPH
+#define DMA_MEMORY_TO_PERIPH                 DMA_MEMORY_TO_PERIPHERAL
+#endif
+
+/* DMA data width: families use either DMA_PERIPH_WIDTH_* or DMA_PERIPHERAL_WIDTH_*. */
+#ifndef DMA_PERIPH_WIDTH_8BIT
+#define DMA_PERIPH_WIDTH_8BIT                DMA_PERIPHERAL_WIDTH_8BIT
+#endif
+#ifndef DMA_PERIPH_WIDTH_16BIT
+#define DMA_PERIPH_WIDTH_16BIT               DMA_PERIPHERAL_WIDTH_16BIT
+#endif
+#ifndef DMA_PERIPH_WIDTH_32BIT
+#define DMA_PERIPH_WIDTH_32BIT               DMA_PERIPHERAL_WIDTH_32BIT
+#endif
+
+/* Pre-FIFO DMA has no FIFO/transfer-access error bit, only a generic DMA_FLAG_ERR. */
+#ifndef GD32_DMA_USING_FIFO
+#define DMA_FLAG_FEE                         DMA_FLAG_ERR
+#define DMA_FLAG_SDE                         DMA_FLAG_ERR
+#define DMA_FLAG_TAE                         DMA_FLAG_ERR
+#endif
+
+#ifndef DMA0
+#define DMA0                                 DMA
+#define RCU_DMA0                             RCU_DMA
+#endif
+
+/* ============================================================================
+ * Section 2: struct dma_config, keyed on how a DMA request reaches a channel.
+ * ============================================================================ */
+#if defined(GD32_DMA_MERGED_IRQ)
+#define GD32_DMA_MERGED_IRQN_0              DMA_Channel0_IRQn
+#define GD32_DMA_MERGED_IRQN_1              DMA_Channel1_2_IRQn
+#define GD32_DMA_MERGED_IRQN_2              DMA_Channel1_2_IRQn
+#define GD32_DMA_MERGED_IRQN_3              DMA_Channel3_4_IRQn
+#define GD32_DMA_MERGED_IRQN_4              DMA_Channel3_4_IRQn
+/* f3x0 has 7 channels; channels 5/6 share DMA_Channel5_6_IRQn */
+#define GD32_DMA_MERGED_IRQN_5              DMA_Channel5_6_IRQn
+#define GD32_DMA_MERGED_IRQN_6              DMA_Channel5_6_IRQn
+#define GD32_DMA_MERGED_IRQN(chx)           GD32_DMA_MERGED_IRQN_##chx
+
+#define DRV_DMA_CONFIG(chx)                 {                                                   \
+                                                .periph     = DMA,                              \
+                                                .channel    = DMA_CH##chx,                      \
+                                                .rcu        = RCU_DMA,                          \
+                                                .irq        = GD32_DMA_MERGED_IRQN(chx),        \
+                                                .data_width = DMA_PERIPH_WIDTH_8BIT,            \
+                                            }
+
 struct dma_config
 {
     uint32_t periph;
@@ -34,15 +115,11 @@ struct dma_config
     rcu_periph_enum rcu;
     dma_channel_enum channel;
     IRQn_Type irq;
+    uint32_t data_width;
 };
 
-#elif defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
-   || defined(SOC_SERIES_GD32L23x)
-/* DMAMUX-based series - reqx is the DMAMUX request ID or subperipheral index.
- * H7xx has two DMA controllers (DMA0/DMA1); L23x has a single DMA controller,
- * where DMA0/RCU_DMA0 are remapped onto DMA/RCU_DMA further below and the
- * interrupt vectors are named DMA_ChannelX_IRQn instead of DMAn_ChannelX_IRQn. */
-#if defined(SOC_SERIES_GD32L23x)
+#elif defined(GD32_DMA_USING_DMAMUX)
+#ifdef GD32_DMA_SINGLE_PERIPH
 #define GD32_DMA_CHANNEL_IRQN(dmax, chx)    DMA_Channel##chx##_IRQn
 #else
 #define GD32_DMA_CHANNEL_IRQN(dmax, chx)    DMA##dmax##_Channel##chx##_IRQn
@@ -68,26 +145,7 @@ struct dma_config
     uint32_t data_width;
 };
 
-#elif defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
-/* Fixed DMA channel mapping - no sub-peripheral selection */
-#define DRV_DMA_CONFIG(dmax, chx)           {                                                   \
-                                                .periph     = DMA##dmax,                        \
-                                                .channel    = DMA_CH##chx,                      \
-                                                .rcu        = RCU_DMA##dmax,                    \
-                                                .irq        = DMA##dmax##_Channel##chx##_IRQn,  \
-                                                .data_width = DMA_PERIPHERAL_WIDTH_8BIT,        \
-                                            }
-
-struct dma_config
-{
-    uint32_t periph;
-    rcu_periph_enum rcu;
-    dma_channel_enum channel;
-    IRQn_Type irq;
-    uint32_t data_width;
-};
-
-#else
+#elif defined(GD32_DMA_USING_SUBPERIPH)
 
 #define DRV_DMA_CONFIG(dmax, chx, subx)     {                                                   \
                                                 .periph     = DMA##dmax,                        \
@@ -109,99 +167,125 @@ struct dma_config
     uint32_t data_width;    /* DMA transfer data width: DMA_PERIPH_WIDTH_8BIT/16BIT/32BIT */
 };
 
+#else
+/* Fixed channel mapping: no routing field at all. */
+#define DRV_DMA_CONFIG(dmax, chx)           {                                                   \
+                                                .periph     = DMA##dmax,                        \
+                                                .channel    = DMA_CH##chx,                      \
+                                                .rcu        = RCU_DMA##dmax,                    \
+                                                .irq        = DMA##dmax##_Channel##chx##_IRQn,  \
+                                                .data_width = DMA_PERIPH_WIDTH_8BIT,            \
+                                            }
+
+struct dma_config
+{
+    uint32_t periph;
+    uint32_t dma_flag;
+    rcu_periph_enum rcu;
+    dma_channel_enum channel;
+    IRQn_Type irq;
+    uint32_t data_width;
+};
+
 #endif
 
-#if defined(SOC_SERIES_GD32L23x)
-/* ---- GD32L23x: single DMA controller + DMAMUX; firmware APIs take only the
- * channel argument, so all driver calls that pass a periph must have it dropped. ---- */
-/* Only one DMA controller exists; DRV_DMA_CONFIG() builds DMA0/RCU_DMA0 from the
- * shared DMAMUX macro, so map them onto the single DMA instance. */
-#define DMA0                                 DMA
-#define RCU_DMA0                             RCU_DMA
-/* DMA init struct type and init function (single-data mode maps to plain init) */
-#define dma_single_data_parameter_struct     dma_parameter_struct
-#define dma_single_data_para_struct_init(s)  dma_struct_para_init(s)
-#define dma_single_data_mode_init(p, ch, s)  dma_init(ch, s)
-/* Direction enums */
-#define DMA_PERIPH_TO_MEMORY                 DMA_PERIPHERAL_TO_MEMORY
-#define DMA_MEMORY_TO_PERIPH                 DMA_MEMORY_TO_PERIPHERAL
-/* Data width enums: F4xx DMA_PERIPH_WIDTH -> L23x DMA_PERIPHERAL_WIDTH */
-#define DMA_PERIPH_WIDTH_8BIT                DMA_PERIPHERAL_WIDTH_8BIT
-#define DMA_PERIPH_WIDTH_16BIT               DMA_PERIPHERAL_WIDTH_16BIT
-#define DMA_PERIPH_WIDTH_32BIT               DMA_PERIPHERAL_WIDTH_32BIT
-/* DMA error flags: L23x has no FIFO/transfer-access error, map to generic DMA_FLAG_ERR */
-#define DMA_FLAG_FEE                         DMA_FLAG_ERR
-#define DMA_FLAG_TAE                         DMA_FLAG_ERR
-/* Single-channel firmware wrappers: drop the leading periph argument. The inner
- * call is not re-expanded (macro name is "painted blue"), so it resolves to the
- * real firmware function. */
-#define dma_deinit(p, ch)                    dma_deinit(ch)
-#define dma_channel_enable(p, ch)            dma_channel_enable(ch)
-#define dma_channel_disable(p, ch)           dma_channel_disable(ch)
-#define dma_circulation_enable(p, ch)        dma_circulation_enable(ch)
-#define dma_circulation_disable(p, ch)       dma_circulation_disable(ch)
-#define dma_transfer_number_config(p, ch, n) dma_transfer_number_config(ch, n)
-#define dma_transfer_number_get(p, ch)       dma_transfer_number_get(ch)
-#define dma_flag_get(p, ch, f)               dma_flag_get(ch, f)
-#define dma_flag_clear(p, ch, f)             dma_flag_clear(ch, f)
-#define dma_interrupt_enable(p, ch, src)     dma_interrupt_enable(ch, src)
-/* Sub-peripheral select does not exist on L23x (DMAMUX handled via .request) */
-#define dma_channel_subperipheral_select(p, ch, sub)  ((void)0)
-/* DMA memory address config: F4xx 4-arg -> L23x 2-arg (drop periph and memory index) */
-#define dma_memory_address_config(p, ch, idx, addr) \
-    dma_memory_address_config(ch, (uint32_t)(addr))
-/* DMA init struct field accessors: L23x has separate periph_width / memory_width.
- * CHCTL_MWIDTH(n) = CHCTL_PWIDTH(n) << 2, so shift converts between them. */
-#define GD32_DMA_SET_MEMADDR(s, v)           ((s)->memory_addr = (v))
-#define GD32_DMA_SET_DATAWIDTH(s, v)         do { (s)->periph_width = (v); \
-                                                  (s)->memory_width = (v) << 2; } while(0)
-/* L23x has no circular_mode field; use dma_circulation_disable() API instead */
-#define GD32_DMA_SET_CIRCULAR(s, v)          ((void)0)
-/* DMA memory increment: F4xx dma_memory_address_generation_config -> single-channel APIs */
-#define dma_memory_address_generation_config(p, ch, inc) \
-    _gd32_dma_mem_inc_##inc(ch)
-#define _gd32_dma_mem_inc_DMA_MEMORY_INCREASE_ENABLE(ch) \
-    dma_memory_increase_enable(ch)
-#define _gd32_dma_mem_inc_DMA_MEMORY_INCREASE_DISABLE(ch) \
-    dma_memory_increase_disable(ch)
-
-#elif defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
-#define dma_single_data_parameter_struct     dma_parameter_struct
-#define dma_single_data_para_struct_init(s)  dma_struct_para_init(s)
-#define dma_single_data_mode_init(p, ch, s)  dma_init(p, ch, s)
-/* Direction enums */
-#define DMA_PERIPH_TO_MEMORY                 DMA_PERIPHERAL_TO_MEMORY
-#define DMA_MEMORY_TO_PERIPH                 DMA_MEMORY_TO_PERIPHERAL
-/* Data width enums: F4xx DMA_PERIPH_WIDTH → F30x DMA_PERIPHERAL_WIDTH */
-#define DMA_PERIPH_WIDTH_8BIT                DMA_PERIPHERAL_WIDTH_8BIT
-#define DMA_PERIPH_WIDTH_16BIT               DMA_PERIPHERAL_WIDTH_16BIT
-#define DMA_PERIPH_WIDTH_32BIT               DMA_PERIPHERAL_WIDTH_32BIT
-/* DMA error flags: F30x has no FIFO/access error, map to generic DMA_FLAG_ERR */
-#define DMA_FLAG_FEE                         DMA_FLAG_ERR
-#define DMA_FLAG_TAE                         DMA_FLAG_ERR
-/* DMA memory address config: F4xx 4-arg → F30x 3-arg (ignore memory index) */
-#define dma_memory_address_config(p, ch, idx, addr) \
-    dma_memory_address_config(p, ch, (uint32_t)(addr))
-/* DMA init struct field accessors: F30x has different field names than F4xx */
-#define GD32_DMA_SET_MEMADDR(s, v)           ((s)->memory_addr = (v))
-/* F30x has separate periph_width / memory_width instead of periph_memory_width.
- * CHCTL_MWIDTH(n) = CHCTL_PWIDTH(n) << 2, so shift converts between them. */
-#define GD32_DMA_SET_DATAWIDTH(s, v)         do { (s)->periph_width = (v); \
-                                                  (s)->memory_width = (v) << 2; } while(0)
-/* F30x has no circular_mode field; use dma_circulation_disable() API instead */
-#define GD32_DMA_SET_CIRCULAR(s, v)          ((void)0)
-/* DMA memory increment: F4xx dma_memory_address_generation_config → F30x APIs */
-#define dma_memory_address_generation_config(p, ch, inc) \
-    _gd32_dma_mem_inc_##inc(p, ch)
-#define _gd32_dma_mem_inc_DMA_MEMORY_INCREASE_ENABLE(p, ch) \
-    dma_memory_increase_enable(p, ch)
-#define _gd32_dma_mem_inc_DMA_MEMORY_INCREASE_DISABLE(p, ch) \
-    dma_memory_increase_disable(p, ch)
+/* ============================================================================
+ * Section 3: Routing helpers shared by usart/spi/i2c.
+ * ============================================================================ */
+#ifdef GD32_DMA_USING_DMAMUX
+#define gd32_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
 #else
-/* F4xx/F5xx/H7xx: use native field names */
+#define gd32_dma_request_config(init_s, dma_cfg)
+#endif
+
+#ifdef GD32_DMA_USING_SUBPERIPH
+#define gd32_dma_subperiph_config(periph, ch, cfg)  dma_channel_subperipheral_select(periph, ch, (cfg)->subperiph)
+#else
+#define gd32_dma_subperiph_config(periph, ch, cfg)  ((void)0)
+#endif
+
+#if defined(GD32_DMA_DEINIT_IS_GLOBAL)
+#define gd32_dma_deinit(periph, ch)                 dma_channel_deinit(periph, ch)
+#elif defined(GD32_DMA_SINGLE_PERIPH)
+#define gd32_dma_deinit(periph, ch)                 dma_deinit(ch)
+#else
+#define gd32_dma_deinit(periph, ch)                 dma_deinit(periph, ch)
+#endif
+
+/* ============================================================================
+ * Section 4: struct/type redirects, keyed on the DMA generation.
+ * ============================================================================ */
+#ifdef GD32_DMA_USING_FIFO
+#define gd32_dma_single_data_parameter_struct       dma_single_data_parameter_struct
+#define gd32_dma_single_data_para_struct_init(s)    dma_single_data_para_struct_init(s)
 #define GD32_DMA_SET_MEMADDR(s, v)           ((s)->memory0_addr = (v))
 #define GD32_DMA_SET_DATAWIDTH(s, v)         ((s)->periph_memory_width = (v))
 #define GD32_DMA_SET_CIRCULAR(s, v)          ((s)->circular_mode = (v))
+#else
+#define gd32_dma_single_data_parameter_struct       dma_parameter_struct
+#define gd32_dma_single_data_para_struct_init(s)    dma_struct_para_init(s)
+/* CHCTL_MWIDTH(n) = CHCTL_PWIDTH(n) << 2, so shift converts between widths. */
+#define GD32_DMA_SET_MEMADDR(s, v)           ((s)->memory_addr = (v))
+#define GD32_DMA_SET_DATAWIDTH(s, v)         do { (s)->periph_width = (v); \
+                                                  (s)->memory_width = (v) << 2; } while(0)
+/* No circular_mode field; use gd32_dma_circulation_enable/disable() at runtime. */
+#define GD32_DMA_SET_CIRCULAR(s, v)          ((void)0)
+#endif
+
+/* ============================================================================
+ * Section 5: gd32_dma_* facade over the firmware API - callers always pass
+ *   (periph, channel, ...) no matter which generation is underneath.
+ * ============================================================================ */
+#ifdef GD32_DMA_USING_FIFO
+#define gd32_dma_single_data_mode_init(p, ch, s)    dma_single_data_mode_init(p, ch, s)
+#define gd32_dma_memory_address_config(p, ch, idx, addr) \
+        dma_memory_address_config(p, ch, idx, (uint32_t)(addr))
+#define gd32_dma_memory_address_generation_config(p, ch, inc) \
+        dma_memory_address_generation_config(p, ch, inc)
+
+#elif !defined(GD32_DMA_SINGLE_PERIPH)
+#define gd32_dma_single_data_mode_init(p, ch, s)    dma_init(p, ch, s)
+#define gd32_dma_memory_address_config(p, ch, idx, addr) \
+        dma_memory_address_config(p, ch, (uint32_t)(addr))
+#define gd32_dma_memory_address_generation_config(p, ch, inc) \
+        gd32_dma_mem_inc_##inc(p, ch)
+#define gd32_dma_mem_inc_DMA_MEMORY_INCREASE_ENABLE(p, ch)      dma_memory_increase_enable(p, ch)
+#define gd32_dma_mem_inc_DMA_MEMORY_INCREASE_DISABLE(p, ch)     dma_memory_increase_disable(p, ch)
+
+#else
+#define gd32_dma_single_data_mode_init(p, ch, s)    dma_init(ch, s)
+#define gd32_dma_memory_address_config(p, ch, idx, addr) \
+        dma_memory_address_config(ch, (uint32_t)(addr))
+#define gd32_dma_memory_address_generation_config(p, ch, inc) \
+        gd32_dma_mem_inc_##inc(ch)
+#define gd32_dma_mem_inc_DMA_MEMORY_INCREASE_ENABLE(ch)         dma_memory_increase_enable(ch)
+#define gd32_dma_mem_inc_DMA_MEMORY_INCREASE_DISABLE(ch)        dma_memory_increase_disable(ch)
+#endif
+
+#ifdef GD32_DMA_SINGLE_PERIPH
+#define gd32_dma_channel_enable(p, ch)          dma_channel_enable(ch)
+#define gd32_dma_channel_disable(p, ch)         dma_channel_disable(ch)
+#define gd32_dma_circulation_enable(p, ch)      dma_circulation_enable(ch)
+#define gd32_dma_circulation_disable(p, ch)     dma_circulation_disable(ch)
+#define gd32_dma_transfer_number_config(p, ch, n)   dma_transfer_number_config(ch, n)
+#define gd32_dma_transfer_number_get(p, ch)     dma_transfer_number_get(ch)
+#define gd32_dma_flag_get(p, ch, f)             dma_flag_get(ch, f)
+#define gd32_dma_flag_clear(p, ch, f)           dma_flag_clear(ch, f)
+#define gd32_dma_interrupt_enable(p, ch, src)   dma_interrupt_enable(ch, src)
+#define gd32_dma_interrupt_flag_get(p, ch, f)   dma_interrupt_flag_get(ch, f)
+#define gd32_dma_interrupt_flag_clear(p, ch, f) dma_interrupt_flag_clear(ch, f)
+#else
+#define gd32_dma_channel_enable(p, ch)          dma_channel_enable(p, ch)
+#define gd32_dma_channel_disable(p, ch)         dma_channel_disable(p, ch)
+#define gd32_dma_circulation_enable(p, ch)      dma_circulation_enable(p, ch)
+#define gd32_dma_circulation_disable(p, ch)     dma_circulation_disable(p, ch)
+#define gd32_dma_transfer_number_config(p, ch, n)   dma_transfer_number_config(p, ch, n)
+#define gd32_dma_transfer_number_get(p, ch)     dma_transfer_number_get(p, ch)
+#define gd32_dma_flag_get(p, ch, f)             dma_flag_get(p, ch, f)
+#define gd32_dma_flag_clear(p, ch, f)           dma_flag_clear(p, ch, f)
+#define gd32_dma_interrupt_enable(p, ch, src)   dma_interrupt_enable(p, ch, src)
+#define gd32_dma_interrupt_flag_get(p, ch, f)   dma_interrupt_flag_get(p, ch, f)
+#define gd32_dma_interrupt_flag_clear(p, ch, f) dma_interrupt_flag_clear(p, ch, f)
 #endif
 
 #endif /* _DRV_DMA_H_ */

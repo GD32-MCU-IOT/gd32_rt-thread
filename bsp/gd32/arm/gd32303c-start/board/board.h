@@ -14,19 +14,17 @@
 #include "gd32f30x.h"
 #include "drv_gpio.h"
 
-#include "gd32f30x_exti.h"
-
 #define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
 
-// <o> Internal SRAM memory size[Kbytes] <8-96>
-//  <i>Default: 96
+// <o> Internal SRAM memory size[Kbytes] <8-48>
+//  <i>Default: 48
 #ifdef __ICCARM__
 // Use *.icf ram symbal, to avoid hardcode.
 extern char __ICFEDIT_region_RAM_end__;
 #define GD32_SRAM_END          &__ICFEDIT_region_RAM_end__
 #else
-#define GD32_SRAM_SIZE         96
+#define GD32_SRAM_SIZE         48
 #define GD32_SRAM_END          (0x20000000 + GD32_SRAM_SIZE * 1024)
 #endif
 

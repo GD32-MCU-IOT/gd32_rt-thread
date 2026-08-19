@@ -320,6 +320,18 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
+
+/* HPMicro SDK */
+
+/* end of HPMicro SDK */
+
+/* FT32 HAL & SDK Drivers */
+
+/* end of FT32 HAL & SDK Drivers */
+
+/* NOVOSNS Drivers */
+
+/* end of NOVOSNS Drivers */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */

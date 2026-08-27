@@ -12,11 +12,22 @@
 
 #include "gd32e50x.h"
 #include "drv_gpio.h"
+#include "drv_hard_i2c.h"
+#include "drv_usart.h"
+#include "drv_spi.h"
 
 #include "gd32e50x_exti.h"
 
 #define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
+
+/* SPI Flash CS pin definition (software-controlled CS via GPIO) */
+/* The CS pin is configured as push-pull output by rt_hw_spi_device_attach(),
+   no extra GPIO setup is needed in board_msd_init.c. */
+/* SPI0 CS: PE3 */
+#ifndef BSP_SPI0_FLASH_CS_PIN
+#define BSP_SPI0_FLASH_CS_PIN       GET_PIN(E, 3)
+#endif
 
 /* <o> Internal SRAM memory size[Kbytes] <96-128>*/
 /*  <i>Default: 128*/

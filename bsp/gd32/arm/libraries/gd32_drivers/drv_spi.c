@@ -29,35 +29,14 @@
 
 #endif /* SOC_SERIES_GD32M53x */
 
-/* Compatibility macros: unify H7xx vs non-H7xx DMA/SPI register differences */
+/* Compatibility macros: unify H7xx vs non-H7xx SPI data register differences
+ * (DMA request/subperiph/deinit macros live in drv_dma.h) */
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
 #define SPI_RXDATA_REG(periph)                      SPI_RDATA(periph)
 #define SPI_TXDATA_REG(periph)                      SPI_TDATA(periph)
-#define gd32_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
-#define gd32_dma_subperiph_config(periph, ch, cfg)
-#elif defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
-/* F30x/F10x/F20x: fixed DMA channel mapping, no subperiph */
-#define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
-#define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
-#define gd32_dma_request_config(init_s, dma_cfg)
-#define gd32_dma_subperiph_config(periph, ch, cfg)
-#elif defined(SOC_SERIES_GD32L23x)
-/* L23x: single DMA + DMAMUX, single SPI_DATA register, request routed via DMAMUX */
-#define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
-#define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
-#define gd32_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
-#define gd32_dma_subperiph_config(periph, ch, cfg)
 #else
 #define SPI_RXDATA_REG(periph)                      SPI_DATA(periph)
 #define SPI_TXDATA_REG(periph)                      SPI_DATA(periph)
-#define gd32_dma_request_config(init_s, dma_cfg)
-#define gd32_dma_subperiph_config(periph, ch, cfg)  dma_channel_subperipheral_select(periph, ch, (cfg)->subperiph)
-#endif
-
-#if defined(SOC_SERIES_GD32H77x)
-#define gd32_dma_deinit(periph, ch)                 dma_channel_deinit(periph, ch)
-#else
-#define gd32_dma_deinit(periph, ch)                 dma_deinit(periph, ch)
 #endif
 
 #ifndef BSP_SPI_XFER_TIMEOUT
@@ -479,7 +458,7 @@ rt_weak void gd32_spi_init(struct gd32_spi *gd32_spi)
 #if defined(BSP_USING_SPI_DMA)
 static void gd32_spi_dma_init(struct gd32_spi *spi_device)
 {
-    dma_single_data_parameter_struct dma_init_struct;
+    gd32_dma_single_data_parameter_struct dma_init_struct;
     uint32_t spi_periph = spi_device->spi_periph;
     
     /* Enable DMA clock (the controller is described by the .rcu field of the */
@@ -499,7 +478,7 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
 #endif
 
     /* Configure DMA common parameters */
-    dma_single_data_para_struct_init(&dma_init_struct);
+    gd32_dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.periph_inc = DMA_PERIPH_INCREASE_DISABLE;
     dma_init_struct.memory_inc = DMA_MEMORY_INCREASE_ENABLE;
     dma_init_struct.priority = DMA_PRIORITY_HIGH;
@@ -516,10 +495,10 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
         dma_init_struct.periph_addr = (uint32_t)&SPI_RXDATA_REG(spi_periph);
         gd32_dma_request_config(&dma_init_struct, spi_device->dma_rx);
         
-        dma_single_data_mode_init(spi_device->dma_rx->periph, spi_device->dma_rx->channel, &dma_init_struct);
+        gd32_dma_single_data_mode_init(spi_device->dma_rx->periph, spi_device->dma_rx->channel, &dma_init_struct);
         gd32_dma_subperiph_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, spi_device->dma_rx);
-        dma_circulation_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
-        dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+        gd32_dma_circulation_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+        gd32_dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
     }
     
     /* TX DMA configuration */
@@ -532,10 +511,10 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
         dma_init_struct.periph_addr = (uint32_t)&SPI_TXDATA_REG(spi_periph);
         gd32_dma_request_config(&dma_init_struct, spi_device->dma_tx);
         
-        dma_single_data_mode_init(spi_device->dma_tx->periph, spi_device->dma_tx->channel, &dma_init_struct);
+        gd32_dma_single_data_mode_init(spi_device->dma_tx->periph, spi_device->dma_tx->channel, &dma_init_struct);
         gd32_dma_subperiph_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, spi_device->dma_tx);
-        dma_circulation_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
-        dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+        gd32_dma_circulation_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+        gd32_dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
     }
 }
 
@@ -549,15 +528,15 @@ rt_inline void gd32_spi_dma_cleanup(struct gd32_spi *spi_device, uint32_t spi_pe
 {
     if (spi_device->dma_rx != RT_NULL)
     {
-        dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
-        dma_flag_clear(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_FLAG_FTF);
+        gd32_dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+        gd32_dma_flag_clear(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_FLAG_FTF);
         spi_dma_disable(spi_periph, SPI_DMA_RECEIVE);
     }
 
     if (spi_device->dma_tx != RT_NULL)
     {
-        dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
-        dma_flag_clear(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_FLAG_FTF);
+        gd32_dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+        gd32_dma_flag_clear(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_FLAG_FTF);
         spi_dma_disable(spi_periph, SPI_DMA_TRANSMIT);
     }
 }
@@ -843,48 +822,48 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
         /* Configure RX DMA */
         if (spi_device->dma_rx != RT_NULL)
         {
-            dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+            gd32_dma_channel_disable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
             
             if (recv_ptr != RT_NULL)
             {
-                dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, 
+                gd32_dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, 
                                          DMA_MEMORY_0, (uint32_t)dma_recv_ptr);
-                dma_memory_address_generation_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_MEMORY_INCREASE_ENABLE);
+                gd32_dma_memory_address_generation_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_MEMORY_INCREASE_ENABLE);
             }
             else
             {
-                dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, 
+                gd32_dma_memory_address_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, 
                                          DMA_MEMORY_0, (uint32_t)&dummy_rx);
-                dma_memory_address_generation_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_MEMORY_INCREASE_DISABLE);
+                gd32_dma_memory_address_generation_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_MEMORY_INCREASE_DISABLE);
             }
             
-            dma_transfer_number_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, size);
-            dma_interrupt_enable(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_CHXCTL_FTFIE);
-            dma_channel_enable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
+            gd32_dma_transfer_number_config(spi_device->dma_rx->periph, spi_device->dma_rx->channel, size);
+            gd32_dma_interrupt_enable(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_CHXCTL_FTFIE);
+            gd32_dma_channel_enable(spi_device->dma_rx->periph, spi_device->dma_rx->channel);
             spi_dma_enable(spi_periph, SPI_DMA_RECEIVE);
         }
         
         /* Configure TX DMA */
         if (spi_device->dma_tx != RT_NULL)
         {
-            dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+            gd32_dma_channel_disable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
             
             if (send_ptr != RT_NULL)
             {
-                dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, 
+                gd32_dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, 
                                          DMA_MEMORY_0, (uint32_t)dma_send_ptr);
-                dma_memory_address_generation_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_MEMORY_INCREASE_ENABLE);
+                gd32_dma_memory_address_generation_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_MEMORY_INCREASE_ENABLE);
             }
             else
             {
-                dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, 
+                gd32_dma_memory_address_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, 
                                          DMA_MEMORY_0, (uint32_t)&dummy_tx);
-                dma_memory_address_generation_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_MEMORY_INCREASE_DISABLE);
+                gd32_dma_memory_address_generation_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_MEMORY_INCREASE_DISABLE);
             }
             
-            dma_transfer_number_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, size);
-            dma_interrupt_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_CHXCTL_FTFIE);
-            dma_channel_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
+            gd32_dma_transfer_number_config(spi_device->dma_tx->periph, spi_device->dma_tx->channel, size);
+            gd32_dma_interrupt_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_CHXCTL_FTFIE);
+            gd32_dma_channel_enable(spi_device->dma_tx->periph, spi_device->dma_tx->channel);
             spi_dma_enable(spi_periph, SPI_DMA_TRANSMIT);
         }
 
@@ -904,12 +883,12 @@ static rt_ssize_t spixfer(struct rt_spi_device* device, struct rt_spi_message* m
             
             if (spi_device->dma_tx != RT_NULL)
             {
-                tx_done = (dma_flag_get(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_FLAG_FTF) == SET);
+                tx_done = (gd32_dma_flag_get(spi_device->dma_tx->periph, spi_device->dma_tx->channel, DMA_FLAG_FTF) == SET);
             }
             
             if (spi_device->dma_rx != RT_NULL)
             {
-                rx_done = (dma_flag_get(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_FLAG_FTF) == SET);
+                rx_done = (gd32_dma_flag_get(spi_device->dma_rx->periph, spi_device->dma_rx->channel, DMA_FLAG_FTF) == SET);
             }
             
             if (tx_done && rx_done)

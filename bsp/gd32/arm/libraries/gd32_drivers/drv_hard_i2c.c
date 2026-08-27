@@ -176,24 +176,7 @@ struct rt_i2c_bus_device i2c5;
 
 #endif
 
-/* Compatibility macros: unify DMA request-field vs subperipheral-select differences */
-#if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
- || defined(SOC_SERIES_GD32L23x)
-#define gd32_i2c_dma_request_config(init_s, dma_cfg)    ((init_s)->request = (dma_cfg)->request)
-#define gd32_i2c_dma_subperiph_config(periph, ch, cfg)
-#elif defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32E51x)
-#define gd32_i2c_dma_request_config(init_s, dma_cfg)
-#define gd32_i2c_dma_subperiph_config(periph, ch, cfg)
-#else
-#define gd32_i2c_dma_request_config(init_s, dma_cfg)
-#define gd32_i2c_dma_subperiph_config(periph, ch, cfg)  dma_channel_subperipheral_select(periph, ch, (cfg)->subperiph)
-#endif
-
-#if defined(SOC_SERIES_GD32H77x)
-#define gd32_dma_deinit(periph, ch)                 dma_channel_deinit(periph, ch)
-#else
-#define gd32_dma_deinit(periph, ch)                 dma_deinit(periph, ch)
-#endif
+/* DMA request-routing and deinit compatibility macros have been moved to drv_dma.h */
 
 /* New I2C IP DMA macros: CTL1 registers, atomic config, frame mode, data registers, DMA control */
 #if defined(SOC_SERIES_GD32F5xx)
@@ -639,7 +622,7 @@ static int gd32_timeout_wait_flag(uint32_t periph, uint32_t flag, rt_bool_t set,
         if(dma != RT_NULL)
         {
             /* DMA flag check */
-            status = dma_flag_get(dma->periph, dma->channel, flag);
+            status = gd32_dma_flag_get(dma->periph, dma->channel, flag);
         }
         else
 #endif
@@ -692,7 +675,7 @@ static int gd32_timeout_wait_flag(uint32_t periph, uint32_t flag, rt_bool_t set,
   */
 static void gd32_i2c_dma_config_channel(struct dma_config *dma, uint32_t periph_addr, uint8_t *buf, uint16_t len, uint32_t direction)
 {
-    dma_single_data_parameter_struct dma_init_struct;
+    gd32_dma_single_data_parameter_struct dma_init_struct;
 
     rcu_periph_clock_enable(dma->rcu);
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x)
@@ -700,7 +683,7 @@ static void gd32_i2c_dma_config_channel(struct dma_config *dma, uint32_t periph_
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif
     gd32_dma_deinit(dma->periph, dma->channel);
-    dma_single_data_para_struct_init(&dma_init_struct);
+    gd32_dma_single_data_para_struct_init(&dma_init_struct);
     dma_init_struct.periph_addr = periph_addr;
     GD32_DMA_SET_MEMADDR(&dma_init_struct, (uint32_t)buf);
     dma_init_struct.direction = direction;
@@ -710,10 +693,10 @@ static void gd32_i2c_dma_config_channel(struct dma_config *dma, uint32_t periph_
     GD32_DMA_SET_DATAWIDTH(&dma_init_struct, dma->data_width);
     dma_init_struct.priority = DMA_PRIORITY_ULTRA_HIGH;
     /* Configure either the DMA request field or the subperipheral selector. */
-    gd32_i2c_dma_request_config(&dma_init_struct, dma);
-    dma_single_data_mode_init(dma->periph, dma->channel, &dma_init_struct);
-    gd32_i2c_dma_subperiph_config(dma->periph, dma->channel, dma);
-    dma_circulation_disable(dma->periph, dma->channel);
+    gd32_dma_request_config(&dma_init_struct, dma);
+    gd32_dma_single_data_mode_init(dma->periph, dma->channel, &dma_init_struct);
+    gd32_dma_subperiph_config(dma->periph, dma->channel, dma);
+    gd32_dma_circulation_disable(dma->periph, dma->channel);
     /* NOTE: Do NOT enable DMA channel here! Caller controls enable order. */
 }
 
@@ -886,7 +869,7 @@ static int gd32_i2c_new_msg_xfer(const struct gd32_i2c_bus *i2c_bus, struct rt_i
             /* Configure DMA channel */
             gd32_i2c_dma_config_channel(dma, data_reg, p_current, nbytes, dma_direction);
             i2c_dma_enable_gd(i2c_periph, dma_mode);
-            dma_channel_enable(dma->periph, dma->channel);
+            gd32_dma_channel_enable(dma->periph, dma->channel);
         }
 
         /* Configure NBYTES + RELOAD + AUTOEND atomically */
@@ -910,8 +893,8 @@ static int gd32_i2c_new_msg_xfer(const struct gd32_i2c_bus *i2c_bus, struct rt_i
                 LOG_E("i2c %s dma timeout", dir_str);
                 goto error_exit_dma;
             }
-            dma_flag_clear(dma->periph, dma->channel, DMA_FLAG_FTF);
-            dma_channel_disable(dma->periph, dma->channel);
+            gd32_dma_flag_clear(dma->periph, dma->channel, DMA_FLAG_FTF);
+            gd32_dma_channel_disable(dma->periph, dma->channel);
 
             p_current += nbytes;
             remaining -= nbytes;
@@ -1014,7 +997,7 @@ static int gd32_i2c_new_msg_xfer(const struct gd32_i2c_bus *i2c_bus, struct rt_i
     return 0;
 
 error_exit_dma:
-    dma_channel_disable(dma->periph, dma->channel);
+    gd32_dma_channel_disable(dma->periph, dma->channel);
     i2c_dma_disable_gd(i2c_periph, dma_mode);
 error_exit:
     i2c_stop_on_bus_gd(i2c_periph);
@@ -1050,12 +1033,12 @@ static int gd32_i2c_legacy_dma_write(const struct gd32_i2c_bus *i2c_bus, const s
     gd32_i2c_dma_config_channel(dma_tx, (uint32_t)&I2C_DATA(i2c_periph),
                                  msg->buf, msg->len, DMA_MEMORY_TO_PERIPH);
     i2c_dma_config(i2c_periph, I2C_DMA_ON);
-    dma_channel_enable(dma_tx->periph, dma_tx->channel);
+    gd32_dma_channel_enable(dma_tx->periph, dma_tx->channel);
 
     /* Wait for DMA completion */
     result = gd32_timeout_wait_flag(i2c_periph, DMA_FLAG_FTF, RT_TRUE, dma_tx);
-    dma_channel_disable(dma_tx->periph, dma_tx->channel);
-    dma_flag_clear(dma_tx->periph, dma_tx->channel, DMA_FLAG_FTF);
+    gd32_dma_channel_disable(dma_tx->periph, dma_tx->channel);
+    gd32_dma_flag_clear(dma_tx->periph, dma_tx->channel, DMA_FLAG_FTF);
     if(result != 0)
     {
         i2c_dma_config(i2c_periph, I2C_DMA_OFF);
@@ -1099,12 +1082,12 @@ static int gd32_i2c_legacy_dma_read(const struct gd32_i2c_bus *i2c_bus, const st
                                  msg->buf, msg->len, DMA_PERIPH_TO_MEMORY);
     i2c_dma_last_transfer_config(i2c_periph, I2C_DMALST_ON);
     i2c_dma_config(i2c_periph, I2C_DMA_ON);
-    dma_channel_enable(dma_rx->periph, dma_rx->channel);
+    gd32_dma_channel_enable(dma_rx->periph, dma_rx->channel);
 
     /* Wait for DMA completion */
     result = gd32_timeout_wait_flag(i2c_periph, DMA_FLAG_FTF, RT_TRUE, dma_rx);
-    dma_channel_disable(dma_rx->periph, dma_rx->channel);
-    dma_flag_clear(dma_rx->periph, dma_rx->channel, DMA_FLAG_FTF);
+    gd32_dma_channel_disable(dma_rx->periph, dma_rx->channel);
+    gd32_dma_flag_clear(dma_rx->periph, dma_rx->channel, DMA_FLAG_FTF);
 
     /* Send STOP */
     i2c_stop_on_bus(i2c_periph);

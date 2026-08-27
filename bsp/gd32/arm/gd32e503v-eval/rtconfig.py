@@ -2,7 +2,7 @@ import os
 
 # toolchains options
 ARCH='arm'
-CPU='cortex-m4'
+CPU='cortex-m33'
 CROSS_TOOL='gcc'
 
 # bsp lib config
@@ -17,9 +17,10 @@ if os.getenv('RTT_ROOT'):
 # EXEC_PATH is the compiler execute path, for example, CodeSourcery, Keil MDK, IAR
 if  CROSS_TOOL == 'gcc':
     PLATFORM    = 'gcc'
-    EXEC_PATH   = r'C:\Users\XXYYZZ'
+    # Use a safe default path that exists; actual compiler path can be provided via RTT_EXEC_PATH
+    EXEC_PATH   = r'C:/Windows/System32'
 elif CROSS_TOOL == 'keil':
-    PLATFORM    = 'armcc'
+    PLATFORM    = 'armclang'
     EXEC_PATH   = r'C:/Keil_v5'
 elif CROSS_TOOL == 'iar':
     PLATFORM = 'iccarm'
@@ -43,7 +44,7 @@ if PLATFORM == 'gcc':
     OBJDUMP = PREFIX + 'objdump'
     OBJCPY = PREFIX + 'objcopy'
 
-    DEVICE = ' -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections'
+    DEVICE = ' -mcpu=cortex-m33 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections'
     CFLAGS = DEVICE + ' -Dgcc'
     AFLAGS = ' -c' + DEVICE + ' -x assembler-with-cpp -Wa,-mimplicit-it=thumb '
     LFLAGS = DEVICE + ' -Wl,--gc-sections,-Map=rtthread.map,-cref,-u,Reset_Handler -T board/linker_scripts/link.ld'
@@ -61,6 +62,40 @@ if PLATFORM == 'gcc':
 
     POST_ACTION = OBJCPY + ' -O binary $TARGET rtthread.bin\n' + SIZE + ' $TARGET \n'
 
+elif PLATFORM == 'armclang':
+    # toolchains
+    CC = 'armclang'
+    CXX = 'armclang'
+    AS = 'armasm'
+    AR = 'armar'
+    LINK = 'armlink'
+    TARGET_EXT = 'axf'
+
+    DEVICE = ' --cpu Cortex-M33.fp '
+    CFLAGS = ' --target=arm-arm-none-eabi -mcpu=cortex-m33 '
+    CFLAGS += ' -mfpu=fpv5-sp-d16 '
+    CFLAGS += ' -mfloat-abi=hard -c -fno-rtti -funsigned-char -fshort-enums -fshort-wchar '
+    CFLAGS += ' -gdwarf-3 -ffunction-sections '
+    AFLAGS = DEVICE + ' --apcs=interwork -mfpu=FPv5-SP'
+    LFLAGS = DEVICE + ' --info sizes --info totals --info unused --info veneers '
+    LFLAGS += ' --list rtthread.map '
+    LFLAGS += r' --strict --scatter "board\linker_scripts\link.sct" '
+    CFLAGS += ' -I' + EXEC_PATH + '/ARM/ARMCLANG/include'
+    LFLAGS += ' --libpath=' + EXEC_PATH + '/ARM/ARMCLANG/lib'
+
+    EXEC_PATH += '/ARM/ARMCLANG/bin/'
+
+    if BUILD == 'debug':
+        CFLAGS += ' -g -O1' # armclang recommend
+        AFLAGS += ' -g'
+    else:
+        CFLAGS += ' -O2'
+
+    CXXFLAGS = CFLAGS
+    CFLAGS += ' -std=c99'
+
+    POST_ACTION = 'fromelf --bin $TARGET --output rtthread.bin \nfromelf -z $TARGET'
+
 elif PLATFORM == 'armcc':
     # toolchains
     CC = 'armcc'
@@ -70,7 +105,7 @@ elif PLATFORM == 'armcc':
     LINK = 'armlink'
     TARGET_EXT = 'axf'
 
-    DEVICE = ' --cpu Cortex-M4.fp '
+    DEVICE = ' --cpu Cortex-M33.fp '
     CFLAGS = '-c ' + DEVICE + ' --apcs=interwork --c99'
     AFLAGS = DEVICE + ' --apcs=interwork '
     LFLAGS = DEVICE + ' --scatter "board\linker_scripts\link.sct" --info sizes --info totals --info unused --info veneers --list rtthread.map --strict'
@@ -114,9 +149,9 @@ elif PLATFORM == 'iccarm':
     CFLAGS += ' --no_clustering'
     CFLAGS += ' --no_scheduling'
     CFLAGS += ' --endian=little'
-    CFLAGS += ' --cpu=Cortex-M4'
+    CFLAGS += ' --cpu=Cortex-M33'
     CFLAGS += ' -e'
-    CFLAGS += ' --fpu=VFPv4_sp'
+    CFLAGS += ' --fpu=FPv5-SP'
     CFLAGS += ' --dlib_config "' + EXEC_PATH + '/arm/INC/c/DLib_Config_Normal.h"'
     CFLAGS += ' --silent'
 
@@ -124,8 +159,8 @@ elif PLATFORM == 'iccarm':
     AFLAGS += ' -s+'
     AFLAGS += ' -w+'
     AFLAGS += ' -r'
-    AFLAGS += ' --cpu Cortex-M4'
-    AFLAGS += ' --fpu VFPv4_sp'
+    AFLAGS += ' --cpu Cortex-M33'
+    AFLAGS += ' --fpu FPv5-SP'
     AFLAGS += ' -S'
 
     if BUILD == 'debug':

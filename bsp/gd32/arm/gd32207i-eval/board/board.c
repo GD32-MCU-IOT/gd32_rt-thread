@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2006-2024, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2021-08-20     BruceOu      first implementation
- * 2024-03-19     Evlers       add serial supports
+ * 2026-07-24     RT-Thread    first implementation for GD32F207I-EVAL
  */
 #include <stdint.h>
 #include <rthw.h>
@@ -63,16 +62,6 @@ void SysTick_Handler(void)
  */
 void rt_hw_board_init()
 {
-    /* NVIC Configuration */
-#define NVIC_VTOR_MASK              0x3FFFFF80
-#ifdef  VECT_TAB_RAM
-    /* Set the Vector Table base location at 0x10000000 */
-    SCB->VTOR  = (0x10000000 & NVIC_VTOR_MASK);
-#else  /* VECT_TAB_FLASH  */
-    /* Set the Vector Table base location at 0x08000000 */
-    SCB->VTOR  = (0x08000000 & NVIC_VTOR_MASK);
-#endif
-
     SystemClock_Config();
 
 #ifdef RT_USING_SERIAL

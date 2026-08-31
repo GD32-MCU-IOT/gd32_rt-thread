@@ -1,26 +1,28 @@
 /*
- * Copyright (c) 2006-2024, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author       Notes
- * 2021-12-18     BruceOu      first implementation
- * 2024-03-19     Evlers       remove the include of drv_usart.h
+ * 2026-07-24     RT-Thread    first implementation for GD32F207I-EVAL
  */
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
 #include "gd32f20x.h"
 #include "drv_gpio.h"
+#include "drv_usart.h"
+#include "drv_hard_i2c.h"
+#include "drv_spi.h"
 
 #include "gd32f20x_exti.h"
 
 #define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
 
-// <o> Internal SRAM memory size[Kbytes] <8-128>
-//  <i>Default: 128
+// <o> Internal SRAM memory size[Kbytes] <8-256>
+//  <i>Default: 256
 #ifdef __ICCARM__
 // Use *.icf ram symbal, to avoid hardcode.
 extern char __ICFEDIT_region_RAM_end__;
@@ -43,5 +45,4 @@ extern int __bss_end;
 
 #define HEAP_END          GD32_SRAM_END
 
-#endif
-
+#endif /* __BOARD_H__ */

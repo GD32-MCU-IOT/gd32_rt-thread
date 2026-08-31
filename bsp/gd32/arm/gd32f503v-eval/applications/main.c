@@ -14,9 +14,7 @@
 
 #define GD32_I2C_EEPROM_TEST
 
-//#define GD32_SPI_TEST
-
-#define GD32_UART_TEST
+#define GD32_SPI_TEST
 
 #define GD32_GPIO_EXTI_TEST
 
@@ -34,7 +32,11 @@
 #ifdef GD32_I2C_EEPROM_TEST
 #include "at24cxx.h"
 #define BUFFER_SIZE    256
+#ifdef BSP_USING_SOFT_I2C0
+#define I2C_SERIAL     "swi2c0"
+#else
 #define I2C_SERIAL     "hwi2c0"
+#endif
 rt_uint8_t buf[16];
 rt_uint8_t i2c_buffer_write[BUFFER_SIZE];
 rt_uint8_t i2c_buffer_read[BUFFER_SIZE];
@@ -55,14 +57,6 @@ uint8_t  tx_buffer[200];
 uint8_t  rx_buffer[200];
 
 static void spi_sample(void);
-#endif
-
-#ifdef GD32_UART_TEST
-#define SAMPLE_UART_NAME    "uart1"
-static struct rt_semaphore  rx_sem;
-static rt_device_t serial;
-
-static int uart_sample(int argc, char *argv[]);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
@@ -120,10 +114,6 @@ int main(void)
 
 #ifdef GD32_SPI_TEST
     spi_sample();
-#endif
-
-#ifdef GD32_UART_TEST
-    uart_sample(0, 0);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
@@ -191,11 +181,12 @@ static void spi_sample(void)
     cfg.max_hz =  2 *1000 *1000;
 
     spi_dev = (struct rt_spi_device *)rt_device_find(SPI_NAME);
-    spi_dev->bus->owner = spi_dev;
     if (RT_NULL == spi_dev)
     {
         rt_kprintf("spi sample run failed! can't find %s device!\n", SPI_NAME);
+        return;
     }
+    spi_dev->bus->owner = spi_dev;
     rt_spi_configure(spi_dev, &cfg);
 
     /* READ FLASH ID */
@@ -274,67 +265,6 @@ uint8_t i2c_24c02_test(void)
     }
     return 1;
 }
-#endif
-
-#ifdef GD32_UART_TEST
-/* receive callback */
-static rt_err_t uart_input(rt_device_t dev, rt_size_t size)
-{
-    rt_sem_release(&rx_sem);
-
-    return RT_EOK;
-}
-
-static void serial_thread_entry(void *parameter)
-{
-    char ch;
-
-    while (1) {
-        while (rt_device_read(serial, -1, &ch, 1) != 1) {
-            rt_sem_take(&rx_sem, RT_WAITING_FOREVER);
-        }
-
-        /* echothe recived ch */
-        rt_device_write(serial, 0, &ch, 1);
-    }
-}
-
-static int uart_sample(int argc, char *argv[])
-{
-    rt_err_t ret = RT_EOK;
-    char uart_name[RT_NAME_MAX];
-    char str[] = "hello RT-Thread!\r\n";
-
-    if (argc == 2) {
-        rt_strncpy(uart_name, argv[1], RT_NAME_MAX);
-    } else {
-        rt_strncpy(uart_name, SAMPLE_UART_NAME, RT_NAME_MAX);
-    }
-
-    serial = rt_device_find(uart_name);
-    if (!serial) {
-        rt_kprintf("find %s failed!\n", uart_name);
-        return RT_ERROR;
-    }
-
-    rt_sem_init(&rx_sem, "rx_sem", 0, RT_IPC_FLAG_FIFO);
-    rt_device_open(serial, RT_DEVICE_FLAG_INT_RX);
-    rt_device_set_rx_indicate(serial, uart_input);
-    rt_device_write(serial, 0, str, (sizeof(str) - 1));
-
-    rt_thread_t thread = rt_thread_create("serial", serial_thread_entry, RT_NULL, 1024, 25, 10);
-
-    if (thread != RT_NULL) {
-        rt_thread_startup(thread);
-        rt_kprintf("UART %s echo test started.\n", uart_name);
-    } else {
-        ret = RT_ERROR;
-    }
-
-    return ret;
-}
-
-MSH_CMD_EXPORT(uart_sample, UART echo test sample);
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST

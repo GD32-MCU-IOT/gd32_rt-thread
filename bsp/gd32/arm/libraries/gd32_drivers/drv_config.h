@@ -76,6 +76,11 @@ extern "C" {
 #include "config/l23x/uart_config.h"
 #include "config/l23x/spi_config.h"
 #include "config/l23x/i2c_config.h"
+#elif defined(SOC_SERIES_GD32F10x)
+#include "config/f10x/dma_config.h"
+#include "config/f10x/uart_config.h"
+#include "config/f10x/spi_config.h"
+#include "config/f10x/i2c_config.h"
 #endif
 
 #ifdef __cplusplus

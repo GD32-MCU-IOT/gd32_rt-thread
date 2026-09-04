@@ -94,7 +94,7 @@ static struct rt_spi_bus spi_bus5;
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
  && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x) \
  && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) && !defined(SOC_SERIES_GD32F4xx) \
- && !defined(SOC_SERIES_GD32F20x)
+ && !defined(SOC_SERIES_GD32F20x) && !defined(SOC_SERIES_GD32E50x)
 
 static const struct gd32_spi spi_bus_obj[] = {
 
@@ -287,7 +287,7 @@ static const struct gd32_spi spi_bus_obj[] = {
     {
         .spi_periph = SPI1,
         .spi_clk = RCU_SPI1,
-#if defined(SOC_SERIES_GD32E51x)
+#if defined(SOC_SERIES_GD32E51x) || defined(SOC_SERIES_GD32E50x)
         .irqn = SPI1_I2S1ADD_IRQn,
 #else
         .irqn = SPI1_IRQn,
@@ -310,7 +310,7 @@ static const struct gd32_spi spi_bus_obj[] = {
     {
         .spi_periph = SPI2,
         .spi_clk = RCU_SPI2,
-#if defined(SOC_SERIES_GD32E51x)
+#if defined(SOC_SERIES_GD32E51x) || defined(SOC_SERIES_GD32E50x)
         .irqn = SPI2_I2S2ADD_IRQn,
 #else
         .irqn = SPI2_IRQn,
@@ -404,7 +404,7 @@ static struct rt_spi_ops gd32_spi_ops =
  && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
  && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) \
  && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) && !defined(SOC_SERIES_GD32F4xx) \
- && !defined(SOC_SERIES_GD32F20x)
+ && !defined(SOC_SERIES_GD32F20x) && !defined(SOC_SERIES_GD32E50x)
 /**
 * @brief SPI Initialization
 * @param gd32_spi: SPI BUS

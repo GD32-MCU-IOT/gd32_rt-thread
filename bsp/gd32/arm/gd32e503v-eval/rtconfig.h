@@ -61,7 +61,7 @@
 
 /* end of rt_strnlen options */
 /* end of klibc options */
-#define RT_NAME_MAX 12
+#define RT_NAME_MAX 16
 #define RT_CPUS_NR 1
 #define RT_ALIGN_SIZE 8
 #define RT_THREAD_PRIORITY_32
@@ -105,6 +105,11 @@
 #define RT_VER_NUM 0x50201
 #define RT_BACKTRACE_LEVEL_MAX_NR 32
 /* end of RT-Thread Kernel */
+#define RT_USING_HW_ATOMIC
+#define RT_USING_CPU_FFS
+#define ARCH_ARM
+#define ARCH_ARM_CORTEX_M
+#define ARCH_ARM_CORTEX_M33
 
 /* RT-Thread Components */
 
@@ -142,6 +147,14 @@
 #define RT_USING_SERIAL_V1
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
+#define RT_USING_I2C
+#define RT_USING_I2C_BITOPS
+#define RT_USING_SPI
+#define RT_USING_SPI_ISR
+#define RT_USING_SFUD
+#define RT_SFUD_USING_SFDP
+#define RT_SFUD_USING_FLASH_INFO_TABLE
+#define RT_SFUD_SPI_MAX_HZ 50000000
 #define RT_USING_PIN
 /* end of Device Drivers */
 
@@ -316,6 +329,18 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
+
+/* HPMicro SDK */
+
+/* end of HPMicro SDK */
+
+/* FT32 HAL & SDK Drivers */
+
+/* end of FT32 HAL & SDK Drivers */
+
+/* NOVOSNS Drivers */
+
+/* end of NOVOSNS Drivers */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -325,6 +350,14 @@
 /* touch drivers */
 
 /* end of touch drivers */
+#define PKG_USING_AT24CXX
+
+/* Select the Type of AT24CXX EEPROM */
+
+#define PKG_AT24CXX_EE_TYPE_AT24C02
+#define PKG_AT24CXX_EE_TYPE 1
+/* end of Select the Type of AT24CXX EEPROM */
+#define PKG_USING_AT24CXX_LATEST_VERSION
 /* end of peripheral libraries and drivers */
 
 /* AI packages */
@@ -400,18 +433,33 @@
 
 /* Hardware Drivers Config */
 
-/* SOC Series */
-
-#define SOC_GD32503V
-/* end of SOC Series */
+#define SOC_GD32E503V
 
 /* Onboard Peripheral Drivers */
+
+#define BSP_USING_SPI_FLASH
+#define BSP_SPI_FLASH_ON_SPI0
+#define BSP_USING_EEPROM
+#define BSP_EEPROM_ON_I2C0
+/* end of Onboard Peripheral Drivers */
 
 /* On-chip Peripheral Drivers */
 
 #define BSP_USING_GPIO
 #define BSP_USING_UART
 #define BSP_USING_UART0
+#define BSP_USING_SPI
+#define BSP_USING_SPI_DMA
+#define BSP_SPI_XFER_TIMEOUT 1000
+#define BSP_USING_SPI0
+#define BSP_SPI0_USING_DMA
+#define BSP_SPI_DMA_TRANS_MIN_LEN 16
+#define BSP_USING_I2C
+#define BSP_USING_I2C_TX_DMA
+#define BSP_USING_I2C_RX_DMA
+#define BSP_USING_HARD_I2C0
+#define BSP_I2C0_TX_USING_DMA
+#define BSP_I2C0_RX_USING_DMA
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

@@ -51,6 +51,15 @@
 
 #endif  /* F10x F20x F30x C11x E11x E50x E51x need no flag */
 
+/* Orthogonal to the DMA generation: the name the I2C library gives its DMA switch.
+ * These families call it i2c_dma_config(); every other one calls it i2c_dma_enable(). */
+#if defined(SOC_SERIES_GD32C11x) || defined(SOC_SERIES_GD32E11x) \
+   || defined(SOC_SERIES_GD32E23x) || defined(SOC_SERIES_GD32E50x) \
+   || defined(SOC_SERIES_GD32E51x) || defined(SOC_SERIES_GD32F3x0) \
+   || defined(SOC_SERIES_GD32F4xx) || defined(SOC_SERIES_GD32F5xx)
+#define GD32_DMA_I2C_EN_NAMED_CONFIG
+#endif
+
 /* ============================================================================
  * Section 1: Aliases for symbols that only part of the firmware libraries ship.
  * ============================================================================ */
@@ -286,6 +295,14 @@ struct dma_config
 #define gd32_dma_interrupt_enable(p, ch, src)   dma_interrupt_enable(p, ch, src)
 #define gd32_dma_interrupt_flag_get(p, ch, f)   dma_interrupt_flag_get(p, ch, f)
 #define gd32_dma_interrupt_flag_clear(p, ch, f) dma_interrupt_flag_clear(p, ch, f)
+#endif
+
+/*------------------- peripheral DMA switch -------------------*/
+/* Same CTL1 DMAON bit and signature everywhere, only the function name differs. */
+#ifdef GD32_DMA_I2C_EN_NAMED_CONFIG
+#define gd32_i2c_dma_enable(periph, state)      i2c_dma_config(periph, state)
+#else
+#define gd32_i2c_dma_enable(periph, state)      i2c_dma_enable(periph, state)
 #endif
 
 #endif /* _DRV_DMA_H_ */

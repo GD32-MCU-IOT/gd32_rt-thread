@@ -29,12 +29,6 @@
 #define I2C_DMA_TRANS_MIN_LEN   4
 #endif
 
-/* F30x-specific I2C DMA compatibility (common DMA macros are in drv_dma.h) */
-#if defined(SOC_SERIES_GD32F30x) || defined(SOC_SERIES_GD32F10x)
-/* F30x/F10x I2C DMA enable function has a different name */
-#define i2c_dma_config(periph, state)        i2c_dma_enable(periph, state)
-#endif
-
 #if !defined(BSP_USING_HARD_I2C0) && !defined(BSP_USING_HARD_I2C1) && !defined(BSP_USING_HARD_I2C2) && !defined(BSP_USING_HARD_I2C3)  && !defined(BSP_USING_HARD_I2C4)  && !defined(BSP_USING_HARD_I2C5)
 #error "Please define at least one BSP_USING_I2Cx"
 /* this driver can be disabled at menuconfig → RT-Thread Components → Device Drivers */
@@ -1035,7 +1029,7 @@ static int gd32_i2c_legacy_dma_write(const struct gd32_i2c_bus *i2c_bus, const s
      * Official order: I2C DMA enable -> DMA channel enable */
     gd32_i2c_dma_config_channel(dma_tx, (uint32_t)&I2C_DATA(i2c_periph),
                                  msg->buf, msg->len, DMA_MEMORY_TO_PERIPH);
-    i2c_dma_config(i2c_periph, I2C_DMA_ON);
+    gd32_i2c_dma_enable(i2c_periph, I2C_DMA_ON);
     gd32_dma_channel_enable(dma_tx->periph, dma_tx->channel);
 
     /* Wait for DMA completion */
@@ -1044,19 +1038,19 @@ static int gd32_i2c_legacy_dma_write(const struct gd32_i2c_bus *i2c_bus, const s
     gd32_dma_flag_clear(dma_tx->periph, dma_tx->channel, DMA_FLAG_FTF);
     if(result != 0)
     {
-        i2c_dma_config(i2c_periph, I2C_DMA_OFF);
+        gd32_i2c_dma_enable(i2c_periph, I2C_DMA_OFF);
         return result;
     }
 
     /* Wait for I2C BTC (Byte Transfer Complete) */
     if(gd32_timeout_wait_flag(i2c_periph, I2C_FLAG_BTC, RT_TRUE, RT_NULL) != 0)
     {
-        i2c_dma_config(i2c_periph, I2C_DMA_OFF);
+        gd32_i2c_dma_enable(i2c_periph, I2C_DMA_OFF);
         return -RT_ETIMEOUT;
     }
 
     /* Disable I2C DMA */
-    i2c_dma_config(i2c_periph, I2C_DMA_OFF);
+    gd32_i2c_dma_enable(i2c_periph, I2C_DMA_OFF);
 
     return 0;
 }
@@ -1084,7 +1078,7 @@ static int gd32_i2c_legacy_dma_read(const struct gd32_i2c_bus *i2c_bus, const st
     gd32_i2c_dma_config_channel(dma_rx, (uint32_t)&I2C_DATA(i2c_periph),
                                  msg->buf, msg->len, DMA_PERIPH_TO_MEMORY);
     i2c_dma_last_transfer_config(i2c_periph, I2C_DMALST_ON);
-    i2c_dma_config(i2c_periph, I2C_DMA_ON);
+    gd32_i2c_dma_enable(i2c_periph, I2C_DMA_ON);
     gd32_dma_channel_enable(dma_rx->periph, dma_rx->channel);
 
     /* Wait for DMA completion */
@@ -1097,7 +1091,7 @@ static int gd32_i2c_legacy_dma_read(const struct gd32_i2c_bus *i2c_bus, const st
 
     /* Cleanup */
     i2c_dma_last_transfer_config(i2c_periph, I2C_DMALST_OFF);
-    i2c_dma_config(i2c_periph, I2C_DMA_OFF);
+    gd32_i2c_dma_enable(i2c_periph, I2C_DMA_OFF);
 
     return result;
 }

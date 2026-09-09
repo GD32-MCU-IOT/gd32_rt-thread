@@ -1,4 +1,4 @@
-# GD32107C-EVAL开发板BSP说明
+# GD32107C-EVAL 开发板 BSP 说明
 
 ## 简介
 
@@ -66,7 +66,7 @@ GD3107C-EVAL是-兆易创新推出的一款GD32F10X系列的评估板，最高�
 
 #### 硬件连接
 
-使用数据线连接开发板到 PC，使用USB转232连接USART1，打开电源开关。
+使用数据线连接开发板到 PC，使用 USB 转 232 线连接板载 COM0 接口（USART0，PA9/PA10），打开电源开关。
 
 #### 编译下载
 
@@ -83,14 +83,23 @@ GD3107C-EVAL是-兆易创新推出的一款GD32F10X系列的评估板，最高�
 ```bash
  \ | /
 - RT -     Thread Operating System
- / | \     4.0.4 build Dec 19 2021 10:00:27
+ / | \     5.0.0 build ...
  2006 - 2021 Copyright by rt-thread team
 msh >
 ```
 
-### 进阶使用
+在 `msh >` 提示符下执行：
 
-此 BSP 默认只开启了 GPIO 和 串口1的功能，如果需使用高级功能，需要利用 ENV 工具对BSP 进行配置，步骤如下：
+```text
+help
+list_thread
+```
+
+命令应正常返回，`list_thread` 应包含 `tshell`，PC0 状态灯在命令执行期间持续闪烁。
+
+## 进阶使用
+
+此 BSP 默认只开启了 GPIO 和串口 0 的功能，如果需使用高级功能，需要利用 ENV 工具对 BSP 进行配置，步骤如下：
 
 1. 在 bsp 下打开 env 工具。
 

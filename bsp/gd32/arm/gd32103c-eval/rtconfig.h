@@ -61,12 +61,12 @@
 
 /* end of rt_strnlen options */
 /* end of klibc options */
-#define RT_NAME_MAX 12
+#define RT_NAME_MAX 16
 #define RT_CPUS_NR 1
 #define RT_ALIGN_SIZE 8
 #define RT_THREAD_PRIORITY_32
 #define RT_THREAD_PRIORITY_MAX 32
-#define RT_TICK_PER_SECOND 100
+#define RT_TICK_PER_SECOND 1000
 #define RT_USING_OVERFLOW_CHECK
 #define RT_USING_HOOK
 #define RT_HOOK_USING_FUNC_PTR
@@ -101,7 +101,7 @@
 #define RT_USING_DEVICE
 #define RT_USING_CONSOLE
 #define RT_CONSOLEBUF_SIZE 128
-#define RT_CONSOLE_DEVICE_NAME "uart1"
+#define RT_CONSOLE_DEVICE_NAME "uart0"
 #define RT_VER_NUM 0x50201
 #define RT_BACKTRACE_LEVEL_MAX_NR 32
 /* end of RT-Thread Kernel */
@@ -147,6 +147,10 @@
 #define RT_USING_SERIAL_V1
 #define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
+#define RT_USING_I2C
+#define RT_USING_I2C_BITOPS
+#define RT_USING_SPI
+#define RT_USING_SPI_ISR
 #define RT_USING_PIN
 /* end of Device Drivers */
 
@@ -321,6 +325,10 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
+
+/* HPMicro SDK */
+
+/* end of HPMicro SDK */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -330,6 +338,8 @@
 /* touch drivers */
 
 /* end of touch drivers */
+#define PKG_USING_AT24CXX
+#define PKG_USING_AT24CXX_LATEST_VERSION
 /* end of peripheral libraries and drivers */
 
 /* AI packages */
@@ -413,7 +423,14 @@
 
 #define BSP_USING_GPIO
 #define BSP_USING_UART
-#define BSP_USING_UART1
+#define BSP_USING_UART0
+#define BSP_UART_POLL_TX_TIMEOUT_MS 1000
+#define BSP_USING_SPI
+#define BSP_SPI_XFER_TIMEOUT 1000
+#define BSP_USING_SPI0
+#define BSP_USING_I2C
+#define BSP_USING_HARD_I2C0
+#define BSP_I2C_XFER_TIMEOUT 1000
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

@@ -10,6 +10,9 @@ board.c
 board_msd_init.c
 ''')
 
+# Add DMA peripheral source for GD32F20x (needed by UART/SPI/I2C DMA drivers)
+src += ['../packages/gd32-arm-series-latest/GD32F20x/GD32F20x_standard_peripheral/Source/gd32f20x_dma.c']
+
 path =  [cwd]
 
 CPPDEFINES = ['GD32F20X_CL']

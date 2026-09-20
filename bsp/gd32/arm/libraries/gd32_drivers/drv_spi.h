@@ -27,32 +27,6 @@ struct gd32_spi_cs
 };
 
 /* gd32 spi dirver class */
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
- && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x) \
- && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) && !defined(SOC_SERIES_GD32F4xx) \
- && !defined(SOC_SERIES_GD32F20x) && !defined(SOC_SERIES_GD32F10x) && !defined(SOC_SERIES_GD32E50x)
-struct gd32_spi
-{
-    uint32_t spi_periph;
-    char *bus_name;
-    rcu_periph_enum spi_clk;
-    rcu_periph_enum sck_gpio_clk;
-    rcu_periph_enum miso_gpio_clk;
-    rcu_periph_enum mosi_gpio_clk;
-    struct rt_spi_bus *spi_bus;
-    uint32_t sck_spi_port;
-    uint32_t miso_spi_port;
-    uint32_t mosi_spi_port;
-#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32H7xx || defined SOC_SERIES_GD32F5xx
-    uint32_t alt_func_num;
-#endif
-    uint16_t sck_pin;
-    uint16_t miso_pin;
-    uint16_t mosi_pin;
-};
-#else
 
 #if defined(BSP_USING_SPI_DMA)
 #include "drv_dma.h"
@@ -77,7 +51,6 @@ struct gd32_spi
 /* This function initializes the SPI pin */
 void gd32_spi_init(struct gd32_spi *gd32_spi);
 
-#endif
 
 rt_err_t rt_hw_spi_device_attach(const char *bus_name, const char *device_name, rt_base_t cs_pin);
 

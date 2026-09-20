@@ -21,34 +21,6 @@ extern "C" {
 #endif
 
 /* GD32 i2c driver */
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
- && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
- && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) \
- && !defined(SOC_SERIES_GD32F4xx) && !defined(SOC_SERIES_GD32F20x) && !defined(SOC_SERIES_GD32F10x) \
- && !defined(SOC_SERIES_GD32E50x)
-struct gd32_i2c_bus
-{
-    uint32_t i2c_periph;             /* Todo: 3bits */
-
-    rcu_periph_enum i2c_clk;         /* Todo: 5bits */
-    rcu_periph_enum scl_gpio_clk;    /* Todo: 5bits */
-    rcu_periph_enum sda_gpio_clk;    /* Todo: 5bits */
-
-    uint32_t scl_port;               /* Todo: 4bits */
-    uint16_t scl_af;                 /* Todo: 4bits */
-    uint16_t scl_pin;                /* Todo: 4bits */
-
-    uint32_t sda_port;               /* Todo: 4bits */
-    uint16_t sda_af;                 /* Todo: 4bits */
-    uint16_t sda_pin;                /* Todo: 4bits */
-
-    struct rt_i2c_bus_device *i2c_bus;
-    char *device_name;
-};
-
-#else
 
 #if defined(BSP_USING_I2C_TX_DMA) || defined(BSP_USING_I2C_RX_DMA)
 #include "drv_dma.h"
@@ -74,7 +46,6 @@ struct gd32_i2c_bus
 /* This function initializes the I2C pin */
 void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c);
 
-#endif
 
 #ifdef __cplusplus
 }

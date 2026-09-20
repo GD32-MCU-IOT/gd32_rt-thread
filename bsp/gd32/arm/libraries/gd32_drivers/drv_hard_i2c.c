@@ -321,106 +321,6 @@ static struct dma_config i2c5_dma_tx_cfg = I2C5_TX_DMA_CONFIG;
 #endif
 #endif /* BSP_USING_I2C_*_DMA */
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
- && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
- && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) \
- && !defined(SOC_SERIES_GD32F4xx) && !defined(SOC_SERIES_GD32F20x) && !defined(SOC_SERIES_GD32F10x) \
- && !defined(SOC_SERIES_GD32E50x)
-static const struct gd32_i2c_bus gd_i2c_config[] = {
-#ifdef BSP_USING_HARD_I2C0
-    {
-    I2C0,    /* uart peripheral index */
-
-    RCU_I2C0, RCU_GPIOB, RCU_GPIOB,    /* periph clock, scl gpio clock, sda gpio clock */
-#if defined (SOC_SERIES_GD32F30x)
-        GPIOB, GPIO_MODE_AF_OD, GPIO_PIN_6,            /* scl port, scl alternate, scl pin */
-        GPIOB, GPIO_MODE_AF_OD, GPIO_PIN_7,           /* sda port, sda alternate, sda pin */
-#else
-        GPIOB, GPIO_AF_4, GPIO_PIN_6,             /* scl port, scl alternate, scl pin */
-        GPIOB, GPIO_AF_4, GPIO_PIN_7,            /* sda port, sda alternate, sda pin */
-#endif
-        &i2c0,
-        "hwi2c0",
-    },
-#endif
-
-#ifdef BSP_USING_HARD_I2C1
-    {
-    I2C1,    /* uart peripheral index */
-#if defined (SOC_SERIES_GD32F30x)
-        RCU_I2C1, RCU_GPIOB, RCU_GPIOB,       /* periph clock, scl gpio clock, sda gpio clock */
-
-        GPIOB, GPIO_MODE_AF_OD, GPIO_PIN_10,           /* scl port, scl alternate, scl pin */
-        GPIOB, GPIO_MODE_AF_OD, GPIO_PIN_11,          /* sda port, sda alternate, sda pin */
-#else
-        RCU_I2C1, RCU_GPIOH, RCU_GPIOB,       /* periph clock, scl gpio clock, sda gpio clock */
-
-        GPIOH, GPIO_AF_4, GPIO_PIN_4,          /* scl port, scl alternate, scl pin */
-        GPIOB, GPIO_AF_4, GPIO_PIN_11,          /* sda port, sda alternate, sda pin */
-#endif
-
-        &i2c1,
-        "hwi2c1",
-    },
-#endif
-
-#ifdef BSP_USING_HARD_I2C2
-    {
-    I2C2,    /* uart peripheral index */
-
-    RCU_I2C2, RCU_GPIOA, RCU_GPIOC,    /* periph clock, scl gpio clock, sda gpio clock */
-
-    GPIOA, GPIO_AF_4, GPIO_PIN_8,    /* scl port, scl alternate, scl pin */
-    GPIOC, GPIO_AF_4, GPIO_PIN_9,    /* sda port, sda alternate, sda pin */
-
-        &i2c2,
-        "hwi2c2",
-    },
-#endif
-
-#ifdef BSP_USING_HARD_I2C3
-    {
-    I2C3,    /* uart peripheral index */
-
-    RCU_I2C3, RCU_GPIOF, RCU_GPIOF,    /* periph clock, scl gpio clock, sda gpio clock */
-
-    GPIOF, GPIO_AF_4, GPIO_PIN_14,    /* scl port, scl alternate, scl pin */
-    GPIOF, GPIO_AF_4, GPIO_PIN_15,    /* sda port, sda alternate, sda pin */
-
-        &i2c3,
-        "hwi2c3",
-    },
-#endif
-#ifdef BSP_USING_HARD_I2C4
-    {
-    I2C4,    /* uart peripheral index */
-
-    RCU_I2C4, RCU_GPIOG, RCU_GPIOG,    /* periph clock, scl gpio clock, sda gpio clock */
-
-    GPIOG, GPIO_AF_6, GPIO_PIN_7,    /* scl port, scl alternate, scl pin */
-    GPIOG, GPIO_AF_6, GPIO_PIN_8,    /* sda port, sda alternate, sda pin */
-
-        &i2c4,
-        "hwi2c4",
-    },
-#endif
-#ifdef BSP_USING_HARD_I2C5
-    {
-    I2C5,    /* uart peripheral index */
-
-    RCU_I2C5, RCU_GPIOF, RCU_GPIOF,    /* periph clock, scl gpio clock, sda gpio clock */
-
-    GPIOF, GPIO_AF_4, GPIO_PIN_11,    /* scl port, scl alternate, scl pin */
-    GPIOF, GPIO_AF_4, GPIO_PIN_12,    /* sda port, sda alternate, sda pin */
-
-        &i2c5,
-        "hwi2c5",
-    }
-#endif
-};
-#else
 static const struct gd32_i2c_bus gd_i2c_config[] = {
 #ifdef BSP_USING_HARD_I2C0
     {
@@ -596,7 +496,6 @@ static const struct gd32_i2c_bus gd_i2c_config[] = {
     }
 #endif
 };
-#endif
 
 /**
  * @brief  Unified timeout wait for I2C/DMA flag or legacy control bit.
@@ -1102,53 +1001,10 @@ static int gd32_i2c_legacy_dma_read(const struct gd32_i2c_bus *i2c_bus, const st
 #endif /* GD32_I2C_HAS_LEGACY_IP */
 
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
- && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E23x) && !defined(SOC_SERIES_GD32E11x) \
- && !defined(SOC_SERIES_GD32H77x) && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) \
- && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) \
- && !defined(SOC_SERIES_GD32F4xx) && !defined(SOC_SERIES_GD32F20x) && !defined(SOC_SERIES_GD32F10x) \
- && !defined(SOC_SERIES_GD32E50x)
-/**
-  * @brief  This function initializes the i2c pin.
-  * @param  i2c
-  * @retval None
-  */
-static void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
-{
-    /* enable I2C and GPIO clock */
-    rcu_periph_clock_enable(i2c->scl_gpio_clk);
-    rcu_periph_clock_enable(i2c->sda_gpio_clk);
-    rcu_periph_clock_enable(i2c->i2c_clk);
-#if defined (SOC_SERIES_GD32F30x)
-    gpio_init(i2c->sda_port, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, i2c->sda_pin);
-    gpio_init(i2c->scl_port, GPIO_MODE_AF_OD, GPIO_OSPEED_50MHZ, i2c->scl_pin);
-#else
-
-    /* configure I2C_SCL as alternate function push-pull */
-    gpio_af_set(i2c->scl_port, i2c->scl_af, i2c->scl_pin);
-    gpio_mode_set(i2c->scl_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, i2c->scl_pin);
-#if defined (SOC_SERIES_GD32H7xx)
-    gpio_output_options_set(i2c->scl_port, GPIO_OTYPE_OD, GPIO_OSPEED_60MHZ, i2c->scl_pin);
-    /* configure I2C_SDA as alternate function push-pull */
-    gpio_af_set(i2c->sda_port, i2c->sda_af, i2c->sda_pin);
-    gpio_mode_set(i2c->sda_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, i2c->sda_pin);
-    gpio_output_options_set(i2c->sda_port, GPIO_OTYPE_OD, GPIO_OSPEED_60MHZ, i2c->sda_pin);
-#else
-    gpio_output_options_set(i2c->scl_port, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, i2c->scl_pin);
-    /* configure I2C_SDA as alternate function push-pull */
-    gpio_af_set(i2c->sda_port, i2c->sda_af, i2c->sda_pin);
-    gpio_mode_set(i2c->sda_port, GPIO_MODE_AF, GPIO_PUPD_PULLUP, i2c->sda_pin);
-    gpio_output_options_set(i2c->sda_port, GPIO_OTYPE_OD, GPIO_OSPEED_50MHZ, i2c->sda_pin);
-#endif
-#endif
-}
-#else
 #warning "gd32_i2c_gpio_init should be defined in board_msd_init.c"
 rt_weak void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
 {
 }
-#endif
 
 /**
   * @brief  read data.

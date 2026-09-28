@@ -89,152 +89,6 @@ static struct rt_spi_bus spi_bus4;
 static struct rt_spi_bus spi_bus5;
 #endif
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
- && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) && !defined(SOC_SERIES_GD32M53x) \
- && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) && !defined(SOC_SERIES_GD32F4xx) \
- && !defined(SOC_SERIES_GD32F20x) && !defined(SOC_SERIES_GD32F10x) && !defined(SOC_SERIES_GD32E50x)
-
-static const struct gd32_spi spi_bus_obj[] = {
-
-#ifdef BSP_USING_SPI0
-    {
-        SPI0,
-        "spi0",
-        RCU_SPI0,
-        RCU_GPIOA,
-        RCU_GPIOA,
-        RCU_GPIOA,
-        &spi_bus0,
-        GPIOA,
-        GPIOA,
-        GPIOA,
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx)
-        GPIO_AF_5,
-#endif
-#if defined (SOC_SERIES_GD32E23x)
-        GPIO_AF_0,
-#endif
-        GPIO_PIN_5,
-        GPIO_PIN_6,
-        GPIO_PIN_7,
-    },
-#endif /* BSP_USING_SPI0 */
-
-#ifdef BSP_USING_SPI1
-    {
-        SPI1,
-        "spi1",
-        RCU_SPI1,
-        RCU_GPIOB,
-        RCU_GPIOB,
-        RCU_GPIOB,
-        &spi_bus1,
-        GPIOB,
-        GPIOB,
-        GPIOB,
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx)
-        GPIO_AF_5,
-#endif
-#if defined SOC_SERIES_GD32E23x
-        GPIO_AF_0,
-#endif
-
-        GPIO_PIN_13,
-        GPIO_PIN_14,
-        GPIO_PIN_15,
-    },
-#endif /* BSP_USING_SPI1 */
-
-#ifdef BSP_USING_SPI2
-    {
-        SPI2,
-        "spi2",
-        RCU_SPI2,
-        RCU_GPIOB,
-        RCU_GPIOB,
-        RCU_GPIOB,
-        &spi_bus2,
-        GPIOB,
-        GPIOB,
-        GPIOB,
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx)
-        GPIO_AF_6,
-#endif
-        GPIO_PIN_3,
-        GPIO_PIN_4,
-        GPIO_PIN_5,
-    },
-#endif /* BSP_USING_SPI2 */
-
-#ifdef BSP_USING_SPI3
-    {
-        SPI3,
-        "spi3",
-        RCU_SPI3,
-        RCU_GPIOE,
-        RCU_GPIOE,
-        RCU_GPIOE,
-        &spi_bus3,
-        GPIOE,
-        GPIOE,
-        GPIOE,
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx)
-        GPIO_AF_5,
-#endif
-        GPIO_PIN_2,
-        GPIO_PIN_5,
-        GPIO_PIN_6,
-    },
-#endif /* BSP_USING_SPI3 */
-
-#ifdef BSP_USING_SPI4
-    {
-        SPI4,
-        "spi4",
-        RCU_SPI4,
-        RCU_GPIOF,
-        RCU_GPIOF,
-        RCU_GPIOF,
-        &spi_bus4,
-        GPIOF,
-        GPIOF,
-        GPIOF,
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx)
-        GPIO_AF_5,
-#endif
-        GPIO_PIN_7,
-        GPIO_PIN_8,
-        GPIO_PIN_9,
-
-    },
-#endif /* BSP_USING_SPI4 */
-
-#ifdef BSP_USING_SPI5
-    {
-        SPI5,
-        "spi5",
-        RCU_SPI5,
-        RCU_GPIOG,
-        RCU_GPIOG,
-
-        RCU_GPIOG,
-        &spi_bus5,
-        GPIOG,
-        GPIOG,
-        GPIOG,
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) || (defined SOC_SERIES_GD32F5xx)
-        GPIO_AF_5,
-#endif
-        GPIO_PIN_13,
-        GPIO_PIN_12,
-        GPIO_PIN_14,
-    }
-#endif /* BSP_USING_SPI5 */
-};
-
-#else
 
 /* Static DMA configurations - safer than compound literals for IAR/older compilers */
 #ifdef BSP_SPI0_USING_DMA
@@ -387,7 +241,6 @@ static const struct gd32_spi spi_bus_obj[] = {
 #endif /* BSP_USING_SPI5 */
 };
 
-#endif
 
 /* private rt-thread spi ops function */
 static rt_err_t spi_configure(struct rt_spi_device* device, struct rt_spi_configuration* configuration);
@@ -399,63 +252,10 @@ static struct rt_spi_ops gd32_spi_ops =
     .xfer = spixfer,
 };
 
-#if !defined(SOC_SERIES_GD32H75E) && !defined(SOC_SERIES_GD32E51x) && !defined(SOC_SERIES_GD32F3x0) \
- && !defined(SOC_SERIES_GD32F50x) && !defined(SOC_SERIES_GD32G5x3) && !defined(SOC_SERIES_GD32C11x) \
- && !defined(SOC_SERIES_GD32L23x) && !defined(SOC_SERIES_GD32E11x) && !defined(SOC_SERIES_GD32H77x) \
- && !defined(SOC_SERIES_GD32M53x) && !defined(SOC_SERIES_GD32H7xx) && !defined(SOC_SERIES_GD32F5xx) \
- && !defined(SOC_SERIES_GD32F30x) && !defined(SOC_SERIES_GD32W51x_F5HC) && !defined(SOC_SERIES_GD32F4xx) \
- && !defined(SOC_SERIES_GD32F20x) && !defined(SOC_SERIES_GD32F10x) && !defined(SOC_SERIES_GD32E50x)
-/**
-* @brief SPI Initialization
-* @param gd32_spi: SPI BUS
-* @retval None
-*/
-static void gd32_spi_init(struct gd32_spi *gd32_spi)
-{
-    /* enable SPI clock */
-    rcu_periph_clock_enable(gd32_spi->spi_clk);
-    rcu_periph_clock_enable(gd32_spi->sck_gpio_clk);
-    rcu_periph_clock_enable(gd32_spi->miso_gpio_clk);
-    rcu_periph_clock_enable(gd32_spi->mosi_gpio_clk);
-
-#if defined (SOC_SERIES_GD32F4xx) || defined (SOC_SERIES_GD32H7xx) \
- || defined (SOC_SERIES_GD32E23x)
-    /*GPIO pin configuration*/
-    gpio_af_set(gd32_spi->sck_spi_port, gd32_spi->alt_func_num, gd32_spi->sck_pin);
-    gpio_af_set(gd32_spi->miso_spi_port, gd32_spi->alt_func_num, gd32_spi->miso_pin);
-    gpio_af_set(gd32_spi->mosi_spi_port, gd32_spi->alt_func_num, gd32_spi->mosi_pin);
-    gpio_mode_set(gd32_spi->sck_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->sck_pin);
-    gpio_mode_set(gd32_spi->miso_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->miso_pin);
-    gpio_mode_set(gd32_spi->mosi_spi_port, GPIO_MODE_AF, GPIO_PUPD_NONE, gd32_spi->mosi_pin);
-    #if defined (SOC_SERIES_GD32H7xx)
-    gpio_output_options_set(gd32_spi->sck_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->sck_pin);
-    gpio_output_options_set(gd32_spi->miso_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->miso_pin);
-    gpio_output_options_set(gd32_spi->mosi_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_100_220MHZ, gd32_spi->mosi_pin);
-    #elif defined (SOC_SERIES_GD32E23x)
-    gpio_output_options_set(gd32_spi->sck_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, gd32_spi->sck_pin);
-    gpio_output_options_set(gd32_spi->miso_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, gd32_spi->miso_pin);
-    gpio_output_options_set(gd32_spi->mosi_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, gd32_spi->mosi_pin);
-    #else
-    gpio_output_options_set(gd32_spi->sck_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_MAX, gd32_spi->sck_pin);
-    gpio_output_options_set(gd32_spi->miso_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_MAX, gd32_spi->miso_pin);
-    gpio_output_options_set(gd32_spi->mosi_spi_port, GPIO_OTYPE_PP, GPIO_OSPEED_MAX, gd32_spi->mosi_pin);
-    #endif
-#else
-    /* Init SPI SCK MOSI */
-    gpio_init(gd32_spi->sck_spi_port, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, gd32_spi->sck_pin);
-    gpio_init(gd32_spi->mosi_spi_port, GPIO_MODE_AF_PP, GPIO_OSPEED_50MHZ, gd32_spi->mosi_pin);
-
-    /* Init SPI MISO */
-    gpio_init(gd32_spi->miso_spi_port, GPIO_MODE_IN_FLOATING, GPIO_OSPEED_50MHZ, gd32_spi->miso_pin);
-#endif
-
-}
-#else
 #warning "gd32_spi_init should be defined in board_msd_init.c"
 rt_weak void gd32_spi_init(struct gd32_spi *gd32_spi)
 {
 }
-#endif
 
 #if defined(BSP_USING_SPI_DMA)
 static void gd32_spi_dma_init(struct gd32_spi *spi_device)

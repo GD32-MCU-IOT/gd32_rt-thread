@@ -46,8 +46,8 @@ uint8_t i2c_24c02_test(void);
 #endif
 
 #ifdef GD32_SPI_TEST
-#define BUS_NAME     "spi2"
-#define SPI_NAME     "spi00"
+#define BUS_NAME     "spi0"
+#define SPI_NAME     "spi01"
 
 uint8_t send_id = 0x9F;
 uint8_t WREN = 0x06;
@@ -120,8 +120,6 @@ static void pin_irq_sample(void);
 
 int main(void)
 {
-    int count = 1;
-
     /* set LED pin mode to output */
     rt_pin_mode(LED1_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
@@ -152,7 +150,7 @@ int main(void)
     pin_irq_sample();
 #endif
 
-    while (count++)
+    while (1)
     {
         /* turn on LED1 */
         rt_pin_write(LED1_PIN, PIN_HIGH);
@@ -208,7 +206,7 @@ static void spi_sample(void)
 
     cfg.data_width = 8;
     cfg.mode   = RT_SPI_MASTER | RT_SPI_MODE_0 | RT_SPI_MSB;
-    cfg.max_hz =  2 *1000 *1000;
+    cfg.max_hz =  2 * 500 *1000;
 
     spi_dev = (struct rt_spi_device *)rt_device_find(SPI_NAME);
     spi_dev->bus->owner = spi_dev;

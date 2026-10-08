@@ -100,7 +100,7 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
 * @param gd32_spi: SPI BUS
 * @retval None
 */
-void gd32_spi_init(struct gd32_spi *gd32_spi)
+void gd32_spi_init(const struct gd32_spi *gd32_spi)
 {
     /* enable SPI clock */
     rcu_periph_clock_enable(gd32_spi->spi_clk);

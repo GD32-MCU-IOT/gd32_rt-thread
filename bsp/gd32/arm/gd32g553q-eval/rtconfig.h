@@ -149,6 +149,7 @@
 #define RT_UNAMED_PIPE_NUMBER 64
 #define RT_USING_SERIAL
 #define RT_USING_SERIAL_V1
+#define RT_SERIAL_USING_DMA
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
@@ -301,6 +302,30 @@
 
 /* end of Kendryte SDK */
 
+/* MM32 HAL & SDK Drivers */
+
+/* end of MM32 HAL & SDK Drivers */
+
+/* WCH HAL & SDK Drivers */
+
+/* end of WCH HAL & SDK Drivers */
+
+/* AT32 HAL & SDK Drivers */
+
+/* end of AT32 HAL & SDK Drivers */
+
+/* HC32 DDL Drivers */
+
+/* end of HC32 DDL Drivers */
+
+/* NXP HAL & SDK Drivers */
+
+/* end of NXP HAL & SDK Drivers */
+
+/* NUVOTON Drivers */
+
+/* end of NUVOTON Drivers */
+
 /* GD32 Drivers */
 
 #define PKG_USING_GD32_ARM_CMSIS_DRIVER
@@ -308,6 +333,26 @@
 #define PKG_USING_GD32_ARM_SERIES_DRIVER
 #define PKG_USING_GD32_ARM_SERIES_DRIVER_LATEST_VERSION
 /* end of GD32 Drivers */
+
+/* HPMicro SDK */
+
+/* end of HPMicro SDK */
+
+/* FM33 Drivers */
+
+/* end of FM33 Drivers */
+
+/* FT32 HAL & SDK Drivers */
+
+/* end of FT32 HAL & SDK Drivers */
+
+/* NOVOSNS Drivers */
+
+/* end of NOVOSNS Drivers */
+
+/* N32 Drivers */
+
+/* end of N32 Drivers */
 /* end of HAL & SDK Drivers */
 
 /* sensors drivers */
@@ -318,6 +363,12 @@
 
 /* end of touch drivers */
 #define PKG_USING_AT24CXX
+
+/* Select the Type of AT24CXX EEPROM */
+
+#define PKG_AT24CXX_EE_TYPE_AT24C02
+#define PKG_AT24CXX_EE_TYPE 1
+/* end of Select the Type of AT24CXX EEPROM */
 #define PKG_USING_AT24CXX_LATEST_VERSION
 /* end of peripheral libraries and drivers */
 
@@ -404,13 +455,25 @@
 
 #define BSP_USING_GPIO
 #define BSP_USING_UART
+#define BSP_USING_UART_TX_DMA
+#define BSP_USING_UART_RX_DMA
 #define BSP_USING_UART0
+#define BSP_UART0_RX_USING_DMA
+#define BSP_UART0_TX_USING_DMA
 #define BSP_USING_UART1
 #define BSP_USING_UART2
 #define BSP_USING_SPI
-#define BSP_USING_SPI2
+#define BSP_USING_SPI_TX_DMA
+#define BSP_USING_SPI_RX_DMA
+#define BSP_USING_SPI0
+#define BSP_SPI0_TX_USING_DMA
+#define BSP_SPI0_RX_USING_DMA
 #define BSP_USING_I2C
+#define BSP_USING_I2C_TX_DMA
+#define BSP_USING_I2C_RX_DMA
 #define BSP_USING_HARD_I2C2
+#define BSP_I2C2_TX_USING_DMA
+#define BSP_I2C2_RX_USING_DMA
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

@@ -27,6 +27,19 @@
 #define spi_enable(periph)                      spi_enable()
 #define spi_disable(periph)                     spi_disable()
 
+#else
+/* Standard GD32 API (for G5x3, F4xx, H7xx, etc.) */
+/* For G5x3, use direct register access instead of library functions */
+#if defined(SOC_SERIES_GD32G5x3)
+#define spi_i2s_flag_get(periph, flag)          (SPI_STAT(periph) & (flag))
+#define spi_i2s_data_transmit(periph, data)     (SPI_DATA(periph) = (data))
+#define spi_i2s_data_receive(periph)            (SPI_DATA(periph))
+#else
+#define spi_i2s_flag_get(periph, flag)          spi_flag_get(periph, flag)
+#define spi_i2s_data_transmit(periph, data)     spi_data_transmit(periph, data)
+#define spi_i2s_data_receive(periph)            spi_data_receive(periph)
+#endif
+
 #endif /* SOC_SERIES_GD32M53x */
 
 /* Compatibility macros: unify H7xx vs non-H7xx SPI data register differences
@@ -59,7 +72,8 @@ rt_inline rt_err_t gd32_spi_wait_flag(uint32_t periph, uint32_t flag)
     rt_tick_t timeout = rt_tick_from_millisecond(BSP_SPI_XFER_TIMEOUT);
     rt_tick_t start = rt_tick_get();
 
-    while (RESET == spi_i2s_flag_get(periph, flag))
+    /* Check SPI status register directly instead of calling potentially missing spi_flag_get */
+    while (RESET == (SPI_STAT(periph) & flag))
     {
         if (rt_tick_get() - start > timeout)
         {
@@ -252,8 +266,7 @@ static struct rt_spi_ops gd32_spi_ops =
     .xfer = spixfer,
 };
 
-#warning "gd32_spi_init should be defined in board_msd_init.c"
-rt_weak void gd32_spi_init(struct gd32_spi *gd32_spi)
+rt_weak void gd32_spi_init(const struct gd32_spi *gd32_spi)
 {
 }
 
@@ -275,8 +288,8 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     }
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
- || defined(SOC_SERIES_GD32F50x)
-    /* H7xx requires DMAMUX clock */
+ || defined(SOC_SERIES_GD32F50x) || defined(SOC_SERIES_GD32G5x3)
+    /* H7xx/F50x/G5x3 requires DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif
 
@@ -969,6 +982,8 @@ int rt_hw_spi_init(void)
 
     for (i = 0; i < sizeof(spi_bus_obj) / sizeof(spi_bus_obj[0]); i++)
     {
+        gd32_spi_init(&spi_bus_obj[i]);
+        
         spi_bus_obj[i].spi_bus->parent.user_data = (void *)&spi_bus_obj[i];
 
         result = rt_spi_bus_register(spi_bus_obj[i].spi_bus, spi_bus_obj[i].bus_name, &gd32_spi_ops);

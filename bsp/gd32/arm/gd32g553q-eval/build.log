@@ -1,0 +1,43 @@
+scons: Reading SConscript files ...
+Newlib version: 4.1.0
+scons: done reading SConscript files.
+scons: Building targets ...
+scons: building associated VariantDir targets: build
+CC build\packages\at24cxx-latest\at24cxx.o
+CC D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_gpio.o
+CC D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_hard_i2c.o
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_hard_i2c.c:1004:2: warning: #warning "gd32_i2c_gpio_init should be defined in board_msd_init.c" [-Wcpp]
+ 1004 | #warning "gd32_i2c_gpio_init should be defined in board_msd_init.c"
+      |  ^~~~~~~
+CC D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_spi.o
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_spi.c: In function 'gd32_spi_wait_flag':
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_spi.c:62:21: warning: implicit declaration of function 'spi_i2s_flag_get'; did you mean 'spi_flag_get'? [-Wimplicit-function-declaration]
+   62 |     while (RESET == spi_i2s_flag_get(periph, flag))
+      |                     ^~~~~~~~~~~~~~~~
+      |                     spi_flag_get
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_spi.c: At top level:
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_spi.c:255:2: warning: #warning "gd32_spi_init should be defined in board_msd_init.c" [-Wcpp]
+  255 | #warning "gd32_spi_init should be defined in board_msd_init.c"
+      |  ^~~~~~~
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_spi.c: In function 'spixfer':
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_spi.c:783:17: warning: implicit declaration of function 'spi_i2s_data_transmit'; did you mean 'spi_data_transmit'? [-Wimplicit-function-declaration]
+  783 |                 spi_i2s_data_transmit(spi_periph, data);
+      |                 ^~~~~~~~~~~~~~~~~~~~~
+      |                 spi_data_transmit
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_spi.c:800:24: warning: implicit declaration of function 'spi_i2s_data_receive'; did you mean 'spi_data_receive'? [-Wimplicit-function-declaration]
+  800 |                 data = spi_i2s_data_receive(spi_periph);
+      |                        ^~~~~~~~~~~~~~~~~~~~
+      |                        spi_data_receive
+CC D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_usart.o
+D:\project\rttthread\bsp\gd32\arm\libraries\gd32_drivers\drv_usart.c:642:2: warning: #warning "gd32_uart_gpio_init should be define in board_msd_init.c" [-Wcpp]
+  642 | #warning "gd32_uart_gpio_init should be define in board_msd_init.c"
+      |  ^~~~~~~
+LINK rt-thread.elf
+Memory region         Used Size  Region Size  %age Used
+            CODE:       86584 B       512 KB     16.51%
+            DATA:        7348 B        96 KB      7.47%
+arm-none-eabi-objcopy -O binary rt-thread.elf rtthread.bin
+arm-none-eabi-size rt-thread.elf
+   text	   data	    bss	    dec	    hex	filename
+  86584	   2436	   4908	  93928	  16ee8	rt-thread.elf
+scons: done building targets.

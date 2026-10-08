@@ -16,7 +16,7 @@
         <TargetCommonOption>
           <Device>GD32G553QE</Device>
           <Vendor>GigaDevice</Vendor>
-          <PackID>GigaDevice.GD32G5x3_DFP.1.1.0</PackID>
+          <PackID>GigaDevice.GD32G5x3_DFP.1.3.0</PackID>
           <PackURL>https://gd32mcu.com/data/documents/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x18000) IRAM2(0x10000000,0x8000) IROM(0x08000000,0x080000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -337,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>__CLK_TCK=RT_TICK_PER_SECOND, RT_USING_ARMLIBC, GD32G5X3, USE_STDPERIPH_DRIVER, __STDC_LIMIT_MACROS, __RTTHREAD__, RT_USING_LIBC</Define>
+              <Define>RT_USING_LIBC, __RTTHREAD__, __STDC_LIMIT_MACROS, GD32G5X3, RT_USING_ARMLIBC, USE_STDPERIPH_DRIVER, __CLK_TCK=RT_TICK_PER_SECOND</Define>
               <Undefine></Undefine>
-              <IncludePath>packages\gd32-arm-series-latest\GD32G5x3\GD32G5x3_standard_peripheral\Include;.;..\..\..\..\components\drivers\include;board;..\..\..\..\components\drivers\include;..\..\..\..\components\finsh;..\..\..\..\components\drivers\spi;..\..\..\..\include;..\libraries\gd32_drivers;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\libcpu\arm\cortex-m33;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\dfs\dfs_v1\include;packages\gd32-arm-cmsis-latest\GD32G5x3\GD\GD32G5x3\Include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\smp_call;..\..\..\..\components\libc\posix\ipc;packages\at24cxx-latest;..\..\..\..\components\drivers\phy;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\libcpu\arm\common;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\drivers\include;..\..\..\..\components\net\utest;board;applications</IncludePath>
+              <IncludePath>..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\ipc;board;applications;..\..\..\..\libcpu\arm\common;..\..\..\..\include;board;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\drivers\include;..\..\..\..\libcpu\arm\cortex-m33;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\finsh;packages\gd32-arm-cmsis-latest\GD32G5x3\GD\GD32G5x3\Include;..\..\..\..\components\drivers\phy;packages\at24cxx-latest;..\..\..\..\components\libc\posix\io\eventfd;.;..\..\..\..\components\libc\posix\io\epoll;packages\gd32-arm-series-latest\GD32G5x3\GD32G5x3_standard_peripheral\Include;..\..\..\..\components\net\utest;..\..\..\..\components\drivers\smp_call;..\libraries\gd32_drivers;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\spi</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1436,9 +1436,9 @@
           <GroupName>Filesystem</GroupName>
           <Files>
             <File>
-              <FileName>dfs.c</FileName>
+              <FileName>dfs_fs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs.c</FilePath>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_fs.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1492,9 +1492,9 @@
               </FileOption>
             </File>
             <File>
-              <FileName>dfs_fs.c</FileName>
+              <FileName>dfs_posix.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_fs.c</FilePath>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_posix.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1604,9 +1604,9 @@
               </FileOption>
             </File>
             <File>
-              <FileName>dfs_posix.c</FileName>
+              <FileName>dfs.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs_posix.c</FilePath>
+              <FilePath>..\..\..\..\components\dfs\dfs_v1\src\dfs.c</FilePath>
               <FileOption>
                 <CommonProperty>
                   <UseCPPCompiler>2</UseCPPCompiler>
@@ -1670,6 +1670,16 @@
               <FilePath>..\..\..\..\components\finsh\msh.c</FilePath>
             </File>
             <File>
+              <FileName>msh_file.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\shell.c</FilePath>
+            </File>
+            <File>
               <FileName>cmd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
@@ -1678,16 +1688,6 @@
               <FileName>msh_parse.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
-            </File>
-            <File>
-              <FileName>shell.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\shell.c</FilePath>
-            </File>
-            <File>
-              <FileName>msh_file.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
             </File>
           </Files>
         </Group>

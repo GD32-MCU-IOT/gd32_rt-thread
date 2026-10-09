@@ -49,7 +49,7 @@ struct gd32_spi
 
 
 /* This function initializes the SPI pin */
-void gd32_spi_init(const struct gd32_spi *gd32_spi);
+void gd32_spi_init(struct gd32_spi *gd32_spi);
 
 
 rt_err_t rt_hw_spi_device_attach(const char *bus_name, const char *device_name, rt_base_t cs_pin);

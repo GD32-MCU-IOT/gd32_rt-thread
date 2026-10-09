@@ -130,7 +130,7 @@ static struct dma_config spi5_dma_tx_cfg = SPI5_TX_DMA_CONFIG;
 static struct dma_config spi5_dma_rx_cfg = SPI5_RX_DMA_CONFIG;
 #endif
 
-static const struct gd32_spi spi_bus_obj[] = {
+static struct gd32_spi spi_bus_obj[] = {
 
 #ifdef BSP_USING_SPI0
     {
@@ -266,7 +266,7 @@ static struct rt_spi_ops gd32_spi_ops =
     .xfer = spixfer,
 };
 
-rt_weak void gd32_spi_init(const struct gd32_spi *gd32_spi)
+rt_weak void gd32_spi_init(struct gd32_spi *gd32_spi)
 {
 }
 

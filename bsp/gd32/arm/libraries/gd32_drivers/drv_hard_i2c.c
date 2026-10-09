@@ -1327,7 +1327,7 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
     struct rt_i2c_msg *msg = RT_NULL;
     struct gd32_i2c_bus *gd32_i2c = (struct gd32_i2c_bus *)bus->priv;
     rt_uint16_t addr;
-    rt_uint32_t i, w_total_byte=0, r_total_byte=0;
+    rt_uint32_t i, j, w_total_byte=0, r_total_byte=0;
     rt_err_t ret = RT_ERROR;
 
     RT_ASSERT(bus != RT_NULL);
@@ -1352,7 +1352,7 @@ static rt_ssize_t gd32_i2c_master_xfer(struct rt_i2c_bus_device *bus, struct rt_
         /* Calculate total bytes for New IP non-DMA path: only on first iteration */
         if(i == 0)
         {
-            for(rt_uint32_t j = 0; j < num; j++)
+            for(j = 0; j < num; j++)
             {
                 if(msgs[j].flags & RT_I2C_RD)
                     r_total_byte += msgs[j].len;

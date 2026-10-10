@@ -639,6 +639,7 @@ void UART7_IRQHandler(void)
 
 #endif /* BSP_USING_UART7 */
 
+#warning "gd32_uart_gpio_init should be define in board_msd_init.c"
 rt_weak void gd32_uart_gpio_init(struct gd32_uart *uart)
 {
 }

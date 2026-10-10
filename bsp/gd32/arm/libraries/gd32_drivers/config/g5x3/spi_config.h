@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-/* SPI0 DMA configuration (DMA0 channels 0-1, DMAMUX 10-11) */
+/* SPI0 DMA configuration */
 #ifdef BSP_SPI0_USING_DMA
 #ifndef SPI0_TX_DMA_CONFIG
 #define SPI0_TX_DMA_CONFIG                          \
@@ -43,7 +43,7 @@ extern "C" {
 #endif /* SPI0_RX_DMA_CONFIG */
 #endif /* BSP_SPI0_USING_DMA */
 
-/* SPI1 DMA configuration (DMA0 channels 2-3, DMAMUX 12-13) */
+/* SPI1 DMA configuration */
 #ifdef BSP_SPI1_USING_DMA
 #ifndef SPI1_TX_DMA_CONFIG
 #define SPI1_TX_DMA_CONFIG                          \
@@ -69,7 +69,7 @@ extern "C" {
 #endif /* SPI1_RX_DMA_CONFIG */
 #endif /* BSP_SPI1_USING_DMA */
 
-/* SPI2 DMA configuration (DMA1 channels 0-1, DMAMUX 14-15) */
+/* SPI2 DMA configuration */
 #ifdef BSP_SPI2_USING_DMA
 #ifndef SPI2_TX_DMA_CONFIG
 #define SPI2_TX_DMA_CONFIG                          \

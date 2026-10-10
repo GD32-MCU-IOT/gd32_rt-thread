@@ -37,7 +37,7 @@
 
 /* USART data register address macros for DMA configuration */
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
- || defined(SOC_SERIES_GD32W51x_F5HC) || defined(SOC_SERIES_GD32L23x)
+ || defined(SOC_SERIES_GD32W51x_F5HC) || defined(SOC_SERIES_GD32L23x) || defined(SOC_SERIES_GD32G5x3)
 /* These series have separate USART transmit/receive data registers */
 #define USART_DATA_TX(usartx) (&USART_TDATA(usartx))
 #define USART_DATA_RX(usartx) (&USART_RDATA(usartx))
@@ -980,7 +980,7 @@ static void gd32_dma_config(struct rt_serial_device *serial, rt_ubase_t flag)
     rcu_periph_clock_enable(uart->dma_rx->rcu);
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E) \
- || defined(SOC_SERIES_GD32F50x)
+ || defined(SOC_SERIES_GD32F50x) || defined(SOC_SERIES_GD32G5x3)
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif
@@ -1017,7 +1017,7 @@ static void gd32_dma_tx_config(struct rt_serial_device *serial, rt_ubase_t flag)
     rcu_periph_clock_enable(uart->dma_tx->rcu);
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H77x) || defined(SOC_SERIES_GD32H75E) \
- || defined(SOC_SERIES_GD32F50x)
+ || defined(SOC_SERIES_GD32F50x) || defined(SOC_SERIES_GD32G5x3)
     /* enable DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif

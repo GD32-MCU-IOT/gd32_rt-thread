@@ -275,8 +275,8 @@ static void gd32_spi_dma_init(struct gd32_spi *spi_device)
     }
 
 #if defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x) \
- || defined(SOC_SERIES_GD32F50x)
-    /* H7xx requires DMAMUX clock */
+ || defined(SOC_SERIES_GD32F50x) || defined(SOC_SERIES_GD32G5x3)
+    /* H7xx/F50x/G5x3 requires DMAMUX clock */
     rcu_periph_clock_enable(RCU_DMAMUX);
 #endif
 

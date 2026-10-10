@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-/* UART0 (USART0) DMA configuration (DMA0 channels 4-5) */
+/* UART0 (USART0) DMA configuration */
 #ifdef BSP_UART0_RX_USING_DMA
 #ifndef UART0_DMA_RX_CONFIG
 #define UART0_DMA_RX_CONFIG                         \
@@ -161,35 +161,6 @@ extern "C" {
     }
 #endif /* UART4_DMA_TX_CONFIG */
 #endif /* BSP_UART4_TX_USING_DMA */
-
-/* UART5 DMA configuration */
-#ifdef BSP_UART5_RX_USING_DMA
-#ifndef UART5_DMA_RX_CONFIG
-#define UART5_DMA_RX_CONFIG                         \
-    {                                               \
-        .periph = UART5_RX_DMA_PERIPH,              \
-        .rcu = UART5_RX_DMA_RCU,                    \
-        .channel = UART5_RX_DMA_CHANNEL,             \
-        .request = UART5_RX_DMA_REQUEST,            \
-        .irq = UART5_RX_DMA_IRQ,                     \
-        .data_width = DMA_PERIPH_WIDTH_8BIT,         \
-    }
-#endif /* UART5_DMA_RX_CONFIG */
-#endif /* BSP_UART5_RX_USING_DMA */
-
-#ifdef BSP_UART5_TX_USING_DMA
-#ifndef UART5_DMA_TX_CONFIG
-#define UART5_DMA_TX_CONFIG                         \
-    {                                               \
-        .periph = UART5_TX_DMA_PERIPH,              \
-        .rcu = UART5_TX_DMA_RCU,                    \
-        .channel = UART5_TX_DMA_CHANNEL,             \
-        .request = UART5_TX_DMA_REQUEST,            \
-        .irq = UART5_TX_DMA_IRQ,                     \
-        .data_width = DMA_PERIPH_WIDTH_8BIT,         \
-    }
-#endif /* UART5_DMA_TX_CONFIG */
-#endif /* BSP_UART5_TX_USING_DMA */
 
 #ifdef __cplusplus
 }

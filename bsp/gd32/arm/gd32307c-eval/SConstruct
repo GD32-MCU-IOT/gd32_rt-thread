@@ -34,7 +34,7 @@ def bsp_pkg_check():
 
 RegisterPreBuildingAction(bsp_pkg_check) 
 
-TARGET = 'rt-thread.' + rtconfig.TARGET_EXT
+TARGET = 'rtthread.' + rtconfig.TARGET_EXT
 
 DefaultEnvironment(tools=[])
 env = Environment(tools = ['mingw'],
@@ -54,13 +54,20 @@ Export('env')
 Export('RTT_ROOT')
 Export('rtconfig')
 
-# Set libraries path
-libraries_path_prefix = os.path.dirname(os.path.abspath('./')) + '/libraries'
+SDK_ROOT = os.path.abspath('./')
+
+if os.path.exists(SDK_ROOT + '/libraries'):
+    libraries_path_prefix = SDK_ROOT + '/libraries'
+else:
+    libraries_path_prefix = os.path.dirname(SDK_ROOT) + '/libraries'
+
+SDK_LIB = libraries_path_prefix
+Export('SDK_LIB')
 
 # prepare building environment
 objs = PrepareBuilding(env, RTT_ROOT, has_libcpu=False)
 
-# include libraries
+# include drivers
 objs.extend(SConscript(os.path.join(libraries_path_prefix, 'gd32_drivers', 'SConscript')))
 
 # make a building

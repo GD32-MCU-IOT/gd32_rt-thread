@@ -2,7 +2,7 @@
 <project>
     <fileVersion>3</fileVersion>
     <configuration>
-        <name>rtthread</name>
+        <name>Debug</name>
         <toolchain>
             <name>ARM</name>
         </toolchain>
@@ -16,15 +16,15 @@
                 <debug>1</debug>
                 <option>
                     <name>ExePath</name>
-                    <state>build\iar\Exe</state>
+                    <state>build\Exe</state>
                 </option>
                 <option>
                     <name>ObjPath</name>
-                    <state>build\iar\Obj</state>
+                    <state>build\Obj</state>
                 </option>
                 <option>
                     <name>ListPath</name>
-                    <state>build\iar\List</state>
+                    <state>build\List</state>
                 </option>
                 <option>
                     <name>GEndianMode</name>
@@ -649,7 +649,7 @@
                 </option>
                 <option>
                     <name>OOCOutputFile</name>
-                    <state>../../../rtthread.bin</state>
+                    <state>../../rtthread.bin</state>
                 </option>
                 <option>
                     <name>OOCCommandLineProducer</name>
@@ -704,7 +704,7 @@
                 </option>
                 <option>
                     <name>IlinkOutputFile</name>
-                    <state>template.out</state>
+                    <state>rtthread.out</state>
                 </option>
                 <option>
                     <name>IlinkDebugInfoEnable</name>

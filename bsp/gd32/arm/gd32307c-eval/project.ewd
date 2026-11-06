@@ -2,7 +2,7 @@
 <project>
     <fileVersion>3</fileVersion>
     <configuration>
-        <name>rtthread</name>
+        <name>Debug</name>
         <toolchain>
             <name>ARM</name>
         </toolchain>

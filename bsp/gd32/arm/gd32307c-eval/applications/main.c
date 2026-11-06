@@ -42,6 +42,7 @@ uint8_t i2c_24c02_test(void);
 #endif
 
 #ifdef GD32_SPI_TEST
+#include "drv_spi.h"
 #define BUS_NAME     "spi0"
 #define SPI_NAME     "spi00"
 

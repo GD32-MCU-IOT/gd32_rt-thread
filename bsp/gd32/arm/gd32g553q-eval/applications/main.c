@@ -5,7 +5,7 @@
  *
  * Change Logs:
  * Date           Author       Notes
- * 2024-08-07     RT-Thread    first implementation for GD32G553Q-EVAL
+ * 2026-10-10     RT-Thread    first implementation for GD32G553Q-EVAL
  */
 
 #include <rtthread.h>

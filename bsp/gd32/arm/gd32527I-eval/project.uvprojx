@@ -324,7 +324,7 @@
             <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
-            <v6Lang>1</v6Lang>
+            <v6Lang>3</v6Lang>
             <v6LangP>1</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
@@ -333,9 +333,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls />
-              <Define>RT_USING_LIBC, RT_USING_ARMLIBC, GD32F527, USE_STDPERIPH_DRIVER, __CLK_TCK=RT_TICK_PER_SECOND, __STDC_LIMIT_MACROS, __RTTHREAD__</Define>
+              <Define>USE_STDPERIPH_DRIVER, __STDC_LIMIT_MACROS, __RTTHREAD__, RT_USING_LIBC, GD32F527, RT_USING_ARMLIBC, __CLK_TCK=RT_TICK_PER_SECOND</Define>
               <Undefine />
-              <IncludePath>..\..\..\..\libcpu\arm\cortex-m33;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\drivers\include;..\..\..\..\libcpu\arm\common;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\drivers\phy;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\net\utest;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;board;..\..\..\..\include;..\..\..\..\components\drivers\smp_call;packages\gd32-arm-cmsis-latest\GD32F5xx\GD\GD32F5xx\Include;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Include;.;..\..\..\..\components\libc\compilers\common\include;applications;..\libraries\gd32_drivers;packages\at24cxx-latest;..\..\..\..\components\libc\posix\io\epoll;packages\gd32-arm-cmsis-latest\GD32F5xx;..\..\..\..\components\drivers\spi;..\..\..\..\components\finsh;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include</IncludePath>
+              <IncludePath>..\..\..\..\components\drivers\include;packages\gd32-arm-cmsis-latest\GD32F5xx;board;..\..\..\..\components\drivers\include;..\..\..\..\components\dfs\dfs_v1\include;..\..\..\..\components\net\utest;..\..\..\..\components\libc\posix\io\poll;..\..\..\..\components\drivers\include;..\..\..\..\libcpu\arm\cortex-m33;.;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\..\..\..\components\libc\posix\io\eventfd;..\..\..\..\components\drivers\include;..\..\..\..\components\drivers\include;..\libraries\gd32_drivers;..\..\..\..\components\drivers\sdio\sdhci\include;..\..\..\..\components\libc\compilers\common\include;..\..\..\..\components\drivers\include;applications;..\..\..\..\components\libc\posix\ipc;..\..\..\..\components\finsh;..\..\..\..\components\libc\compilers\common\extension;..\..\..\..\components\drivers\spi;packages\gd32-arm-cmsis-latest\GD32F5xx\GD\GD32F5xx\Include;..\..\..\..\components\libc\compilers\common\extension\fcntl\octal;..\..\..\..\libcpu\arm\common;..\..\..\..\components\drivers\include;packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Include;packages\at24cxx-latest;..\..\..\..\include;..\..\..\..\components\drivers\phy;..\..\..\..\components\libc\posix\io\epoll;..\..\..\..\components\drivers\smp_call;..\..\..\..\components\drivers\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -450,6 +450,82 @@
         </Group>
         <Group>
           <GroupName>DeviceDrivers</GroupName>
+          <Files>
+            <File>
+              <FileName>blk.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\block\blk.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>blk_dev.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\block\blk_dev.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>blk_dfs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\block\blk_dfs.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>blk_partition.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\block\blk_partition.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
           <Files>
             <File>
               <FileName>device.c</FileName>
@@ -718,6 +794,101 @@
           </Files>
           <Files>
             <File>
+              <FileName>dev_block.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\sdio\dev_block.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>dev_mmc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\sdio\dev_mmc.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>dev_mmcsd_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\sdio\dev_mmcsd_core.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>dev_sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\sdio\dev_sd.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>dev_sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\drivers\sdio\dev_sdio.c</FilePath>
+              <FileOption>
+                <FileArmAds>
+                  <Cads>
+                    <VariousControls>
+                      <MiscControls> </MiscControls>
+                      <Define>__RT_IPC_SOURCE__</Define>
+                      <Undefine> </Undefine>
+                      <IncludePath> </IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+          </Files>
+          <Files>
+            <File>
               <FileName>dev_serial.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\drivers\serial\dev_serial.c</FilePath>
@@ -809,6 +980,13 @@
               <FileName>drv_hard_i2c.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\libraries\gd32_drivers\drv_hard_i2c.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>drv_sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\libraries\gd32_drivers\drv_sdio.c</FilePath>
             </File>
           </Files>
           <Files>
@@ -909,6 +1087,13 @@
           <GroupName>Finsh</GroupName>
           <Files>
             <File>
+              <FileName>cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
               <FileName>msh_parse.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\msh_parse.c</FilePath>
@@ -933,13 +1118,6 @@
               <FileName>msh_file.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\components\finsh\msh_file.c</FilePath>
-            </File>
-          </Files>
-          <Files>
-            <File>
-              <FileName>cmd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\components\finsh\cmd.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1388,6 +1566,13 @@
               <FileName>gd32f5xx_rcu.c</FileName>
               <FileType>1</FileType>
               <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_rcu.c</FilePath>
+            </File>
+          </Files>
+          <Files>
+            <File>
+              <FileName>gd32f5xx_sdio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>packages\gd32-arm-series-latest\GD32F5xx\GD32F5xx_standard_peripheral\Source\gd32f5xx_sdio.c</FilePath>
             </File>
           </Files>
           <Files>

@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2006-2022, RT-Thread Development Team
+ * Copyright (c) 2006-2026, RT-Thread Development Team
  *
  * SPDX-License-Identifier: Apache-2.0
  *
  * Change Logs:
  * Date           Author            Notes
- * 2022-07-20     jiezhi320    the first version
+ * 2022-07-20     jiezhi320         the first version
  */
 #include <stddef.h>
 #include <rthw.h>
@@ -78,7 +78,7 @@
 #define SD_MASK_16_23BITS                   ((uint32_t)0x00FF0000)    /* mask [23:16] bits */
 #define SD_MASK_24_31BITS                   ((uint32_t)0xFF000000)    /* mask [31:24] bits */
 
-#define SDIO_FIFO_ADDR                      ((uint32_t)0x40012C80)    /* address of SDIO_FIFO */
+#define SDIO_FIFO_ADDR                      ((uint32_t)&SDIO_FIFO)    /* address of SDIO_FIFO */
 #define SD_FIFOHALF_WORDS                   ((uint32_t)0x00000008)    /* words of FIFO half full/empty */
 #define SD_FIFOHALF_BYTES                   ((uint32_t)0x00000020)    /* bytes of FIFO half full/empty */
 
@@ -87,8 +87,38 @@
 #define SD_MAX_DATA_LENGTH                  ((uint32_t)0x01FFFFFF)    /* the maximum length of data */
 #define SD_ALLZERO                          ((uint32_t)0x00000000)    /* all zero */
 #define SD_RCA_SHIFT                        ((uint8_t)0x10)           /* RCA shift bits */
+
+/* SD clock division, values from the official Demo_Suites SDIO_SDCardTest */
+#if defined(SOC_SERIES_GD32F10x)
+#define SD_CLK_DIV_INIT                     ((uint16_t)0x00FF)        /* SD clock division in initialization phase */
+#define SD_CLK_DIV_TRANS                    ((uint16_t)0x0003)        /* SD clock division in transmission phase */
+#elif defined(SOC_SERIES_GD32F30x)
+#define SD_CLK_DIV_INIT                     ((uint16_t)0x012A)        /* SD clock division in initialization phase */
+#define SD_CLK_DIV_TRANS                    ((uint16_t)0x0008)        /* SD clock division in transmission phase */
+#else
 #define SD_CLK_DIV_INIT                     ((uint16_t)0x0076)        /* SD clock division in initialization phase */
 #define SD_CLK_DIV_TRANS                    ((uint16_t)0x0002)        /* SD clock division in transmission phase */
+#endif
+
+/* erase delay base, values from the official Demo_Suites SDIO_SDCardTest */
+#if defined(SOC_SERIES_GD32F10x)
+#define SD_ERASE_DELAY_BASE                 ((uint32_t)108000)
+#elif defined(SOC_SERIES_GD32F20x) || defined(SOC_SERIES_GD32F30x)
+#define SD_ERASE_DELAY_BASE                 ((uint32_t)120000)
+#else
+#define SD_ERASE_DELAY_BASE                 ((uint32_t)168000)
+#endif
+
+/* GD32_SDIO_HAS_DIV8: SDIO_CLKCTL has the DIV8 bit (9-bit clock divider) */
+#if defined(SOC_SERIES_GD32F20x) || defined(SOC_SERIES_GD32F30x) || \
+    defined(SOC_SERIES_GD32F4xx) || defined(SOC_SERIES_GD32F5xx)
+#define GD32_SDIO_HAS_DIV8
+#endif
+
+/* GD32_SDIO_DMA_MULTI_DATA: SDIO uses multi-data DMA with sub-peripheral select */
+#if defined(SOC_SERIES_GD32F4xx) || defined(SOC_SERIES_GD32F5xx)
+#define GD32_SDIO_DMA_MULTI_DATA
+#endif
 
 #define SDIO_MASK_INTC_FLAGS                ((uint32_t)0x00C007FF)    /* mask flags of SDIO_INTC */
 
@@ -162,8 +192,6 @@ static sd_error_enum sd_scr_get(uint16_t rca, uint32_t *pscr);
 /* get the data block size */
 static uint32_t sd_datablocksize_get(uint16_t bytesnumber);
 
-/* configure the GPIO of SDIO interface */
-static void gpio_config(void);
 /* configure the RCU of SDIO and DMA */
 static void rcu_config(void);
 /* configure the DMA for SDIO transfer request */
@@ -210,7 +238,7 @@ static rt_err_t rt_sdcard_init(rt_device_t dev)
         LOG_I("\r\n Card init success!\r\n");
     }
     else {
-        LOG_E("\r\n Card init failed!\r\n");
+        LOG_E("\r\n Card init failed! e:%d\r\n", sd_error);
         ret = -RT_EIO;
         return ret;
     }
@@ -251,10 +279,10 @@ static rt_ssize_t rt_sdcard_read(rt_device_t dev, rt_off_t pos, void* buffer, rt
         /* non-aligned. */
         uint32_t i;
         uint32_t sector_adr;
-        uint32_t* copy_buffer;
+        uint8_t* copy_buffer;
 
         sector_adr = pos*SECTOR_SIZE;
-        copy_buffer = (uint32_t*)buffer;
+        copy_buffer = (uint8_t*)buffer;
 
         for(i=0; i<size; i++){
             sd_error = sd_block_read((uint32_t*)dma_buffer, sector_adr, SECTOR_SIZE);
@@ -300,10 +328,10 @@ static rt_ssize_t rt_sdcard_write (rt_device_t dev, rt_off_t pos, const void* bu
         /* non-aligned. */
         uint32_t i;
         rt_size_t sector_adr;
-        uint32_t* copy_buffer;
+        const uint8_t* copy_buffer;
 
         sector_adr = pos*SECTOR_SIZE;
-        copy_buffer = (uint32_t*)buffer;
+        copy_buffer = (const uint8_t*)buffer;
 
         for (i=0; i<size; i++) {
             retry = WR_RETRY_TIMES;
@@ -558,7 +586,7 @@ sd_error_enum sd_init(void)
 
     /* configure the RCU and GPIO, deinitialize the SDIO */
     rcu_config();
-    gpio_config();
+    gd32_sdio_gpio_init();
     sdio_deinit();
 
     /* configure the clock and work voltage */
@@ -1566,9 +1594,11 @@ sd_error_enum sd_erase(uint32_t startaddr, uint32_t endaddr)
         return status;
     }
     clkdiv = (SDIO_CLKCTL & SDIO_CLKCTL_DIV);
+#ifdef GD32_SDIO_HAS_DIV8
     clkdiv += ((SDIO_CLKCTL & SDIO_CLKCTL_DIV8)>>31)*256;
+#endif
     clkdiv += 2;
-    delay = 168000 / clkdiv;
+    delay = SD_ERASE_DELAY_BASE / clkdiv;
 
     /* check whether the card is locked */
     if (sdio_response_get(SDIO_RESPONSE0) & SD_CARDSTATE_LOCKED)
@@ -2768,39 +2798,9 @@ static uint32_t sd_datablocksize_get(uint16_t bytesnumber)
     return DATACTL_BLKSZ(exp_val);
 }
 
-/*!
-    \brief      configure the GPIO of SDIO interface
-    \param[in]  none
-    \param[out] none
-    \retval     none
-*/
-static void gpio_config(void)
+#warning "gd32_sdio_gpio_init should be defined in board_msd_init.c"
+rt_weak void gd32_sdio_gpio_init(void)
 {
-    /* configure the SDIO_DAT0(PC8), SDIO_DAT1(PC9), SDIO_DAT2(PC10), SDIO_DAT3(PC11), SDIO_CLK(PC12) and SDIO_CMD(PD2) */
-    gpio_af_set(SDIO_CLK_PORT, GPIO_AF_12, SDIO_CLK_PIN);
-    gpio_af_set(SDIO_CMD_PORT, GPIO_AF_12, SDIO_CMD_PIN);
-    gpio_af_set(SDIO_D0_PORT,  GPIO_AF_12, SDIO_D0_PIN);
-    gpio_af_set(SDIO_D1_PORT,  GPIO_AF_12, SDIO_D1_PIN);
-    gpio_af_set(SDIO_D2_PORT,  GPIO_AF_12, SDIO_D2_PIN);
-    gpio_af_set(SDIO_D3_PORT,  GPIO_AF_12, SDIO_D3_PIN);
-
-    gpio_mode_set(SDIO_CLK_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE, SDIO_CLK_PIN);
-    gpio_output_options_set(SDIO_CLK_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_25MHZ, SDIO_CLK_PIN);
-
-    gpio_mode_set(SDIO_CMD_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, SDIO_CMD_PIN);
-    gpio_output_options_set(SDIO_CMD_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_25MHZ, SDIO_CMD_PIN);
-
-    gpio_mode_set(SDIO_D0_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, SDIO_D0_PIN);
-    gpio_output_options_set(SDIO_D0_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_25MHZ, SDIO_D0_PIN);
-
-    gpio_mode_set(SDIO_D1_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, SDIO_D1_PIN);
-    gpio_output_options_set(SDIO_D1_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_25MHZ, SDIO_D1_PIN);
-
-    gpio_mode_set(SDIO_D2_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, SDIO_D2_PIN);
-    gpio_output_options_set(SDIO_D2_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_25MHZ, SDIO_D2_PIN);
-
-    gpio_mode_set(SDIO_D3_PORT, GPIO_MODE_AF, GPIO_PUPD_PULLUP, SDIO_D3_PIN);
-    gpio_output_options_set(SDIO_D3_PORT, GPIO_OTYPE_PP, GPIO_OSPEED_25MHZ, SDIO_D3_PIN);
 }
 
 /*!
@@ -2811,13 +2811,6 @@ static void gpio_config(void)
 */
 static void rcu_config(void)
 {
-    rcu_periph_clock_enable(SDIO_GPIO_CLK);
-    rcu_periph_clock_enable(SDIO_GPIO_CMD);
-    rcu_periph_clock_enable(SDIO_GPIO_D0);
-    rcu_periph_clock_enable(SDIO_GPIO_D1);
-    rcu_periph_clock_enable(SDIO_GPIO_D2);
-    rcu_periph_clock_enable(SDIO_GPIO_D3);
-
     rcu_periph_clock_enable(SDIO_PERI_CLOCK);
     rcu_periph_clock_enable(SDIO_DMA_CLOCK);
 }
@@ -2829,6 +2822,63 @@ static void rcu_config(void)
     \param[out] none
     \retval     none
 */
+#ifndef GD32_SDIO_DMA_MULTI_DATA
+/* fixed-mapping DMA: SDIO request is hard-wired to DMA1 CH3, no peripheral flow control */
+static void dma_transfer_config(uint32_t *srcbuf, uint32_t bufsize)
+{
+    dma_parameter_struct dma_struct;
+    /* clear all the interrupt flags */
+    dma_flag_clear(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_FLAG_G);
+    dma_flag_clear(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_FLAG_FTF);
+    dma_flag_clear(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_FLAG_HTF);
+    dma_flag_clear(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_FLAG_ERR);
+    dma_channel_disable(SDIO_DMA, SDIO_DMA_CHANNEL);
+    dma_deinit(SDIO_DMA, SDIO_DMA_CHANNEL);
+
+    /* configure the DMA1 channel 3 */
+    dma_struct.periph_addr  = (uint32_t)SDIO_FIFO_ADDR;
+    dma_struct.memory_addr  = (uint32_t)srcbuf;
+    dma_struct.direction    = DMA_MEMORY_TO_PERIPHERAL;
+    dma_struct.number       = bufsize / 4;
+    dma_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
+    dma_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
+    dma_struct.periph_width = DMA_PERIPHERAL_WIDTH_32BIT;
+    dma_struct.memory_width = DMA_MEMORY_WIDTH_32BIT;
+    dma_struct.priority     = DMA_PRIORITY_ULTRA_HIGH;
+    dma_init(SDIO_DMA, SDIO_DMA_CHANNEL, &dma_struct);
+
+    dma_circulation_disable(SDIO_DMA, SDIO_DMA_CHANNEL);
+    dma_channel_enable(SDIO_DMA, SDIO_DMA_CHANNEL);
+}
+
+static void dma_receive_config(uint32_t *dstbuf, uint32_t bufsize)
+{
+    dma_parameter_struct dma_struct;
+    /* clear all the interrupt flags */
+    dma_flag_clear(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_FLAG_G);
+    dma_flag_clear(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_FLAG_FTF);
+    dma_flag_clear(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_FLAG_HTF);
+    dma_flag_clear(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_FLAG_ERR);
+    dma_channel_disable(SDIO_DMA, SDIO_DMA_CHANNEL);
+    dma_deinit(SDIO_DMA, SDIO_DMA_CHANNEL);
+
+    /* configure the DMA1 channel 3 */
+    dma_struct.periph_addr  = (uint32_t)SDIO_FIFO_ADDR;
+    dma_struct.memory_addr  = (uint32_t)dstbuf;
+    dma_struct.direction    = DMA_PERIPHERAL_TO_MEMORY;
+    dma_struct.number       = bufsize / 4;
+    dma_struct.periph_inc   = DMA_PERIPH_INCREASE_DISABLE;
+    dma_struct.memory_inc   = DMA_MEMORY_INCREASE_ENABLE;
+    dma_struct.periph_width = DMA_PERIPHERAL_WIDTH_32BIT;
+    dma_struct.memory_width = DMA_MEMORY_WIDTH_32BIT;
+    dma_struct.priority     = DMA_PRIORITY_ULTRA_HIGH;
+    dma_init(SDIO_DMA, SDIO_DMA_CHANNEL, &dma_struct);
+
+    dma_circulation_disable(SDIO_DMA, SDIO_DMA_CHANNEL);
+    dma_channel_enable(SDIO_DMA, SDIO_DMA_CHANNEL);
+}
+#else
+/* sub-peripheral DMA: multi-data mode with FIFO, burst and SDIO as flow controller */
 static void dma_transfer_config(uint32_t *srcbuf, uint32_t bufsize)
 {
     dma_multi_data_parameter_struct dma_struct;
@@ -2902,6 +2952,7 @@ static void dma_receive_config(uint32_t *dstbuf, uint32_t bufsize)
     dma_channel_subperipheral_select(SDIO_DMA, SDIO_DMA_CHANNEL, DMA_SUBPERI4);
     dma_channel_enable(SDIO_DMA, SDIO_DMA_CHANNEL);
 }
+#endif /* GD32_SDIO_DMA_MULTI_DATA */
 
 #if SDIO_DMA_USE_IPC
 static void sdio_dma_irq_config(void)

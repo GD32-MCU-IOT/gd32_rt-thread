@@ -15,6 +15,9 @@
 #include "drv_hard_i2c.h"
 #include "drv_spi.h"
 #include "drv_usart.h"
+#ifdef BSP_USING_SDIO
+#include "drv_sdio.h"
+#endif
 
 #ifdef RT_USING_I2C
 /**
@@ -309,3 +312,28 @@ void gd32_sdram_gpio_init(void)
     gpio_output_options_set(GPIOH, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO_PIN_5);
 }
 #endif
+
+#ifdef BSP_USING_SDIO
+/**
+  * @brief  SDIO GPIO Initialization (same as Demo_Suites 17_SDIO_SDCardTest)
+  * @note   PC10/PC11 conflict with UART3, PC12/PD2 conflict with UART4
+  * @retval None
+  */
+void gd32_sdio_gpio_init(void)
+{
+    /* SDIO_D0: PC8, SDIO_D1: PC9, SDIO_D2: PC10, SDIO_D3: PC11, SDIO_CLK: PC12, SDIO_CMD: PD2 */
+    rcu_periph_clock_enable(RCU_GPIOC);
+    rcu_periph_clock_enable(RCU_GPIOD);
+    gpio_af_set(GPIOC, GPIO_AF_12, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12);
+    gpio_af_set(GPIOD, GPIO_AF_12, GPIO_PIN_2);
+
+    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_10MHZ, GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11);
+
+    gpio_mode_set(GPIOC, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO_PIN_12);
+    gpio_output_options_set(GPIOC, GPIO_OTYPE_PP, GPIO_OSPEED_10MHZ, GPIO_PIN_12);
+
+    gpio_mode_set(GPIOD, GPIO_MODE_AF, GPIO_PUPD_PULLUP, GPIO_PIN_2);
+    gpio_output_options_set(GPIOD, GPIO_OTYPE_PP, GPIO_OSPEED_10MHZ, GPIO_PIN_2);
+}
+#endif /* BSP_USING_SDIO */

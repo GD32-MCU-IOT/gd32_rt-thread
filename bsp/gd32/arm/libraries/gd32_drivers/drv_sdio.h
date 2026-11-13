@@ -13,40 +13,10 @@
 
 #include <board.h>
 
-#if defined SOC_SERIES_GD32F10x
-#include "gd32f10x_sdio.h"
-#include "gd32f10x_dma.h"
-#elif defined SOC_SERIES_GD32F20x
-#include "gd32f20x_sdio.h"
-#include "gd32f20x_dma.h"
-#elif defined SOC_SERIES_GD32F30x
-#include "gd32f30x_sdio.h"
-#include "gd32f30x_dma.h"
-#elif defined SOC_SERIES_GD32F4xx
-#include "gd32f4xx_sdio.h"
-#include "gd32f4xx_dma.h"
-#endif
+/* SDIO/DMA peripheral headers (gd32fXxx_sdio.h, gd32fXxx_dma.h) are pulled in
+ * via board.h -> gd32fXxx.h -> USE_STDPERIPH_DRIVER -> gd32fXxx_libopt.h */
 
 #define SDIO_PERI_CLOCK            RCU_SDIO
-#define SDIO_GPIO_CLK              RCU_GPIOC
-#define SDIO_GPIO_CMD              RCU_GPIOD
-#define SDIO_GPIO_D0               RCU_GPIOC
-#define SDIO_GPIO_D1               RCU_GPIOC
-#define SDIO_GPIO_D2               RCU_GPIOC
-#define SDIO_GPIO_D3               RCU_GPIOC
-
-#define SDIO_CLK_PORT              GPIOC
-#define SDIO_CLK_PIN               GPIO_PIN_12
-#define SDIO_CMD_PORT              GPIOD
-#define SDIO_CMD_PIN               GPIO_PIN_2
-#define SDIO_D0_PORT               GPIOC
-#define SDIO_D0_PIN                GPIO_PIN_8
-#define SDIO_D1_PORT               GPIOC
-#define SDIO_D1_PIN                GPIO_PIN_9
-#define SDIO_D2_PORT               GPIOC
-#define SDIO_D2_PIN                GPIO_PIN_10
-#define SDIO_D3_PORT               GPIOC
-#define SDIO_D3_PIN                GPIO_PIN_11
 
 #define SDIO_DMA                   DMA1
 #define SDIO_DMA_CLOCK             RCU_DMA1
@@ -228,6 +198,8 @@ typedef enum
 
 
 /* function declarations */
+/* configure SDIO pins, defined in board_msd_init.c */
+void gd32_sdio_gpio_init(void);
 /* initialize the SD card and make it in standby state */
 sd_error_enum sd_init(void);
 /* initialize the card and get CID and CSD of the card */

@@ -13,13 +13,13 @@
 #include <string.h>
 
 /* Test Feature Switches - comment out to disable */
-#define GD32_I2C_EEPROM_TEST
-#define GD32_SPI_POLL_TEST
-#define GD32_SPI_DMA_TEST
-#define GD32_UART_TEST
-#define GD32_UART_DMA_TEST
+// #define GD32_I2C_EEPROM_TEST
+// #define GD32_SPI_POLL_TEST
+// #define GD32_SPI_DMA_TEST
+// #define GD32_UART_TEST
+// #define GD32_UART_DMA_TEST
 
-#define GD32_GPIO_EXTI_TEST
+// #define GD32_GPIO_EXTI_TEST
 
 /* GD32H75EY-EVAL has 3 LEDs */
 #define LED1_PIN    GET_PIN(C, 3)   /* LED1 on PC3 */
@@ -71,6 +71,9 @@ static int uart_sample(int argc, char *argv[]);
 #ifdef GD32_UART_DMA_TEST
 /* UART DMA test: DMA RX + DMA TX echo on uart3 */
 #define UART_DMA_NAME      "uart3"
+#if defined(BSP_UART3_RX_USING_DMA) && defined(BSP_UART3_TX_USING_DMA)
+#define UART_DMA_AUTORUN
+#endif
 #define RX_BUF_SIZE        256
 #define TX_BUF_SIZE        256
 #define DMA_TX_TIMEOUT     rt_tick_from_millisecond(1000)  /* 1 second timeout */
@@ -81,6 +84,7 @@ static struct rt_mutex uart_dma_tx_mutex;
 static rt_device_t uart_dma_serial;
 static rt_uint8_t uart_dma_rx_buf[RX_BUF_SIZE];
 static rt_uint8_t uart_dma_tx_buf[TX_BUF_SIZE];
+static rt_bool_t uart_sample_use_dma = RT_FALSE;
 
 /* Initialization flag to prevent re-initialization */
 static rt_bool_t uart_dma_initialized = RT_FALSE;
@@ -98,6 +102,65 @@ static rt_err_t uart_dma_tx_done(rt_device_t dev, void *buffer);
 static rt_ssize_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len);
 static void uart_dma_thread_entry(void *parameter);
 static int uart_dma_sample(int argc, char *argv[]);
+
+static rt_bool_t uart_dma_port_enabled(const char *uart_name)
+{
+    if (uart_name == RT_NULL)
+    {
+        return RT_FALSE;
+    }
+
+#if defined(BSP_UART0_RX_USING_DMA) && defined(BSP_UART0_TX_USING_DMA)
+    if (rt_strcmp(uart_name, "uart0") == 0)
+    {
+        return RT_TRUE;
+    }
+#endif
+#if defined(BSP_UART1_RX_USING_DMA) && defined(BSP_UART1_TX_USING_DMA)
+    if (rt_strcmp(uart_name, "uart1") == 0)
+    {
+        return RT_TRUE;
+    }
+#endif
+#if defined(BSP_UART2_RX_USING_DMA) && defined(BSP_UART2_TX_USING_DMA)
+    if (rt_strcmp(uart_name, "uart2") == 0)
+    {
+        return RT_TRUE;
+    }
+#endif
+#if defined(BSP_UART3_RX_USING_DMA) && defined(BSP_UART3_TX_USING_DMA)
+    if (rt_strcmp(uart_name, "uart3") == 0)
+    {
+        return RT_TRUE;
+    }
+#endif
+#if defined(BSP_UART4_RX_USING_DMA) && defined(BSP_UART4_TX_USING_DMA)
+    if (rt_strcmp(uart_name, "uart4") == 0)
+    {
+        return RT_TRUE;
+    }
+#endif
+#if defined(BSP_UART5_RX_USING_DMA) && defined(BSP_UART5_TX_USING_DMA)
+    if (rt_strcmp(uart_name, "uart5") == 0)
+    {
+        return RT_TRUE;
+    }
+#endif
+#if defined(BSP_UART6_RX_USING_DMA) && defined(BSP_UART6_TX_USING_DMA)
+    if (rt_strcmp(uart_name, "uart6") == 0)
+    {
+        return RT_TRUE;
+    }
+#endif
+#if defined(BSP_UART7_RX_USING_DMA) && defined(BSP_UART7_TX_USING_DMA)
+    if (rt_strcmp(uart_name, "uart7") == 0)
+    {
+        return RT_TRUE;
+    }
+#endif
+
+    return RT_FALSE;
+}
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
@@ -147,7 +210,12 @@ int main(void)
 #endif
 
 #ifdef GD32_UART_DMA_TEST
+#ifdef UART_DMA_AUTORUN
     uart_dma_sample(0, RT_NULL);
+#else
+    rt_kprintf("UART DMA sample skipped: UART3 DMA is disabled in current config.\n");
+    rt_kprintf("Run 'uart_dma_sample uartX' manually after enabling RX/TX DMA for target UART.\n");
+#endif
 #endif
 
 #ifdef GD32_GPIO_EXTI_TEST
@@ -522,13 +590,21 @@ static rt_ssize_t uart_dma_send(const rt_uint8_t *buf, rt_size_t len)
     }
     else if (sent > 0)
     {
-        /* Wait for TX completion with timeout to avoid infinite blocking */
-        ret = rt_sem_take(&uart_dma_tx_sem, DMA_TX_TIMEOUT);
-        if (ret == -RT_ETIMEOUT)
+        if (uart_sample_use_dma)
         {
-            tx_timeout_count++;
-            rt_kprintf("[UART DMA] TX timeout! count=%d\n", tx_timeout_count);
-            sent = -RT_ETIMEOUT;  /* Indicate failure */
+            /* Wait for TX completion with timeout to avoid infinite blocking */
+            ret = rt_sem_take(&uart_dma_tx_sem, DMA_TX_TIMEOUT);
+            if (ret == -RT_ETIMEOUT)
+            {
+                tx_timeout_count++;
+                rt_kprintf("[UART DMA] TX timeout! count=%d\n", tx_timeout_count);
+                sent = -RT_ETIMEOUT;  /* Indicate failure */
+            }
+            else
+            {
+                tx_count++;
+                total_tx_bytes += sent;
+            }
         }
         else
         {
@@ -572,6 +648,7 @@ static int uart_dma_sample(int argc, char *argv[])
     char str[] = "hello RT-Thread UART DMA!\r\n";
     rt_err_t ret;
     rt_thread_t thread;
+    rt_uint16_t open_flags;
 
     /* Prevent re-initialization */
     if (uart_dma_initialized)
@@ -591,6 +668,25 @@ static int uart_dma_sample(int argc, char *argv[])
     if (!uart_dma_serial)
     {
         rt_kprintf("UART device %s not found!\n\r", uart_name);
+        return RT_ERROR;
+    }
+
+    uart_sample_use_dma = uart_dma_port_enabled(uart_name);
+    if (!uart_sample_use_dma)
+    {
+        rt_kprintf("Warning: %s RX/TX DMA is disabled in current config.\n\r", uart_name);
+        rt_kprintf("Fallback to INT RX + normal TX mode for functional testing.\n\r");
+    }
+
+    /*
+     * serial v2 uses polling TX on console device path, which bypasses
+     * TX complete callback and will make this DMA sample timeout forever.
+     */
+    if (uart_dma_serial == rt_console_get_device())
+    {
+        rt_kprintf("Error: %s is current console device, DMA TX sample is invalid on console.\n\r", uart_name);
+        rt_kprintf("Please use a non-console UART (for example uart3) or switch RT_CONSOLE_DEVICE_NAME.\n\r");
+        uart_dma_serial = RT_NULL;
         return RT_ERROR;
     }
 
@@ -617,7 +713,9 @@ static int uart_dma_sample(int argc, char *argv[])
     }
 
     /* Open with DMA RX + DMA TX */
-    ret = rt_device_open(uart_dma_serial, RT_DEVICE_FLAG_DMA_RX | RT_DEVICE_FLAG_DMA_TX);
+    /* Open in DMA mode when enabled, otherwise fallback to INT RX + normal TX. */
+    open_flags = uart_sample_use_dma ? (RT_DEVICE_FLAG_DMA_RX | RT_DEVICE_FLAG_DMA_TX) : RT_DEVICE_FLAG_INT_RX;
+    ret = rt_device_open(uart_dma_serial, open_flags);
     if (ret != RT_EOK)
     {
         rt_kprintf("open %s failed! ret=%d\n\r", uart_name, ret);
@@ -625,9 +723,12 @@ static int uart_dma_sample(int argc, char *argv[])
     }
 
     rt_device_set_rx_indicate(uart_dma_serial, uart_dma_rx_indicate);
-    rt_device_set_tx_complete(uart_dma_serial, uart_dma_tx_done);
+    if (uart_sample_use_dma)
+    {
+        rt_device_set_tx_complete(uart_dma_serial, uart_dma_tx_done);
+    }
 
-    /* Send initial message via DMA */
+    /* Send initial message */
     uart_dma_send((const rt_uint8_t *)str, sizeof(str) - 1);
 
     /* Create echo thread */
@@ -640,14 +741,24 @@ static int uart_dma_sample(int argc, char *argv[])
 
     rt_thread_startup(thread);
     uart_dma_initialized = RT_TRUE;
-    rt_kprintf("UART DMA RX + DMA TX on %s (115200,8N1)\n\r", uart_name);
+    if (uart_sample_use_dma)
+    {
+        rt_kprintf("UART DMA RX + DMA TX on %s (115200,8N1)\n\r", uart_name);
+    }
+    else
+    {
+        rt_kprintf("UART INT RX + normal TX on %s (115200,8N1)\n\r", uart_name);
+    }
     rt_kprintf("Commands: dma_tx <data>, loopback [n], uart_stat, uart_clear\n\r");
 
     return RT_EOK;
 
 err_close_device:
     rt_device_set_rx_indicate(uart_dma_serial, RT_NULL);
-    rt_device_set_tx_complete(uart_dma_serial, RT_NULL);
+    if (uart_sample_use_dma)
+    {
+        rt_device_set_tx_complete(uart_dma_serial, RT_NULL);
+    }
     rt_device_close(uart_dma_serial);
 err_detach_mutex:
     rt_mutex_detach(&uart_dma_tx_mutex);
@@ -731,7 +842,14 @@ static void uart_stat(int argc, char *argv[])
         return;
     }
 
-    rt_kprintf("UART Statistics (DMA RX + DMA TX):\n");
+    if (uart_sample_use_dma)
+    {
+        rt_kprintf("UART Statistics (DMA RX + DMA TX):\n");
+    }
+    else
+    {
+        rt_kprintf("UART Statistics (INT RX + normal TX):\n");
+    }
     rt_kprintf("  RX count: %d, bytes: %d\n", rx_count, total_rx_bytes);
     rt_kprintf("  TX count: %d, bytes: %d\n", tx_count, total_tx_bytes);
     rt_kprintf("  TX timeout: %d\n", tx_timeout_count);

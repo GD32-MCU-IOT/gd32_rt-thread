@@ -16,7 +16,11 @@
 
 #include "gd32f5xx_exti.h"
 #include "drv_hard_i2c.h"
+#ifdef RT_USING_SERIAL_V2
+#include "drv_usart_v2.h"
+#else
 #include "drv_usart.h"
+#endif
 #include "drv_spi.h"
 
 #define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */

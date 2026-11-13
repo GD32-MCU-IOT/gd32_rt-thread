@@ -21,6 +21,7 @@
 #define GD32_UART_TEST
 #define GD32_GPIO_EXTI_TEST
 #define GD32_UART_DMA_TEST
+#define GD32_SDIO_SDCARD_TEST
 
 /* LED pins - GD32F527I-EVAL board (per schematic) */
 #define LED1_PIN    GET_PIN(F, 7)
@@ -108,6 +109,19 @@ static int uart_dma_sample(int argc, char *argv[]);
 static void pin_irq_sample(void);
 #endif
 
+/* SD card test - same as Demo_Suites 17_SDIO_SDCardTest (block 100/200, 512B) */
+#ifdef GD32_SDIO_SDCARD_TEST
+#include "drv_sdio.h"
+static uint32_t sd_buf_write[512];
+static uint32_t sd_buf_read[512];
+/* unaligned test: 2 sectors at buf + 1, extra bytes as overrun guard */
+#define SD_UNALIGNED_SECTORS   2
+#define SD_UNALIGNED_LEN       (SD_UNALIGNED_SECTORS * 512)
+static uint8_t sd_ua_write[SD_UNALIGNED_LEN + 16];
+static uint8_t sd_ua_read[SD_UNALIGNED_LEN + 16];
+static void sdio_sample(void);
+#endif
+
 int main(void)
 {
     /* set LED pin mode to output */
@@ -155,6 +169,11 @@ int main(void)
 #ifdef GD32_GPIO_EXTI_TEST
     rt_kprintf("\n\r--- GPIO EXTI Test ---\n\r");
     pin_irq_sample();
+#endif
+
+#ifdef GD32_SDIO_SDCARD_TEST
+    rt_kprintf("\n\r--- SDIO SD Card Test ---\n\r");
+    sdio_sample();
 #endif
 
     while (1)
@@ -785,5 +804,93 @@ static void pin_irq_sample(void)
     rt_pin_irq_enable(TAMPER_PIN, PIN_IRQ_ENABLE);
 
     rt_kprintf("GPIO EXTI ready. Press Wakeup(PA0) or Tamper(PC13) key.\n\r");
+}
+#endif
+
+#ifdef GD32_SDIO_SDCARD_TEST
+static void sdio_sample(void)
+{
+    sd_error_enum sd_error;
+    uint16_t i;
+    rt_device_t dev;
+    struct rt_device_blk_geometry geometry;
+
+    rt_kprintf("--- SD card init ---\r\n");
+    dev = rt_device_find("sd0");
+    if (RT_NULL == dev) {
+        rt_kprintf("sd0 not found, check BSP_USING_SDIO\r\n");
+        return;
+    }
+    if (RT_EOK != rt_device_open(dev, RT_DEVICE_FLAG_RDWR)) {
+        rt_kprintf("sd0 open failed, card init error\r\n");
+        return;
+    }
+    rt_device_control(dev, RT_DEVICE_CTRL_BLK_GETGEOME, &geometry);
+    rt_kprintf("geometry: %u sectors x %u bytes\r\n",
+        (rt_uint32_t)geometry.sector_count, geometry.bytes_per_sector);
+
+    /* write pattern 0..511, same as the official demo */
+    for (i = 0; i < 512; i++) {
+        sd_buf_write[i] = i;
+    }
+
+    sd_error = sd_block_write(sd_buf_write, 100 * 512, 512);
+    if (SD_OK != sd_error) {
+        rt_kprintf("Block write fail! e:%d\r\n", sd_error);
+        return;
+    }
+    rt_kprintf("Block write success!\r\n");
+
+    sd_error = sd_block_read(sd_buf_read, 100 * 512, 512);
+    if (SD_OK != sd_error) {
+        rt_kprintf("Block read fail! e:%d\r\n", sd_error);
+        return;
+    }
+    rt_kprintf("Block read success! %s\r\n",
+        (0 == memcmp(sd_buf_write, sd_buf_read, 512)) ? "data match" : "DATA MISMATCH");
+
+    sd_error = sd_multiblocks_write(sd_buf_write, 200 * 512, 512, 3);
+    if (SD_OK != sd_error) {
+        rt_kprintf("Multiple block write fail! e:%d\r\n", sd_error);
+        return;
+    }
+    rt_kprintf("Multiple block write success!\r\n");
+
+    sd_error = sd_multiblocks_read(sd_buf_read, 200 * 512, 512, 3);
+    if (SD_OK != sd_error) {
+        rt_kprintf("Multiple block read fail! e:%d\r\n", sd_error);
+        return;
+    }
+
+    /* single block covers 512B, multiblock 3*512B */
+    rt_kprintf("Multiple block read success! %s\r\n",
+        (0 == memcmp(sd_buf_write, sd_buf_read, 3 * 512)) ? "data match" : "DATA MISMATCH");
+
+    /* unaligned buffer path in rt_sdcard_read/write, sector 300 */
+    for (i = 0; i < SD_UNALIGNED_LEN; i++) {
+        sd_ua_write[1 + i] = (uint8_t)(i * 7 + 3);
+    }
+    rt_memset(sd_ua_read, 0xA5, sizeof(sd_ua_read));
+
+    if (SD_UNALIGNED_SECTORS != rt_device_write(dev, 300, &sd_ua_write[1], SD_UNALIGNED_SECTORS)) {
+        rt_kprintf("Unaligned write fail!\r\n");
+        return;
+    }
+    if (SD_UNALIGNED_SECTORS != rt_device_read(dev, 300, &sd_ua_read[1], SD_UNALIGNED_SECTORS)) {
+        rt_kprintf("Unaligned read fail!\r\n");
+        return;
+    }
+
+    if (0 != memcmp(&sd_ua_write[1], &sd_ua_read[1], SD_UNALIGNED_LEN)) {
+        rt_kprintf("Unaligned rw DATA MISMATCH\r\n");
+        return;
+    }
+    for (i = 1 + SD_UNALIGNED_LEN; i < sizeof(sd_ua_read); i++) {
+        if (0xA5 != sd_ua_read[i]) {
+            rt_kprintf("Unaligned read OVERRUN at byte %d\r\n", i);
+            return;
+        }
+    }
+    rt_kprintf("Unaligned rw success! data match, no overrun\r\n");
 }
 #endif

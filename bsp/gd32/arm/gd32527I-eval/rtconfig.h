@@ -134,6 +134,9 @@
 
 /* DFS: device virtual file system */
 
+#define RT_USING_SDIO
+#define BSP_USING_SDIO
+#define RT_USING_BLK
 #define RT_USING_DFS
 #define DFS_USING_POSIX
 #define DFS_USING_WORKDIR

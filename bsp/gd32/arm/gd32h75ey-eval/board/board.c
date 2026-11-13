@@ -50,6 +50,30 @@ void SysTick_Handler(void)
     rt_interrupt_leave();
 }
 
+#if defined(SOC_SERIES_GD32H75E)
+static void mpu_config(void)
+{
+    /* Guard 0x60000000-0xDFFFFFFF (unused external memory window) to stop
+     * M7 speculative access from hanging cache maintenance in DMA scenarios. */
+    MPU->CTRL = 0U;
+    MPU->RNR = 0U;
+    MPU->RBAR = 0x00000000U;
+    MPU->RASR =
+        (0U << MPU_RASR_XN_Pos) |
+        (0U << MPU_RASR_AP_Pos) |
+        (0U << MPU_RASR_TEX_Pos) |
+        (1U << MPU_RASR_S_Pos) |
+        (0U << MPU_RASR_C_Pos) |
+        (0U << MPU_RASR_B_Pos) |
+        (0x87U << MPU_RASR_SRD_Pos) |
+        (31U << MPU_RASR_SIZE_Pos) |
+        (1U << MPU_RASR_ENABLE_Pos);
+    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_ENABLE_Msk;
+    __DSB();
+    __ISB();
+}
+#endif
+
 /**
  * This function will initial GD32 board.
  */
@@ -66,6 +90,10 @@ void rt_hw_board_init()
 #endif
 
     SystemClock_Config();
+
+#if defined(SOC_SERIES_GD32H75E)
+    mpu_config();
+#endif
 
 #ifdef BSP_SCB_ENABLE_I_CACHE
     /* Enable I-Cache */

@@ -14,6 +14,57 @@
 #include <board.h>
 
 #ifdef RT_USING_I2C
+/* Runs before the scheduler (INIT_BOARD_EXPORT), so busy-wait on SysTick instead of rt_hw_us_delay (weak stub here). */
+static void i2c_recover_delay_us(rt_uint32_t us)
+{
+    rt_uint32_t ticks = us * (SystemCoreClock / 1000000U);
+    rt_uint32_t reload = SysTick->LOAD + 1U;
+    rt_uint32_t told = SysTick->VAL;
+    rt_uint32_t tcnt = 0;
+
+    while (tcnt < ticks)
+    {
+        rt_uint32_t tnow = SysTick->VAL;
+        if (tnow != told)
+        {
+            tcnt += (tnow < told) ? (told - tnow) : (reload - tnow + told);
+            told = tnow;
+        }
+    }
+}
+
+/* A slave interrupted mid-byte by an MCU reset keeps SDA low until it gets the remaining clocks; only a power cycle clears it otherwise. */
+static void i2c_bus_recover(uint32_t scl_port, uint32_t scl_pin, uint32_t sda_port, uint32_t sda_pin)
+{
+    int i;
+
+    gpio_bit_set(scl_port, scl_pin);
+    gpio_bit_set(sda_port, sda_pin);
+    gpio_output_options_set(scl_port, GPIO_OTYPE_OD, GPIO_OSPEED_60MHZ, scl_pin);
+    gpio_output_options_set(sda_port, GPIO_OTYPE_OD, GPIO_OSPEED_60MHZ, sda_pin);
+    gpio_mode_set(scl_port, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, scl_pin);
+    gpio_mode_set(sda_port, GPIO_MODE_OUTPUT, GPIO_PUPD_PULLUP, sda_pin);
+    i2c_recover_delay_us(5);
+
+    for (i = 0; i < 9 && gpio_input_bit_get(sda_port, sda_pin) == RESET; i++)
+    {
+        gpio_bit_reset(scl_port, scl_pin);
+        i2c_recover_delay_us(5);
+        gpio_bit_set(scl_port, scl_pin);
+        i2c_recover_delay_us(5);
+    }
+
+    /* STOP: SDA rises while SCL is high */
+    gpio_bit_reset(scl_port, scl_pin);
+    i2c_recover_delay_us(5);
+    gpio_bit_reset(sda_port, sda_pin);
+    i2c_recover_delay_us(5);
+    gpio_bit_set(scl_port, scl_pin);
+    i2c_recover_delay_us(5);
+    gpio_bit_set(sda_port, sda_pin);
+    i2c_recover_delay_us(5);
+}
+
 /**
   * @brief  This function initializes the i2c pin.
   * @param  i2c
@@ -29,6 +80,8 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
     case I2C0:
         /* enable I2C clock */
         rcu_periph_clock_enable(RCU_GPIOB);
+
+        i2c_bus_recover(GPIOB, GPIO_PIN_6, GPIOB, GPIO_PIN_7);
 
         /*GPIO pin configuration*/
         gpio_af_set(GPIOB, GPIO_AF_4, GPIO_PIN_6);
@@ -46,6 +99,8 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
         rcu_periph_clock_enable(RCU_GPIOH);
         rcu_periph_clock_enable(RCU_GPIOB);
 
+        i2c_bus_recover(GPIOH, GPIO_PIN_4, GPIOB, GPIO_PIN_11);
+
         /*GPIO pin configuration*/
         gpio_af_set(GPIOH, GPIO_AF_4, GPIO_PIN_4);
         gpio_af_set(GPIOB, GPIO_AF_4, GPIO_PIN_11);
@@ -62,6 +117,8 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
         rcu_periph_clock_enable(RCU_GPIOA);
         rcu_periph_clock_enable(RCU_GPIOC);
 
+        i2c_bus_recover(GPIOA, GPIO_PIN_8, GPIOC, GPIO_PIN_9);
+
         /*GPIO pin configuration*/
         gpio_af_set(GPIOA, GPIO_AF_4, GPIO_PIN_8);
         gpio_af_set(GPIOC, GPIO_AF_4, GPIO_PIN_9);
@@ -76,6 +133,8 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
     case I2C3:
         /* enable I2C clock */
         rcu_periph_clock_enable(RCU_GPIOH);
+
+        i2c_bus_recover(GPIOH, GPIO_PIN_11, GPIOH, GPIO_PIN_12);
 
         /*GPIO pin configuration*/
         gpio_af_set(GPIOH, GPIO_AF_4, GPIO_PIN_11);
@@ -241,10 +300,17 @@ void gd32_spi_init(struct gd32_spi *gd32_spi)
 */
 void gd32_uart_gpio_init(struct gd32_uart *uart)
 {
-    /* enable USART clock */
-    rcu_periph_clock_enable(uart->uart_clk);
+    uint32_t uart_id;
 
-    switch(uart->uart_periph) {
+#ifdef RT_USING_SERIAL_V2
+    rcu_periph_clock_enable(uart->per_clk);
+    uart_id = uart->periph;
+#else
+    rcu_periph_clock_enable(uart->uart_clk);
+    uart_id = uart->uart_periph;
+#endif
+
+    switch(uart_id) {
 #ifdef BSP_USING_UART0
     case USART0:
         /* enable UART clock */

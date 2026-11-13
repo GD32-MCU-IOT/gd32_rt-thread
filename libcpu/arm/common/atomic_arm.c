@@ -86,10 +86,19 @@ rt_atomic_t rt_hw_atomic_load(volatile rt_atomic_t *ptr)
 
 void rt_hw_atomic_store(volatile rt_atomic_t *ptr, rt_atomic_t val)
 {
+#if defined (__IAR_SYSTEMS_ICC__)
+    volatile rt_atomic_t oldval;
+    do
+    {
+        oldval = __LDREXW(ptr);
+        (void)oldval;
+    } while ((__STREXW(val, ptr)) != 0U);
+#else
     do
     {
         __LDREXW(ptr);
     } while ((__STREXW(val, ptr)) != 0U);
+#endif
 }
 
 rt_atomic_t rt_hw_atomic_add(volatile rt_atomic_t *ptr, rt_atomic_t val)
@@ -154,10 +163,19 @@ rt_atomic_t rt_hw_atomic_exchange(volatile rt_atomic_t *ptr, rt_atomic_t val)
 
 void rt_hw_atomic_flag_clear(volatile rt_atomic_t *ptr)
 {
+#if defined (__IAR_SYSTEMS_ICC__)
+    volatile rt_atomic_t oldval;
+    do
+    {
+        oldval = __LDREXW(ptr);
+        (void)oldval;
+    } while ((__STREXW(0, ptr)) != 0U);
+#else
     do
     {
         __LDREXW(ptr);
     } while ((__STREXW(0, ptr)) != 0U);
+#endif
 }
 
 rt_atomic_t rt_hw_atomic_flag_test_and_set(volatile rt_atomic_t *ptr)

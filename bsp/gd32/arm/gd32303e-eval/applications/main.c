@@ -6,7 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2021-08-20     BruceOu      first implementation
- * 2026-05-19     Zhiwei Zhang simplify: keep LED, I2C, SPI basic tests only
+ * 2026-11-17     RT-Thread    first implementation
  */
 
 #include <rtthread.h>
@@ -20,6 +20,9 @@
 #endif
 #ifdef RT_USING_SPI
 #define GD32_SPI_TEST
+#endif
+#ifdef BSP_USING_PWM3_CH3
+#define GD32_PWM_TEST
 #endif
 
 /* LED pins - GD32303E-EVAL board
@@ -39,6 +42,7 @@ static uint8_t i2c_basic_test(void);
 #endif
 
 #ifdef GD32_SPI_TEST
+#include "drv_spi.h"
 #define SPI_BUS_NAME     "spi0"
 #define SPI_DEV_NAME     "spi00"
 #define SPI_CS_PIN       GET_PIN(E, 3)
@@ -47,13 +51,27 @@ static uint8_t i2c_basic_test(void);
 static uint8_t spi_basic_test(void);
 #endif
 
+#ifdef GD32_PWM_TEST
+/* PWM breath LED test, same effect as official demo 22_TIMER_Breath_LED.
+ * Connect PB8 (pwm3 channel 3, TIMER3_CH2) to LED2 (PF0) with a jumper wire.
+ * pwm_breath_step() is called every 40 ms from the main loop. */
+#define PWM_DEV_NAME     "pwm3"
+#define PWM_CHANNEL      3
+#define PWM_PERIOD_NS    500000  /* 2 kHz */
+#define PWM_STEP_NS      10000   /* 50 steps from off to full on */
+#define PWM_PRINT_STEPS  5       /* print every 5 steps (10% duty) */
+
+static void pwm_breath_init(void);
+static void pwm_breath_step(void);
+#endif
+
 int main(void)
 {
-    /* set LED pin mode to output */
-    rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
-    rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
-    rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
-    rt_pin_mode(LED5_PIN, PIN_MODE_OUTPUT);
+    /* LED water light is commented out: LED2 (PF0) is driven by PWM (PB8 jumper) in the PWM breath LED test */
+    // rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
+    // rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
+    // rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
+    // rt_pin_mode(LED5_PIN, PIN_MODE_OUTPUT);
 
     rt_kprintf("\n\rHello GD32303E-EVAL!\n\r");
     rt_kprintf("RT-Thread BSP adaptation successful!\n\r");
@@ -83,20 +101,31 @@ int main(void)
     }
 #endif
 
+#ifdef GD32_PWM_TEST
+    rt_kprintf("\n\r--- PWM Breath LED Test (PB8 -> LED2) ---\n\r");
+    pwm_breath_init();
+#endif
+
     while (1)
     {
-        rt_pin_write(LED2_PIN, PIN_HIGH);
-        rt_thread_mdelay(200);
-        rt_pin_write(LED2_PIN, PIN_LOW);
-        rt_pin_write(LED3_PIN, PIN_HIGH);
-        rt_thread_mdelay(200);
-        rt_pin_write(LED3_PIN, PIN_LOW);
-        rt_pin_write(LED4_PIN, PIN_HIGH);
-        rt_thread_mdelay(200);
-        rt_pin_write(LED4_PIN, PIN_LOW);
-        rt_pin_write(LED5_PIN, PIN_HIGH);
-        rt_thread_mdelay(200);
-        rt_pin_write(LED5_PIN, PIN_LOW);
+        /* LED water light is commented out, see above */
+        // rt_pin_write(LED2_PIN, PIN_HIGH);
+        // rt_thread_mdelay(200);
+        // rt_pin_write(LED2_PIN, PIN_LOW);
+        // rt_pin_write(LED3_PIN, PIN_HIGH);
+        // rt_thread_mdelay(200);
+        // rt_pin_write(LED3_PIN, PIN_LOW);
+        // rt_pin_write(LED4_PIN, PIN_HIGH);
+        // rt_thread_mdelay(200);
+        // rt_pin_write(LED4_PIN, PIN_LOW);
+        // rt_pin_write(LED5_PIN, PIN_HIGH);
+        // rt_thread_mdelay(200);
+        // rt_pin_write(LED5_PIN, PIN_LOW);
+
+#ifdef GD32_PWM_TEST
+        pwm_breath_step();
+#endif
+        rt_thread_mdelay(40);
     }
 
     return RT_EOK;
@@ -261,5 +290,80 @@ static uint8_t spi_basic_test(void)
         rt_kprintf("%02X ", rx_buf[i]);
     rt_kprintf("\n\r");
     return 0;
+}
+#endif
+
+#ifdef GD32_PWM_TEST
+static struct rt_device_pwm *pwm_dev = RT_NULL;
+
+static void pwm_breath_print(rt_uint32_t pulse, rt_bool_t up)
+{
+    struct rt_pwm_configuration cfg = {0};
+
+    /* read back from TIMER registers through the driver */
+    cfg.channel = PWM_CHANNEL;
+    rt_device_control(&pwm_dev->parent, PWM_CMD_GET, &cfg);
+
+    rt_kprintf("[PWM] %s set: period=%u ns (%u Hz) pulse=%6u ns duty=%3u%% | read: period=%u ns pulse=%6u ns\n",
+               up ? "up  " : "down", PWM_PERIOD_NS, 1000000000U / PWM_PERIOD_NS, pulse,
+               pulse * 100 / PWM_PERIOD_NS, cfg.period, cfg.pulse);
+}
+
+/**
+ * @brief Find the PWM device and start output with 0% duty
+ */
+static void pwm_breath_init(void)
+{
+    pwm_dev = (struct rt_device_pwm *)rt_device_find(PWM_DEV_NAME);
+    if (pwm_dev == RT_NULL)
+    {
+        rt_kprintf("can't find %s device!\n\r", PWM_DEV_NAME);
+        return;
+    }
+
+    rt_pwm_set(pwm_dev, PWM_CHANNEL, PWM_PERIOD_NS, 0);
+    rt_pwm_enable(pwm_dev, PWM_CHANNEL);
+    rt_kprintf("%s channel %d enabled, period %u ns, step %u ns every 40 ms\n",
+               PWM_DEV_NAME, PWM_CHANNEL, PWM_PERIOD_NS, PWM_STEP_NS);
+    pwm_breath_print(0, RT_TRUE);
+}
+
+/**
+ * @brief Move the duty cycle one step up or down (0% -> 100% -> 0%)
+ */
+static void pwm_breath_step(void)
+{
+    static rt_uint32_t pulse = 0;
+    static rt_bool_t   up    = RT_TRUE;
+    rt_bool_t          rising = up;
+
+    if (pwm_dev == RT_NULL)
+    {
+        return;
+    }
+
+    if (up)
+    {
+        pulse += PWM_STEP_NS;
+        if (pulse >= PWM_PERIOD_NS)
+        {
+            pulse = PWM_PERIOD_NS;
+            up    = RT_FALSE;
+        }
+    }
+    else
+    {
+        pulse -= PWM_STEP_NS;
+        if (pulse == 0)
+        {
+            up = RT_TRUE;
+        }
+    }
+
+    rt_pwm_set(pwm_dev, PWM_CHANNEL, PWM_PERIOD_NS, pulse);
+    if ((pulse / PWM_STEP_NS) % PWM_PRINT_STEPS == 0)
+    {
+        pwm_breath_print(pulse, rising);
+    }
 }
 #endif

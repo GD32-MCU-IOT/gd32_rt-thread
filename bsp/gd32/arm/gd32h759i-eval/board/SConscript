@@ -10,6 +10,9 @@ board.c
 board_msd_init.c
 ''')
 
+if GetDepend(['RT_USING_HWTIMER']) or GetDepend(['RT_USING_PWM']):
+    src += [cwd + '/../packages/gd32-arm-series-latest/GD32H7xx/GD32H7xx_standard_peripheral/Source/gd32h7xx_timer.c']
+
 path =  [cwd]
 
 CPPDEFINES = ['GD32H7XX']

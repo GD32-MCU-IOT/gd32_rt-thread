@@ -13,6 +13,9 @@ board_msd_init.c
 # Add DMA peripheral source for GD32F30x (needed by UART/SPI/I2C DMA drivers)
 src += [cwd + '/../packages/gd32-arm-series-latest/GD32F30x/GD32F30x_standard_peripheral/Source/gd32f30x_dma.c']
 
+# Add TIMER peripheral source for GD32F30x (needed by PWM/HWTIMER drivers)
+src += [cwd + '/../packages/gd32-arm-series-latest/GD32F30x/GD32F30x_standard_peripheral/Source/gd32f30x_timer.c']
+
 path =  [cwd]
 
 CPPDEFINES = ['GD32F30X_HD']

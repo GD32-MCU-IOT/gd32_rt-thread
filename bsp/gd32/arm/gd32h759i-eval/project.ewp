@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project>
   <fileVersion>3</fileVersion>
   <configuration>
@@ -356,31 +355,32 @@
         <option>
           <name>CCIncludePath2</name>
           <state />
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\eventfd</state>
+          <state>$PROJ_DIR$\board</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\include</state>
           <state>$PROJ_DIR$\..\..\..\..\components\drivers\include</state>
-          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD32H7xx\GD\GD32H7xx\Include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\eventfd</state>
-          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
-          <state>$PROJ_DIR$\..\..\..\..\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
-          <state>$PROJ_DIR$\packages\gd32-arm-series-latest\GD32H7xx\GD32H7xx_standard_peripheral\Include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\filesystems\devfs</state>
           <state>$PROJ_DIR$\..\libraries\gd32_drivers</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
-          <state>$PROJ_DIR$\packages\at24cxx-latest</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\epoll</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\net\utest</state>
-          <state>$PROJ_DIR$\.</state>
+          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
           <state>$PROJ_DIR$\..\..\..\..\components\finsh</state>
-          <state>$PROJ_DIR$\board</state>
-          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m7</state>
+          <state>$PROJ_DIR$\packages\at24cxx-latest</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD32H7xx\GD\GD32H7xx\Include</state>
           <state>$PROJ_DIR$\applications</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</state>
+          <state>$PROJ_DIR$\.</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD32H7xx</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\filesystems\devfs</state>
+          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m7</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\net\utest</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-series-latest\GD32H7xx\GD32H7xx_standard_peripheral\Include</state>
+          <state>$PROJ_DIR$\..\..\..\..\include</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1426,31 +1426,32 @@
         <option>
           <name>CCIncludePath2</name>
           <state />
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\eventfd</state>
+          <state>$PROJ_DIR$\board</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\include</state>
           <state>$PROJ_DIR$\..\..\..\..\components\drivers\include</state>
-          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD32H7xx\GD\GD32H7xx\Include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\eventfd</state>
-          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
-          <state>$PROJ_DIR$\..\..\..\..\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
-          <state>$PROJ_DIR$\packages\gd32-arm-series-latest\GD32H7xx\GD32H7xx_standard_peripheral\Include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\filesystems\devfs</state>
           <state>$PROJ_DIR$\..\libraries\gd32_drivers</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\include</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\ipc</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\spi</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
-          <state>$PROJ_DIR$\packages\at24cxx-latest</state>
           <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\epoll</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension</state>
-          <state>$PROJ_DIR$\..\..\..\..\components\net\utest</state>
-          <state>$PROJ_DIR$\.</state>
+          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\common</state>
           <state>$PROJ_DIR$\..\..\..\..\components\finsh</state>
-          <state>$PROJ_DIR$\board</state>
-          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m7</state>
+          <state>$PROJ_DIR$\packages\at24cxx-latest</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\posix\io\poll</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD32H7xx\GD\GD32H7xx\Include</state>
           <state>$PROJ_DIR$\applications</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\libc\compilers\common\extension\fcntl\octal</state>
+          <state>$PROJ_DIR$\.</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-cmsis-latest\GD32H7xx</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\phy</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\dfs\dfs_v1\filesystems\devfs</state>
+          <state>$PROJ_DIR$\..\..\..\..\libcpu\arm\cortex-m7</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\net\utest</state>
+          <state>$PROJ_DIR$\..\..\..\..\components\drivers\smp_call</state>
+          <state>$PROJ_DIR$\packages\gd32-arm-series-latest\GD32H7xx\GD32H7xx_standard_peripheral\Include</state>
+          <state>$PROJ_DIR$\..\..\..\..\include</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2216,6 +2217,9 @@
       <name>$PROJ_DIR$\..\..\..\..\components\drivers\ipc\workqueue.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\..\components\drivers\misc\rt_drv_pwm.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\..\components\drivers\pin\dev_pin.c</name>
     </file>
     <file>
@@ -2237,10 +2241,16 @@
       <name>$PROJ_DIR$\board\board_msd_init.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\packages\gd32-arm-series-latest\GD32H7xx\GD32H7xx_standard_peripheral\Source\gd32h7xx_timer.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\libraries\gd32_drivers\drv_gpio.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\libraries\gd32_drivers\drv_hard_i2c.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\libraries\gd32_drivers\drv_pwm.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\libraries\gd32_drivers\drv_spi.c</name>
@@ -2270,19 +2280,19 @@
   <group>
     <name>Finsh</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_parse.c</name>
+      <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_file.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_file.c</name>
+      <name>$PROJ_DIR$\..\..\..\..\components\finsh\cmd.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\components\finsh\shell.c</name>
+      <name>$PROJ_DIR$\..\..\..\..\components\finsh\msh_parse.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\..\components\finsh\cmd.c</name>
+      <name>$PROJ_DIR$\..\..\..\..\components\finsh\shell.c</name>
     </file>
   </group>
   <group>

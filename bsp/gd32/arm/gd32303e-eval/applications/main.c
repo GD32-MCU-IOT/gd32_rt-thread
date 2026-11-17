@@ -7,6 +7,7 @@
  * Date           Author       Notes
  * 2021-08-20     BruceOu      first implementation
  * 2026-05-19     Zhiwei Zhang simplify: keep LED, I2C, SPI basic tests only
+ * 2026-11-17     RT-Thread    add PWM sample for GD32303E-EVAL
  */
 
 #include <rtthread.h>
@@ -21,12 +22,14 @@
 #ifdef RT_USING_SPI
 #define GD32_SPI_TEST
 #endif
+#ifdef BSP_USING_PWM3_CH3
+#define GD32_PWM_TEST
+#endif
 
 /* LED pins - GD32303E-EVAL board
  * LED1 = power indicator (no GPIO)
- * LED2 = PF0, LED3 = PF1, LED4 = PF2, LED5 = PF3
+ * LED2 = PF0 (used by PWM breath LED test), LED3 = PF1, LED4 = PF2, LED5 = PF3
  */
-#define LED2_PIN    GET_PIN(F, 0)
 #define LED3_PIN    GET_PIN(F, 1)
 #define LED4_PIN    GET_PIN(F, 2)
 #define LED5_PIN    GET_PIN(F, 3)
@@ -39,6 +42,7 @@ static uint8_t i2c_basic_test(void);
 #endif
 
 #ifdef GD32_SPI_TEST
+#include "drv_spi.h"
 #define SPI_BUS_NAME     "spi0"
 #define SPI_DEV_NAME     "spi00"
 #define SPI_CS_PIN       GET_PIN(E, 3)
@@ -47,10 +51,21 @@ static uint8_t i2c_basic_test(void);
 static uint8_t spi_basic_test(void);
 #endif
 
+#ifdef GD32_PWM_TEST
+/* PWM breath LED test, same effect as official demo 22_TIMER_Breath_LED.
+ * Connect PB8 (pwm3 channel 3, TIMER3_CH2) to LED2 (PF0) with a jumper wire. */
+#define PWM_DEV_NAME     "pwm3"
+#define PWM_CHANNEL      3
+#define PWM_PERIOD_NS    500000  /* 2 kHz */
+#define PWM_STEP_NS      10000   /* 50 steps from off to full on */
+#define PWM_STEP_MS      40
+
+static void pwm_breath_init(void);
+#endif
+
 int main(void)
 {
     /* set LED pin mode to output */
-    rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED3_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED4_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED5_PIN, PIN_MODE_OUTPUT);
@@ -83,11 +98,13 @@ int main(void)
     }
 #endif
 
+#ifdef GD32_PWM_TEST
+    rt_kprintf("\n\r--- PWM Breath LED Test (PB8 -> LED2) ---\n\r");
+    pwm_breath_init();
+#endif
+
     while (1)
     {
-        rt_pin_write(LED2_PIN, PIN_HIGH);
-        rt_thread_mdelay(200);
-        rt_pin_write(LED2_PIN, PIN_LOW);
         rt_pin_write(LED3_PIN, PIN_HIGH);
         rt_thread_mdelay(200);
         rt_pin_write(LED3_PIN, PIN_LOW);
@@ -261,5 +278,73 @@ static uint8_t spi_basic_test(void)
         rt_kprintf("%02X ", rx_buf[i]);
     rt_kprintf("\n\r");
     return 0;
+}
+#endif
+
+#ifdef GD32_PWM_TEST
+static struct rt_device_pwm *pwm_dev = RT_NULL;
+
+/**
+ * @brief Move the duty cycle one step up or down (0% -> 100% -> 0%) every PWM_STEP_MS
+ */
+static void pwm_breath_thread_entry(void *parameter)
+{
+    rt_uint32_t pulse = 0;
+    rt_bool_t   up    = RT_TRUE;
+
+    while (1)
+    {
+        rt_thread_mdelay(PWM_STEP_MS);
+
+        if (up)
+        {
+            pulse += PWM_STEP_NS;
+            if (pulse >= PWM_PERIOD_NS)
+            {
+                pulse = PWM_PERIOD_NS;
+                up    = RT_FALSE;
+            }
+        }
+        else
+        {
+            pulse -= PWM_STEP_NS;
+            if (pulse == 0)
+            {
+                up = RT_TRUE;
+            }
+        }
+
+        rt_pwm_set(pwm_dev, PWM_CHANNEL, PWM_PERIOD_NS, pulse);
+    }
+}
+
+/**
+ * @brief Find the PWM device, start output with 0% duty and create the breath thread
+ */
+static void pwm_breath_init(void)
+{
+    rt_thread_t tid;
+
+    pwm_dev = (struct rt_device_pwm *)rt_device_find(PWM_DEV_NAME);
+    if (pwm_dev == RT_NULL)
+    {
+        rt_kprintf("can't find %s device!\n\r", PWM_DEV_NAME);
+        return;
+    }
+
+    rt_pwm_set(pwm_dev, PWM_CHANNEL, PWM_PERIOD_NS, 0);
+    rt_pwm_enable(pwm_dev, PWM_CHANNEL);
+
+    tid = rt_thread_create("pwm_breath", pwm_breath_thread_entry, RT_NULL,
+                           1024, RT_THREAD_PRIORITY_MAX / 2, 20);
+    if (tid != RT_NULL)
+    {
+        rt_thread_startup(tid);
+    }
+    else
+    {
+        rt_kprintf("Failed to create PWM thread\n\r");
+        rt_pwm_disable(pwm_dev, PWM_CHANNEL);
+    }
 }
 #endif

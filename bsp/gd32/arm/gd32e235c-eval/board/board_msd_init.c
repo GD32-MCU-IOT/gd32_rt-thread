@@ -12,6 +12,11 @@
 #include <rthw.h>
 #include <rtthread.h>
 #include <board.h>
+#ifdef RT_USING_SERIAL_V2
+#include "drv_usart_v2.h"
+#else
+#include "drv_usart.h"
+#endif
 
 #ifdef RT_USING_I2C
 /**
@@ -78,10 +83,18 @@ void gd32_i2c_gpio_init(const struct gd32_i2c_bus *i2c)
   */
 void gd32_uart_gpio_init(struct gd32_uart *uart)
 {
-    /* enable USART clock */
-    rcu_periph_clock_enable(uart->uart_clk);
+    uint32_t uart_id;
 
-    switch(uart->uart_periph) {
+    /* enable USART clock */
+#ifdef RT_USING_SERIAL_V2
+    rcu_periph_clock_enable(uart->per_clk);
+    uart_id = uart->periph;
+#else
+    rcu_periph_clock_enable(uart->uart_clk);
+    uart_id = uart->uart_periph;
+#endif
+
+    switch(uart_id) {
 #ifdef BSP_USING_UART0
     case USART0:
         /* enable UART GPIO clock */

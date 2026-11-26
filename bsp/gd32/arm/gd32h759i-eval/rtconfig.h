@@ -154,6 +154,7 @@
 #define RT_SERIAL_RB_BUFSZ 64
 #define RT_USING_I2C
 #define RT_USING_I2C_BITOPS
+#define RT_USING_PWM
 #define RT_USING_SPI
 #define RT_USING_SPI_ISR
 #define RT_USING_PIN
@@ -452,6 +453,9 @@
 #define BSP_I2C1_RX_USING_DMA
 #define BSP_I2C_XFER_TIMEOUT 1000
 #define BSP_I2C_DMA_TRANS_MIN_LEN 4
+#define BSP_USING_PWM
+#define BSP_USING_PWM0
+#define BSP_USING_PWM0_CH4
 #define BSP_USING_GD_DBG
 /* end of On-chip Peripheral Drivers */
 

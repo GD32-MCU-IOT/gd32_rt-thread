@@ -6,6 +6,7 @@
  * Change Logs:
  * Date           Author       Notes
  * 2026-03-17     RT-Thread    first implementation
+ * 2026-11-23     RT-Thread    add PWM sample for GD32H759I-EVAL
  */
 
 #include <rtthread.h>
@@ -20,9 +21,9 @@
 #define GD32_UART_TEST
 #define GD32_UART_DMA_TEST
 #define GD32_GPIO_EXTI_TEST
+#define GD32_PWM_TEST
 
-/* GD32H759I-EVAL has 2 LEDs */
-#define LED1_PIN    GET_PIN(F, 10)   /* LED1 on PF10 */
+/* GD32H759I-EVAL has 2 LEDs, LED1 on PF10 is used by PWM breath LED test */
 #define LED2_PIN    GET_PIN(A, 6)    /* LED2 on PA6  */
 
 #ifdef GD32_I2C_EEPROM_TEST
@@ -108,12 +109,23 @@ static int uart_dma_sample(int argc, char *argv[]);
 static void pin_irq_sample(void);
 #endif
 
+#ifdef GD32_PWM_TEST
+/* PWM breath LED test, same effect as official demo 23_TIMER_Breath_LED.
+ * Connect PC7 (pwm0 channel 4, TIMER0_CH3) to LED1 (PF10) with a jumper wire. */
+#define PWM_DEV_NAME        "pwm0"
+#define PWM_DEV_CHANNEL     4
+#define PWM_PERIOD          500000  // period = 500us
+
+static struct rt_device_pwm *pwm_dev = RT_NULL;
+static rt_thread_t pwm_thread = RT_NULL;
+static void pwm_init(void);
+#endif
+
 int main(void)
 {
     int count = 1;
 
     /* set LED pin mode to output */
-    rt_pin_mode(LED1_PIN, PIN_MODE_OUTPUT);
     rt_pin_mode(LED2_PIN, PIN_MODE_OUTPUT);
 
     rt_kprintf("Hello GD32H759I!\n");
@@ -157,21 +169,20 @@ int main(void)
     pin_irq_sample();
 #endif
 
+#ifdef GD32_PWM_TEST
+    rt_kprintf("\n--- PWM Breath LED Test (PC7 -> LED1) ---\n");
+    pwm_init();
+#endif
+
     while (count++)
     {
-        /* turn on LED1 */
-        rt_pin_write(LED1_PIN, PIN_HIGH);
-        rt_thread_mdelay(500);
-
-        /* turn off LED1 */
-        rt_pin_write(LED1_PIN, PIN_LOW);
-
         /* turn on LED2 */
         rt_pin_write(LED2_PIN, PIN_HIGH);
         rt_thread_mdelay(500);
 
         /* turn off LED2 */
         rt_pin_write(LED2_PIN, PIN_LOW);
+        rt_thread_mdelay(500);
     }
 
     return RT_EOK;
@@ -785,4 +796,66 @@ static void pin_irq_sample(void)
     rt_pin_attach_irq(USER_PIN, PIN_IRQ_MODE_FALLING, user_key_pin_cb, RT_NULL);
     rt_pin_irq_enable(USER_PIN, PIN_IRQ_ENABLE);
 }
+#endif
+
+#ifdef GD32_PWM_TEST
+static void pwm_thread_entry(void *parameter)
+{
+    rt_uint32_t pulse;
+    rt_uint8_t duty_cycle;
+
+    rt_kprintf("PWM breathing started \n");
+
+    while (1)
+    {
+        for (duty_cycle = 1; duty_cycle <= 100; duty_cycle++)
+        {
+            pulse = (PWM_PERIOD * duty_cycle) / 100;
+            rt_pwm_set(pwm_dev, PWM_DEV_CHANNEL, PWM_PERIOD, pulse);
+            rt_thread_mdelay(30);
+        }
+
+        for (duty_cycle = 100; duty_cycle >= 1; duty_cycle--)
+        {
+            pulse = (PWM_PERIOD * duty_cycle) / 100;
+            rt_pwm_set(pwm_dev, PWM_DEV_CHANNEL, PWM_PERIOD, pulse);
+            rt_thread_mdelay(30);
+        }
+    }
+}
+
+static void pwm_init(void)
+{
+    pwm_dev = (struct rt_device_pwm *)rt_device_find(PWM_DEV_NAME);
+    if (pwm_dev == RT_NULL)
+    {
+        rt_kprintf("Cannot find PWM device: %s \n", PWM_DEV_NAME);
+        return;
+    }
+
+    if (rt_pwm_enable(pwm_dev, PWM_DEV_CHANNEL) != RT_EOK)
+    {
+        rt_kprintf("Failed to enable PWM \n");
+        return;
+    }
+
+    pwm_thread = rt_thread_create("pwm_breath",
+                                 pwm_thread_entry,
+                                 RT_NULL,
+                                 1024,
+                                 RT_THREAD_PRIORITY_MAX / 2,
+                                 20);
+
+    if (pwm_thread != RT_NULL)
+    {
+        rt_thread_startup(pwm_thread);
+        rt_kprintf("PWM breathing initialized \n");
+    }
+    else
+    {
+        rt_kprintf("Failed to create PWM thread \n");
+        rt_pwm_disable(pwm_dev, PWM_DEV_CHANNEL);
+    }
+}
+MSH_CMD_EXPORT(pwm_init, Enable pwm breath app);
 #endif

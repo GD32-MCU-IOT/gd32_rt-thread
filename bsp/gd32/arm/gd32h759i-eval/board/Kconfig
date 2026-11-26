@@ -361,6 +361,101 @@ menu "On-chip Peripheral Drivers"
             endif
         endif
 
+    menuconfig BSP_USING_PWM
+        bool "Enable PWM"
+        default n
+        select RT_USING_PWM
+        if BSP_USING_PWM
+            menuconfig BSP_USING_PWM0
+                bool "Enable timer0 output PWM"
+                default n
+                if BSP_USING_PWM0
+                    config BSP_USING_PWM0_CH1
+                        bool "Enable PWM0 channel1 (TIMER0_CH0, PA8)"
+                        default n
+                    config BSP_USING_PWM0_CH2
+                        bool "Enable PWM0 channel2 (TIMER0_CH1, PE11)"
+                        default n
+                    config BSP_USING_PWM0_CH3
+                        bool "Enable PWM0 channel3 (TIMER0_CH2, PE13)"
+                        default n
+                    config BSP_USING_PWM0_CH4
+                        bool "Enable PWM0 channel4 (TIMER0_CH3, PC7)"
+                        default y
+                endif
+
+            menuconfig BSP_USING_PWM2
+                bool "Enable timer2 output PWM"
+                default n
+                if BSP_USING_PWM2
+                    config BSP_USING_PWM2_CH1
+                        bool "Enable PWM2 channel1 (TIMER2_CH0, PB4)"
+                        depends on !BSP_USING_SPI2
+                        default n
+                    config BSP_USING_PWM2_CH2
+                        bool "Enable PWM2 channel2 (TIMER2_CH1, PB5)"
+                        depends on !BSP_USING_SPI2
+                        default n
+                    config BSP_USING_PWM2_CH3
+                        bool "Enable PWM2 channel3 (TIMER2_CH2, PB0)"
+                        default n
+                    config BSP_USING_PWM2_CH4
+                        bool "Enable PWM2 channel4 (TIMER2_CH3, PB1)"
+                        default n
+                endif
+
+            menuconfig BSP_USING_PWM7
+                bool "Enable timer7 output PWM"
+                default n
+                if BSP_USING_PWM7
+                    config BSP_USING_PWM7_CH1
+                        bool "Enable PWM7 channel1 (TIMER7_CH0, PC6)"
+                        default n
+                    config BSP_USING_PWM7_CH2
+                        bool "Enable PWM7 channel2 (TIMER7_CH1, PC7)"
+                        depends on !BSP_USING_PWM0_CH4
+                        default n
+                    config BSP_USING_PWM7_CH3
+                        bool "Enable PWM7 channel3 (TIMER7_CH2, PC8)"
+                        default n
+                    config BSP_USING_PWM7_CH4
+                        bool "Enable PWM7 channel4 (TIMER7_CH3, PC9)"
+                        default n
+                endif
+
+            menuconfig BSP_USING_PWM14
+                bool "Enable timer14 output PWM"
+                default n
+                if BSP_USING_PWM14
+                    config BSP_USING_PWM14_CH1
+                        bool "Enable PWM14 channel1 (TIMER14_CH0, PE5)"
+                        depends on !BSP_USING_SPI3
+                        default n
+                    config BSP_USING_PWM14_CH2
+                        bool "Enable PWM14 channel2 (TIMER14_CH1, PE6)"
+                        depends on !BSP_USING_SPI3
+                        default n
+                endif
+
+            menuconfig BSP_USING_PWM15
+                bool "Enable timer15 output PWM"
+                default n
+                if BSP_USING_PWM15
+                    config BSP_USING_PWM15_CH1
+                        bool "Enable PWM15 channel1 (TIMER15_CH0, PB8)"
+                        default n
+                endif
+
+            menuconfig BSP_USING_PWM16
+                bool "Enable timer16 output PWM"
+                default n
+                if BSP_USING_PWM16
+                    config BSP_USING_PWM16_CH1
+                        bool "Enable PWM16 channel1 (TIMER16_CH0, PB9)"
+                        default n
+                endif
+        endif
+
     source "$(BSP_DIR)/../libraries/gd32_drivers/Kconfig"
 endmenu
 

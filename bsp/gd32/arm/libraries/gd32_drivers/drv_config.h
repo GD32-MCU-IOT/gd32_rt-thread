@@ -47,11 +47,13 @@ extern "C" {
 #include "config/h7xx/uart_config.h"
 #include "config/h7xx/spi_config.h"
 #include "config/h7xx/i2c_config.h"
+#include "config/h7xx/pwm_config.h"
 #elif defined(SOC_SERIES_GD32H77x)
 #include "config/h77x/dma_config.h"
 #include "config/h77x/uart_config.h"
 #include "config/h77x/spi_config.h"
 #include "config/h77x/i2c_config.h"
+#include "config/h77x/pwm_config.h"
 #elif defined(SOC_SERIES_GD32H75E)
 #include "config/h75e/dma_config.h"
 #include "config/h75e/uart_config.h"
@@ -62,6 +64,7 @@ extern "C" {
 #include "config/f30x/uart_config.h"
 #include "config/f30x/spi_config.h"
 #include "config/f30x/i2c_config.h"
+#include "config/f30x/pwm_config.h"
 #elif defined(SOC_SERIES_GD32F20x)
 #include "config/f20x/dma_config.h"
 #include "config/f20x/uart_config.h"

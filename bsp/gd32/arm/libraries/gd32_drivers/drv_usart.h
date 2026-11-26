@@ -15,6 +15,10 @@
 #include <rtthread.h>
 #include <board.h>
 
+#ifdef RT_USING_SERIAL_V2
+#include "drv_usart_v2.h"
+#else
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -84,6 +88,8 @@ int rt_hw_usart_init(void);
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* RT_USING_SERIAL_V2 */
 
 #endif /* __DRV_USART_H__ */
 

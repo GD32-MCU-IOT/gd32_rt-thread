@@ -241,9 +241,7 @@ void gd32_spi_init(struct gd32_spi *gd32_spi)
 */
 void gd32_uart_gpio_init(struct gd32_uart *uart)
 {
-    /* enable USART clock */
     rcu_periph_clock_enable(uart->uart_clk);
-
     switch(uart->uart_periph) {
 #ifdef BSP_USING_UART0
     case USART0:

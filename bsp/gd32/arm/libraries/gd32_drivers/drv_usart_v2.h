@@ -16,31 +16,27 @@
 #include <rtdevice.h>
 #include <board.h>
 #include "drv_dma.h"
+#ifdef RT_SERIAL_USING_DMA
+#include "drv_config.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#if defined(RT_SERIAL_USING_DMA) && defined(RT_USING_CACHE) && \
+    (defined(SOC_SERIES_GD32H7xx) || defined(SOC_SERIES_GD32H75E) || defined(SOC_SERIES_GD32H77x))
+#define GD32_UART_DMA_DCACHE
+#endif
 
 /* GD32 uart driver */
 struct gd32_uart
 {
-    char *device_name;
-    uint32_t periph;
+    /* common hardware members, same order as V1 */
+    uint32_t uart_periph;
+    rcu_periph_enum uart_clk;
     IRQn_Type irqn;
-    rcu_periph_enum per_clk;
-    rcu_periph_enum tx_gpio_clk;
-    rcu_periph_enum rx_gpio_clk;
-    uint32_t tx_port;
-#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32F5xx
-    uint16_t tx_af;
-#endif
-    uint16_t tx_pin;
-    uint32_t rx_port;
-#if defined SOC_SERIES_GD32F4xx || defined SOC_SERIES_GD32E23x || defined SOC_SERIES_GD32F5xx
-    uint16_t rx_af;
-#endif
-    uint16_t rx_pin;
+    char *device_name;
 
     struct rt_serial_device serial;
 
@@ -50,14 +46,17 @@ struct gd32_uart
         struct dma_config rx;
         struct dma_config tx;
         rt_size_t last_index;
-        rt_sem_t sem_ftf;
+#ifdef GD32_UART_DMA_DCACHE
+        /* framework ping buffer shares cache lines with other data, so RX DMA targets this one */
+        rt_uint8_t *rx_buf;
+#endif
     } dma;
 #endif
     rt_uint16_t uart_dma_flag;
 };
 
 int rt_hw_usart_init(void);
-
+void gd32_uart_gpio_init(struct gd32_uart *uart);
 #ifdef __cplusplus
 }
 #endif

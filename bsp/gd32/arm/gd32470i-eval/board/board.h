@@ -15,6 +15,11 @@
 #include "drv_gpio.h"
 
 #include "gd32f4xx_exti.h"
+#ifdef RT_USING_SERIAL_V2
+#include "drv_usart_v2.h"
+#else
+#include "drv_usart.h"
+#endif
 
 #define EXT_SDRAM_BEGIN    (0xC0000000U) /* the begining address of external SDRAM */
 #define EXT_SDRAM_END      (EXT_SDRAM_BEGIN + (32U * 1024 * 1024)) /* the end address of external SDRAM */
